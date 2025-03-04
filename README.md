@@ -1,66 +1,134 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# TripQuota
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+TripQuota は複数人での旅行計画を共有・管理するためのウェブアプリケーションです。旅客機チケット、バスや電車のチケット、宿泊先ホテル、eSim変更に伴う電話番号の変更などを共有し、旅行の計画から実行、精算までをサポートします。
 
-## About Laravel
+## 目次
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- [利用シナリオ](#利用シナリオ)
+- [用語集](#用語集)
+- [主要機能](#主要機能)
+  - [旅行計画](#旅行計画)
+  - [グループ管理](#グループ管理)
+  - [旅程入力](#旅程入力)
+  - [割り勘管理](#割り勘管理)
+  - [通知機能](#通知機能)
+  - [アカウント管理](#アカウント管理)
+- [技術スタック](#技術スタック)
+- [プロジェクト構造](#プロジェクト構造)
+- [開発ガイドライン](#開発ガイドライン)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 利用シナリオ
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+以下は、TripQuotaの典型的な利用シナリオです：
 
-## Learning Laravel
+Aさん、Bさん、Cさんの三人で日本から韓国のソウルへ旅行する場合：
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. **計画段階**：
+   - Aさんがチケット、Bさんが宿泊先、Cさんが観光地を担当
+   - Aさんが TripQuota にアカウントを作成し、旅行計画（2024年10月10日〜13日）を作成
+   - BさんとCさんをメールで招待
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+2. **情報共有**：
+   - Aさんが飛行機の便、出発・到着時刻を登録
+   - Bさんが宿泊ホテル情報（10日〜11日、11日〜12日の別々のホテル）を登録
+   - Cさんが観光地情報をGoogleMapやWebサイト、雑誌から共有
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+3. **旅行中**：
+   - 韓国到着後の食事でAさんがカード支払い
+   - 二日目の朝食はCさんが現金で支払い
+   - TripQuotaに支払い情報（ウォン）を記録
 
-## Laravel Sponsors
+4. **精算**：
+   - 旅行終了後、未記入の支払いがないか通知
+   - 各自の支払い状況を確認し、日本円での精算額を計算
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 用語集
 
-### Premium Partners
+| 用語 | 定義 |
+|------|------|
+| サイトの登録 | メールアドレス・OAuthなど外部サイトログインで、サイトにアカウントを作成すること |
+| アカウント | サイトに登録したユーザーデータ |
+| メンバー | 旅行する人（アカウント所有の有無を問わない） |
+| グループ | メンバーの集まり |
+| コアグループ | 主となるグループ（旅行する全メンバーが所属） |
+| 班グループ | コアグループから一部のメンバーが集まって別行動するときのグループ |
+| 時刻 | 特に明記がない限り現地のタイムゾーンを使用 |
+| 出発日 | 旅行の開始日（タイムゾーンは変更可能） |
+| 帰宅日 | 旅行の最終日（タイムゾーンは変更可能） |
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## 主要機能
 
-## Contributing
+### 旅行計画
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- グループと旅程の情報入力で旅行計画を作成
+- 出発日に帰宅日が未記入の場合、計画破棄または帰宅日入力を要求
+- 日程重複するメンバーへのアラート表示
+- メンバー不在時の計画データ破棄
+- 削除権限の管理（基本は作成者、委譲可能）
 
-## Code of Conduct
+### グループ管理
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- コアグループ：全メンバーが所属する主グループ
+- 班グループ：一部メンバーの別行動用グループ
+- 未登録メンバーの代理入力機能
 
-## Security Vulnerabilities
+### 旅程入力
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- 出発日から帰宅日までの期間管理（最長120日）
+- 移動手段情報の登録（徒歩・バイク・車・フェリー・バス・飛行機）
+- 宿泊先情報の登録
+- 飛行機利用時は航空会社、便名、出発・到着時刻の入力が必須
 
-## License
+### 割り勘管理
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- 支払い情報の記録（金額、通貨、支払者、対象者）
+- 旅行終了後の精算計算
+
+### 通知機能
+
+- メンバー招待通知
+- 情報更新通知
+- 未記入支払い確認通知
+
+### アカウント管理
+
+- メールアドレス・パスワードによる登録
+- OAuth認証による外部サイトアカウントでの登録
+- ログイン機能
+
+## 技術スタック
+
+- PHP 8.3
+- Laravel 11
+
+## プロジェクト構造
+
+```
+.clinerules-dev # プロンプト
+app/*           # Laravel Application
+TripQuota/*     # namespace が TripQuota\ で始まる各種機能
+```
+
+## 開発ガイドライン
+
+### ドメイン設計
+
+- 各機能はドメインとして実装
+- ドメインの namespace は `TripQuota\` で始まり、機能名が続く
+- ドメインの機能を使うには `<ドメイン名>Service` クラスを使用
+- 各ドメインは機能内で完結し、他の機能のクラスを使用しない（`<ドメイン名>Service` クラスを除く）
+
+### テスト方法
+
+- Laravel Eloquent は Repository パターンで抽象化
+- Service は Repository 経由でデータをやり取り
+- テストには Dummy Repository 実装を使用
+
+### Gitワークフロー
+
+コミットとプルリクエストの作成に関するベストプラクティスについては、詳細なガイドラインが用意されています。
+
+### 厳守事項
+
+1. **ファイル `.env` は決して読んではいけない**
+2. ファイルの変更が必要な時は、ユーザに問い合わせをする
