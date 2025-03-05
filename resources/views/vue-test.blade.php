@@ -10,7 +10,7 @@
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Vue.js コンポーネント -->
-        <example-component></example-component>
+        <!-- <example-component></example-component> -->
         
         <!-- 通常のHTML -->
         <div class="bg-white p-6 rounded-lg shadow-md">
