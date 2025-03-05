@@ -1,6 +1,6 @@
-FROM node:23 as node
+FROM node:23 AS node
 
-FROM php:8.3-apache as base
+FROM php:8.3-apache AS base
 
 # Middleware Instaration
 # memo:
@@ -49,6 +49,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY --from=node /usr/local/include/node /usr/local/include/node
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
+RUN ln -sf ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+ && ln -sf ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+ && ln -sf /usr/local/bin/node /usr/local/bin/nodejs
 
 # using python3
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
