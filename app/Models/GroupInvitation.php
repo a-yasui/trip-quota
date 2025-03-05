@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * グループへの招待情報を管理するテーブル。招待者、招待メールアドレス、トークン、ステータスなどを保存し、招待の有効期限や承諾/拒否の日時も記録する。
  * 
  *
  * @property int $id

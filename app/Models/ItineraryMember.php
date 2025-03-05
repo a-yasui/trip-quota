@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * 旅程とメンバーの関連付けを管理する中間テーブル。どのメンバーがどの旅程に参加するかを記録する。
  * 
  *
  * @property int $id

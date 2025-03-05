@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
+ * システムのユーザー情報を管理するテーブル。認証情報、基本プロフィール、およびアカウント関連の情報を保存する。
  * 
  *
  * @property int $id

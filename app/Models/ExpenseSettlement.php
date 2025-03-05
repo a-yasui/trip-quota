@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 割り勘精算情報を管理するテーブル。メンバー間の支払い精算情報を記録し、誰が誰にいくら支払うべきかの情報を保存する。
  * 
  *
  * @property int $id

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * システム内のユーザーアクションを記録するテーブル。ユーザーのアクティビティ、IPアドレス、操作対象などの監査情報を保存する。
  * 
  *
  * @property int $id

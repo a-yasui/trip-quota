@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * ユーザーの設定情報を管理するテーブル。言語、タイムゾーン、通貨、通知設定などのユーザー固有の設定を保存する。
  * 
  *
  * @property int $id

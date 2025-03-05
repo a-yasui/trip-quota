@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 別旅行計画等の班グループを招待するために使用する区別用名前を管理するテーブル。招待時に使用する一意のキーを保存する。
  * 
  *
  * @property int $id

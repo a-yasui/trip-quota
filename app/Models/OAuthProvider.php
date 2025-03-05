@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * 外部認証プロバイダー（OAuth）との連携情報を管理するテーブル。ユーザーがGoogle、Facebook等の外部サービスでログインするための情報を保存する。
  * 
  *
  * @property-read \App\Models\User|null $user

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * ユーザーのアカウント情報を管理するテーブル。一人のユーザーが複数のアカウントを持ち、旅行計画ごとに異なるアカウントで参加できる。
  * 
  *
  * @property int $id

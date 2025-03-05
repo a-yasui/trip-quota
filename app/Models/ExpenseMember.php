@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * 支出とメンバーの関連付けを管理する中間テーブル。各メンバーの負担額と支払い状況を記録し、割り勘計算の詳細を保存する。
  * 
  *
  * @property int $id

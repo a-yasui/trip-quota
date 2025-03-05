@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 旅程情報を管理するテーブル。交通手段、出発地、到着地、出発時刻、到着時刻などの移動情報や、航空会社や便名などの参照情報を保存する。
  * 
  *
  * @property int $id

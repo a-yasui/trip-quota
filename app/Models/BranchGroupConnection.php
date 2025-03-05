@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 異なる旅行計画の班グループ間の接続を管理するテーブル。別の旅行計画の班グループと合流する際の関連付けを保存する。
  * 
  *
  * @property int $id

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 旅行中の支出情報を管理するテーブル。支払者、金額、通貨、説明、日付、カテゴリなどの情報を保存し、割り勘計算の基礎となるデータを提供する。
  * 
  *
  * @property int $id

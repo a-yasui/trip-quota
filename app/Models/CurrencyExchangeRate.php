@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * 通貨間の為替レートを管理するテーブル。異なる通貨での支出を一貫した通貨で計算するために使用し、レート適用日やデータソースも記録する。
  * 
  *
  * @property int $id

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 旅行メンバーのグループを管理するテーブル。コアグループ（全メンバー）と班グループ（一部メンバー）の区別や、親子関係のある班グループの構造を表現する。
  * 
  *
  * @property int $id

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * 宿泊先とメンバーの関連付けを管理する中間テーブル。どのメンバーがどの宿泊施設に滞在するかを記録する。
  * 
  *
  * @property int $id

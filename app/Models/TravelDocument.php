@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 旅行関連の文書・ファイルを管理するテーブル。チケットのPDF、予約確認書、パスポートのスキャン、旅行ガイドなどのファイル情報を保存する。
  * 
  *
  * @property int $id

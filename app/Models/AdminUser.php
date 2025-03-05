@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
+ * システム管理者情報を管理するテーブル。管理者の認証情報、権限、ログイン履歴などを保存する。一般ユーザーとは別に管理される。
  * 
  *
  * @property int $id

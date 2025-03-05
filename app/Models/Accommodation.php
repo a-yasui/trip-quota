@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 宿泊先情報を管理するテーブル。ホテル名、住所、チェックイン・チェックアウト日、予約番号などの宿泊施設に関する情報を保存する。
  * 
  *
  * @property int $id

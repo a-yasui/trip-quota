@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 旅行中の訪問場所情報を管理するテーブル。観光地、レストラン、ショッピングスポットなどの位置情報、説明、訪問予定時間などを保存する。
  * 
  *
  * @property int $id

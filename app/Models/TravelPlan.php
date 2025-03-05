@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 旅行計画の基本情報を管理するテーブル。タイトル、出発日、帰宅日、タイムゾーンなどの旅行の基本情報と、作成者および削除権限保持者の情報を保存する。
  * 
  *
  * @property int $id

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * メンバーとアカウントの関連付けを管理するテーブル。メンバーが使用するアカウントの変更履歴も保存し、アカウント変更の追跡を可能にする。
  * 
  *
  * @property int $id

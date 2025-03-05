@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * 旅行文書とメンバーの関連付けを管理する中間テーブル。どのメンバーがどの文書を閲覧できるかを記録する。
  * 
  *
  * @property int $id

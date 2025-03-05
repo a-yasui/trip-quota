@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\DatabaseNotification;
 
 /**
+ * 通知情報を管理するテーブル。未読/既読状態や通知内容のデータを保存し、Laravelのポリモーフィック関係を使用して様々なエンティティに関連付けられる。
  * 
  *
  * @property string $id

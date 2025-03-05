@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * 旅行に参加するメンバー情報を管理するテーブル。登録ユーザーと未登録メンバー両方を扱い、各メンバーの到着日・出発日などの情報も保存する。
  * 
  *
  * @property int $id
