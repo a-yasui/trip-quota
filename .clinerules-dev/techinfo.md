@@ -26,3 +26,9 @@ Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Ser
 - app にはLaravelが作成するPHPプログラムのみ保持する。
 - 機能ごとの役割は `TripQuote` に機能に相応する名前のサブディレクトリを作成し、その中にある `<ドメイン名>Service` クラスで実装をする。
 - Controller 内は Service クラスを使うのみである。
+
+# フロント
+
+- フロントは Blade および VueJS3 で作成する。
+- CSS Framework は Tailwind を使う。
+
