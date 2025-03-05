@@ -6,6 +6,9 @@
 
 ここに利用シーンを仮定してサイト利用の流れを把握する。
 
+
+### 利用シーン１　短期旅行
+
 Aさん、Bさん、Cさんの三人で、日本から韓国のソウルに行く事になった。
 
 まず役割分担としてAさんがチケット、Bさんが宿泊先、Cさんがそれぞれの観光地を探す事にした。それぞれの事が別々なのでチャットだけでは難しく、タイムラインとして表示させるため `TripQuota` を使う事にした。期間は 2024年10月10日〜2024年10月13日の三日間としている。AさんはBさんとCさんのメールアドレスを知っているので、AさんはTripQuotaにアカウントを作成し、旅行計画を作成した後に、BさんCさんを誘った。まず、旅行計画には出発日と帰国日が記入する。今回は経由地はない。
@@ -18,6 +21,16 @@ Cさんはメジャな観光地等をGoogleMapやwebサイト、雑誌の切り�
 
 最終日の翌日になって、AさんBさんCさん宛に、支払いの未記入がないか通知され、割り勘の未記入分を記入し、おのおのが誰に対して日本円でどれだけ払えばいいか計算されて送られる。
 
+### 利用シーン2 社員旅行
+
+大阪にある会社ABCは社員10人で、社員旅行として沖縄に行く事にした。旅程として2024年10月10日に伊丹空港を出発、2024年10月13日に帰宅する。役割として、社員Aさんが10人分のチケットを手配する。ツアーパックで宿泊先までおさえた。12日は現地の社員の3人と会食する事になっている。
+
+### 利用シーン3 他社合流を含めた旅行
+
+大阪にある会社ABCと東京にある会社BDBは、旅行先の北海道で一時合流することになっている。
+
+会社ABCは2024年12月13日に北海道入りをして、2024年12月24日に帰宅する。東京の会社BDBは2024年1213に青森に行き，2024年12月20日に北海道、2025年01月03日に新潟、2025年01月01日に東京に帰宅する。
+
 # サイトの特徴
 
 グループ内で旅行に関する共有をするのが目的である。
@@ -26,68 +39,135 @@ Cさんはメジャな観光地等をGoogleMapやwebサイト、雑誌の切り�
 
 いくつかサイト内の表記揺れを防ぐため、言葉を決めておく。
 
-| 言葉 | 意味 |
-| :----- | :----- |
-| サイトの登録 | サイトの登録は、メールアドレス・OAuthなど外部サイトログインで、サイトにアカウントを作成する事である |
-| アカウント | サイトに登録をしたデータの事。|
-| メンバー | 旅行する人の事。アカウントがあれば、無い場合もある。|
-| グループ | メンバーの集まり。|
-| コアグループ | 主となるグループ。旅行する全メンバーが集まっている |
-| 班グループ | コアグループの中から、一部のメンバーが集まって行動する時に使うグループ |
-| 時刻 | 時間の事。明記がない限り現地のタイムゾーンを使う。メンバーが日本在住の場合は、出発時は日本時刻になり、旅行先が韓国の時は、到着時間は韓国時間になる |
-| 出発日 | 旅行の開始日である。この時刻は初めに旅行計画をたてたメンバーの国のタイムゾーンに依存するが、入力時の国のタイムゾーンとなり、後にタイムゾーンは変更可能 |
-| 帰宅日 | 旅行の最終日である。出発日同様、タイムゾーンの変更は可能である|
+| 言葉 | 英語 | 意味 |
+| :----- | :----- | :----- |
+| サイトの登録 | register | サイトの登録は、メールアドレス・OAuthなど外部サイトログインで、サイトにアカウントを作成する事である |
+| ログインアカウント | LoginAccount | ログインするための情報。有効なメールアドレスが必須 |
+| アカウント | Account |サイトに登録をしたデータの事。|
+| メンバー | Member | 旅行する人の事。アカウントがあれば、無い場合もある。|
+| 旅行計画 | Trip Quote | 旅行の全貌の事。 |
+| グループ | Group | メンバーの集まり。|
+| コアグループ | Core Group | 主となるグループ。旅行する全メンバーが集まっている |
+| 班グループ | Branch Group | コアグループの中から、一部のメンバーが集まって行動する時に使うグループ |
+| 区別用名前 | System Branch Group Key | 別旅行計画等の班グループを招待するために、招待する時に使う名前 |
+| 時刻 | Date | 時間の事。明記がない限り現地のタイムゾーンを使う。メンバーが日本在住の場合は、出発時は日本時刻になり、旅行先が韓国の時は、到着時間は韓国時間になる |
+| 出発日 | departure date | 旅行の開始日である。この時刻は初めに旅行計画をたてたメンバーの国のタイムゾーンに依存するが、入力時の国のタイムゾーンとなり、後にタイムゾーンは変更可能 |
+| 帰宅日 | Return Date | 旅行の最終日である。出発日同様、タイムゾーンの変更は可能である|
+| サイト管理者 | Admin | TripQuota で何らかのトラブルがあった時に管理するための管理者。ログインアカウントとは別である。 |
 
 # サイトの機能
 
 サイトの実装する機能を書く。
 
+- [機能] と書いている項目はユーザ側に関連する機能である
+- [管理機能] と書いている項目は、サイト管理者が
+
+## [機能] ログインアカウント
+
+- メールアドレスとパスワードの組み合わせでログインする。
+- メールアドレスはサイト内でユニークとする
+- OAuth で登録する時、既にメールアドレスが存在する時は、そのメールアドレスとパスワードでログインをうながす。
+- OAuth で登録する時、メールアドレスが未登録のときは、そのメールアドレスでログインアカウントを作成する。その際パスワードログインはできない事とする。
+- ユーザのログイン管理画面で、OAuthの登録を済ましている時は、そのままログインできる。
+- ログイン情報を管理する画面では、メールアドレス、パスワード、OAuthの連携・連携解除ができる。
+
+## [機能] アカウント機能
+
+- アカウントの登録情報、過去に参加した旅行計画の一覧などを見る事ができる。この機能は他アカウントの情報は見れない。
+- アカウントはユニークになる「account名」を持っており、その制限は '^[a-zA-Z][\w\-_]{3,}$' という物である。ただし、アカウントのユニークは、英語の大文字小文字を問わない。例えば ABC と abc は同一アカウントとする。
+- アカウントは他人からもわかるように、サムネイル画像を登録する機能がある。
+- 一つのログインアカウントに対して、アカウントは複数持てる。それは、旅行計画に応じてアカウントを変更できるようにするためである。
+- 参加している旅行計画で、別アカウントに置き換える機能がある。例えばABCというアカウントで参加しているが、ABCDE という別アカウントで参加し直したい時は、account保持者なら可能とする。その際、旅行計画に参加している他アカウントにその事の通知が飛ぶ。
+
 ## [機能] 旅行計画
 
-メンバー数はとわず、１回の旅行の計画を作る場所。
+メンバー数は問わず、１回の旅行の計画を作る。
+旅行計画にはDB内で唯一の名前を付ける必要がある。それはシステム内で自動的に決まる物で、UUID のランダム値である。
 
+- 一つのアカウントで旅行計画を最低一つ持てる。
 - 旅行計画には、グループと旅程の最低二つが必須になる。それぞれの最低限の情報を入力したら旅行計画は作成できる。
 - 旅行計画で出発日を迎えても、帰宅日が未記入の時は、旅行計画を破棄するか、帰宅日を入力するかのどちらか選択しないと使えないようにする。
 - 別の旅行計画が日程が重なっているメンバーがいる時、そのメンバーはアラートが表示される。
 - 旅行計画からメンバーがいなくなったら、旅行計画のデータは全て破棄する。
 - 旅行計画は削除権限を持ったメンバーがおり、基本は作成者とする。
-- 削除権限は他のメンバーに委譲する事ができる。
-- 旅行計画から作成者が抜ける時は、削除権限は別のメンバーに委譲しているのが前提である。
+    - 削除権限は他のメンバーに委譲する事ができる。
+    - 削除は、出発日の前日の0時までできる。その日以降は終了日が未入力の時だけ削除可能である。
+    - 削除した時に参加していたアカウントに通知は飛ぶ。
+- 旅行計画から作成者が退出する時は、削除権限がない時である。
 
 ## [機能] グループ
 
-主となる旅行のメンバーを招待する機能である。
-旅行計画を作成したメンバーが最小単位である。
-リーダーと言うのは特に決めない。
-必要に応じて、`TripQuota`に登録していないメンバーの代筆できる機能がある。
+- 主となる旅行のメンバーを招待する機能である。
+- 旅行計画を作成したメンバーが最小単位である。
+- 必要に応じて、`TripQuota`に登録していないメンバーの代筆できる機能がある。
+- グループへの参加は招待のみである。account保持者が既存のグループへ参加するには、招待を受ける必要がある。
+- グループには名前が付けられる。
+    - コアグループは登録時に登録した名前が使われる。
+    - 班グループは後から名前の変更が可能だが、区別用名前は変更不可である。
+
+### [機能]旅行計画とグループの関連
+
+- 他の旅行計画の班グループと合流する事がある。それは互いに班グループの単位のみ可能である。
+- 他の旅行計画の班グループと合流するには、招待を受ける必要がある。
+- 参加された班グループは、合流した班グループのメンバーと計画だけ見る事ができ、変更はできないとする。
+- 他の旅行計画の班グループと合流は、有効な旅行計画の班グループのみ可能である。
+- 他の旅行計画の班グループと合流方法は、
+
+### [機能] グループの種類とメンバーの関連性
 
 グループは、コアグループとブランチグループに分かれる。
 
 - コアグループ : メンバー全員が集まっているグループ。誰がいつからいつまで、どこに宿泊している等といった情報が見れる。
-- 班グループ : コアグループから一部のメンバーが集まって別行動するときのグループ。
+- 班グループ : コアグループから一部のメンバーが集まって別行動するときのグループ。他の旅行計画の班グループと合流は可能とする。
+
+### [機能] グループ参加のプロセス
+
+1. グループにいるメンバーが、account名を教えてもらい、検索をして招待ボタンを押す。
+2. 招待を受けたメンバーはログインをして、参加承認のボタンを押して、旅行計画に参加をする。
+
+### [機能] 班グループの作成プロセス
+
+1. コアグループにいるメンバーが、「班グループ」名を入力して作成する。
+2. コアグループにいる別メンバーを選択して、参加ボタンを押す。
+
+### [機能] 班グループでできる事
+
+- 
 
 ## [機能] 旅程入力
 
 - 旅行計画の出発日から帰宅日までの期間の事である。
     - 出発日だけが決まっている場合があり、最終日は未記入でも旅行計画は作成できる。
-    - ただし、未記入のまま出発日になった時、旅行計画は停止して、最終日の入力が必須となる。
+    - 未記入のまま出発日になった時、旅行計画は停止し、最終日の入力が必須となる。
     - 出発日から帰宅日の最長期間は120日までとする。
-    - これはメンバーごとに違うが、サイトにまだアカウント作成してない等といった必要に応じて、他のメンバーの情報を書く事もある。
-    - 飛行機やフェリーなどは全員で行動する事が多いので、メンバーを選択して、移動手段を入力する。
+    - これはメンバーごとに違うが、サイトにまだアカウント作成してない等といった状況に対応するため、他のメンバーの情報を書く事もある。
+    - 他のメンバー情報は「名前」のみである。
+    - 飛行機やフェリーなどは、登録者以外のメンバーを選択して、移動手段を入力する事ができる。
 - 入力に必須なのは、移動手段（徒歩・バイク・車・フェリー・バス・飛行機）の情報と、宿泊先のホテル名である。
     - 移動手段が飛行機の場合は航空会社、便名、出発時刻、到着時刻の入力が必須になる。
 
 ## [機能] メンバー管理
 
-思案中
+* 追加、退出は全メンバーできる
 
 ## [機能] 割り勘入力
 
-思案中
+必須入力
+
+* いつ支払いをしたか
+* 誰が支払いをしたか
+* 全員で誰がいたか
+* どの通貨で支払いをしたか
+* 金額はいくらか
+
+割り勘入力は確定するまで参加、不参加ができる。
 
 ## [機能] 通知機能
 
-思案中
+通知するタイミング。これ以外にも後々増える事を考慮する
+
+1. 旅行計画のメンバーに招待
+2. 割り勘メンバーに参加
 
 ## [機能] アカウント登録
 
@@ -96,9 +176,25 @@ Cさんはメジャな観光地等をGoogleMapやwebサイト、雑誌の切り�
 1. メールアドレス・パスワード
 2. OAuth で別サイトアカウントでの登録
 
+### [管理機能] ログイン時
+
+- ログイン時にIPアドレスを保持する。
+
+### 追加・変更が可能
+
+- メールアドレス
+- パスワード
+
 ## [機能] ログイン
 
 ログインをしないと、旅行計画の作成などといった各機能が使えないとする。
+
+## [機能] 履歴機能
+
+- 過去の旅行計画を見る事ができる。後から割り勘参加等をするため。
+- 各種変更履歴を保持する。
+- 旅行計画が「誰」に作成された
+- メンバーに招待された
 
 # 厳守事項
 
@@ -120,6 +216,321 @@ Cさんはメジャな観光地等をGoogleMapやwebサイト、雑誌の切り�
 git status で現在の git のコンテキストを確認します。 もし指示された内容と無関係な変更が多い場合、現在の変更からユーザーに別のタスクとして開始するように提案してください。
 
 無視するように言われた場合は、そのまま続行します。
+# Database Structure
+
+Below is the entity-relationship diagram for the TripQuota application database:
+
+```mermaid
+erDiagram
+    users {
+        id bigint PK
+        name string
+        email string UK
+        email_verified_at timestamp
+        password string
+        remember_token string
+        created_at timestamp
+        updated_at timestamp
+    }
+    
+    password_reset_tokens {
+        email string PK
+        token string
+        created_at timestamp
+    }
+    
+    sessions {
+        id string PK
+        user_id bigint FK
+        ip_address string
+        user_agent text
+        payload longtext
+        last_activity integer
+    }
+    
+    travel_plans {
+        id bigint PK
+        title string
+        creator_id bigint FK
+        deletion_permission_holder_id bigint FK
+        departure_date date
+        return_date date
+        timezone string
+        is_active boolean
+        created_at timestamp
+        updated_at timestamp
+        deleted_at timestamp
+    }
+    
+    groups {
+        id bigint PK
+        name string
+        type enum
+        travel_plan_id bigint FK
+        parent_group_id bigint FK
+        description text
+        created_at timestamp
+        updated_at timestamp
+        deleted_at timestamp
+    }
+    
+    members {
+        id bigint PK
+        name string
+        email string
+        user_id bigint FK
+        group_id bigint FK
+        arrival_date date
+        departure_date date
+        is_registered boolean
+        is_active boolean
+        created_at timestamp
+        updated_at timestamp
+        deleted_at timestamp
+    }
+    
+    accommodations {
+        id bigint PK
+        travel_plan_id bigint FK
+        name string
+        address string
+        check_in_date date
+        check_out_date date
+        booking_reference string
+        phone_number string
+        website string
+        notes text
+        created_at timestamp
+        updated_at timestamp
+        deleted_at timestamp
+    }
+    
+    accommodation_member {
+        id bigint PK
+        accommodation_id bigint FK
+        member_id bigint FK
+        created_at timestamp
+        updated_at timestamp
+    }
+    
+    itineraries {
+        id bigint PK
+        travel_plan_id bigint FK
+        transportation_type enum
+        departure_location string
+        arrival_location string
+        departure_time datetime
+        arrival_time datetime
+        company_name string
+        reference_number string
+        notes text
+        created_at timestamp
+        updated_at timestamp
+        deleted_at timestamp
+    }
+    
+    itinerary_member {
+        id bigint PK
+        itinerary_id bigint FK
+        member_id bigint FK
+        created_at timestamp
+        updated_at timestamp
+    }
+    
+    expenses {
+        id bigint PK
+        travel_plan_id bigint FK
+        payer_member_id bigint FK
+        amount decimal
+        currency string
+        description string
+        expense_date date
+        category string
+        notes text
+        is_settled boolean
+        created_at timestamp
+        updated_at timestamp
+        deleted_at timestamp
+    }
+    
+    expense_member {
+        id bigint PK
+        expense_id bigint FK
+        member_id bigint FK
+        share_amount decimal
+        is_paid boolean
+        created_at timestamp
+        updated_at timestamp
+    }
+    
+    notifications {
+        id uuid PK
+        type string
+        notifiable_type string
+        notifiable_id bigint
+        data text
+        read_at timestamp
+        created_at timestamp
+        updated_at timestamp
+    }
+    
+    group_invitations {
+        id bigint PK
+        group_id bigint FK
+        inviter_id bigint FK
+        email string
+        token string UK
+        status enum
+        expires_at timestamp
+        accepted_at timestamp
+        declined_at timestamp
+        created_at timestamp
+        updated_at timestamp
+        deleted_at timestamp
+    }
+    
+    currency_exchange_rates {
+        id bigint PK
+        from_currency string
+        to_currency string
+        rate decimal
+        rate_date date
+        source string
+        created_at timestamp
+        updated_at timestamp
+    }
+    
+    users ||--o{ travel_plans : "creates"
+    users ||--o{ travel_plans : "has deletion permission"
+    users ||--o{ sessions : "has"
+    users ||--o{ members : "can be"
+    users ||--o{ group_invitations : "invites"
+    
+    travel_plans ||--o{ groups : "has"
+    travel_plans ||--o{ accommodations : "has"
+    travel_plans ||--o{ itineraries : "has"
+    travel_plans ||--o{ expenses : "has"
+    
+    groups ||--o{ groups : "can have branch groups"
+    groups ||--o{ members : "has"
+    groups ||--o{ group_invitations : "has"
+    
+    members ||--o{ accommodation_member : "stays at"
+    members ||--o{ itinerary_member : "travels on"
+    members ||--o{ expenses : "pays"
+    members ||--o{ expense_member : "shares expense"
+    
+    accommodations ||--o{ accommodation_member : "has"
+    itineraries ||--o{ itinerary_member : "has"
+    expenses ||--o{ expense_member : "has"
+```
+
+## Key Relationships
+
+1. **Users and Travel Plans**:
+   - A user can create multiple travel plans
+   - A user can hold deletion permission for multiple travel plans
+
+2. **Travel Plans and Groups**:
+   - A travel plan has one or more groups
+   - Groups can be of type 'core' or 'branch'
+   - Branch groups can have a parent group
+
+3. **Groups and Members**:
+   - A group consists of multiple members
+   - A member belongs to a specific group
+   - A member can optionally be linked to a registered user
+
+4. **Travel Plans and Accommodations/Itineraries/Expenses**:
+   - A travel plan has multiple accommodations, itineraries, and expenses
+   - These are shared among members through pivot tables
+
+5. **Expense Tracking**:
+   - Expenses are recorded with a payer member
+   - Expenses are shared among members through the expense_member pivot table
+   - Currency exchange rates are tracked for multi-currency support
+
+6. **Group Invitations**:
+   - Users can invite others to join groups via email
+   - Invitations have statuses (pending, accepted, declined, expired)
+
+7. **Notifications**:
+   - System uses Laravel's notification system with polymorphic relationships
+
+## データベースの役割
+
+各テーブルの役割と目的を日本語で説明します：
+
+1. **users**:
+   - ユーザー情報を管理するテーブル
+   - サイトに登録したアカウント情報（名前、メールアドレス、パスワード）を保存
+   - 認証・認可の基本となるデータ
+
+2. **password_reset_tokens**:
+   - パスワードリセット機能のためのトークンを管理
+   - パスワードを忘れた場合のリセット処理に使用
+
+3. **sessions**:
+   - ユーザーセッション情報を保存
+   - ログイン状態の維持や追跡に使用
+
+4. **travel_plans**:
+   - 旅行計画の基本情報を管理
+   - タイトル、出発日、帰宅日、タイムゾーンなどの旅行の基本情報を保存
+   - 作成者と削除権限保持者の情報も管理
+
+5. **groups**:
+   - 旅行メンバーのグループを管理
+   - コアグループ（全メンバー）と班グループ（一部メンバー）の区別
+   - 親子関係のある班グループの構造も表現可能
+
+6. **members**:
+   - 旅行に参加するメンバー情報を管理
+   - 登録ユーザーと未登録メンバー両方を扱える
+   - 各メンバーの到着日・出発日などの情報も保存
+
+7. **accommodations**:
+   - 宿泊先情報を管理
+   - ホテル名、住所、チェックイン・チェックアウト日、予約番号などを保存
+
+8. **accommodation_member**:
+   - 宿泊先とメンバーの関連付けを管理する中間テーブル
+   - どのメンバーがどの宿泊施設に滞在するかを記録
+
+9. **itineraries**:
+   - 旅程情報を管理
+   - 交通手段、出発地、到着地、出発時刻、到着時刻などの移動情報を保存
+   - 航空会社や便名などの参照情報も記録
+
+10. **itinerary_member**:
+    - 旅程とメンバーの関連付けを管理する中間テーブル
+    - どのメンバーがどの旅程に参加するかを記録
+
+11. **expenses**:
+    - 旅行中の支出情報を管理
+    - 支払者、金額、通貨、説明、日付、カテゴリなどの情報を保存
+    - 割り勘計算の基礎となるデータ
+
+12. **expense_member**:
+    - 支出とメンバーの関連付けを管理する中間テーブル
+    - 各メンバーの負担額と支払い状況を記録
+
+13. **notifications**:
+    - 通知情報を管理
+    - 未読/既読状態や通知内容のデータを保存
+    - Laravelのポリモーフィック関係を使用して様々なエンティティに関連付け可能
+
+14. **group_invitations**:
+    - グループへの招待情報を管理
+    - 招待者、招待メールアドレス、トークン、ステータスなどを保存
+    - 招待の有効期限や承諾/拒否の日時も記録
+
+15. **currency_exchange_rates**:
+    - 通貨間の為替レートを管理
+    - 異なる通貨での支出を一貫した通貨で計算するために使用
+    - レート適用日やデータソースも記録
+
+これらのテーブルが連携することで、複数人での旅行計画の共有、旅程の管理、宿泊先の記録、そして最終的な割り勘計算までをシームレスに行うことができます。
 # ディレクトリ配置規則
 
 ```
@@ -347,6 +758,12 @@ Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Ser
 
 - 基調色は #cbf542 とする
 - PC とスマートフォンでサイトを見る。
+
+## Styling Guildline
+
+- Use Tailwind CSS classes instead of inline style objects for new markup
+- VSCode CSS variables must be added to webview-ui/src/index.css before using them in Tailwind classes
+- Example: `<div className="text-md text-vscode-descriptionForeground mb-2" />` instead of style objects
 
 ## 画面設計
 
