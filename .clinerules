@@ -126,9 +126,12 @@ git status で現在の git のコンテキストを確認します。 もし指
 .clinerules-dev # プロンプト
 app/*           # Laravel Application
 TripQuota/*        # namespace が TripQuota\ で始まる各種機能
+tests/*         # Laravel の test が入っている
+tests/resources/*   # テストで使用するダミーデータを保存している
 ```
 
-それぞれのディレクトリには readme があり、どのような機能責任があるか書いている。## Gitワークフロー
+それぞれのディレクトリには readme があり、どのような機能責任があるか書いている。
+## Gitワークフロー
 
 このドキュメントでは、コミットとプルリクエストの作成に関するベストプラクティスを説明します。
 
@@ -335,3 +338,15 @@ TypeScriptのエラー処理をより型安全にするため、Result型を導�
 ## テストデータとmock
 
 Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Service は Repository でやり取りをする。DummyというRepositoryの最低限の実装をした実態を使いテストをする。
+
+# ディレクトリ構造とドメインの関係
+
+- app にはLaravelが作成するPHPプログラムのみ保持する。
+- 機能ごとの役割は `TripQuote` に機能に相応する名前のサブディレクトリを作成し、その中にある `<ドメイン名>Service` クラスで実装をする。
+- Controller 内は Service クラスを使うのみである。# UI 設計
+
+- 基調色は #cbf542 とする
+- PC とスマートフォンでサイトを見る。
+
+## 画面設計
+

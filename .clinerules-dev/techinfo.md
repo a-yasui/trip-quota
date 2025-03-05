@@ -20,3 +20,9 @@
 ## テストデータとmock
 
 Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Service は Repository でやり取りをする。DummyというRepositoryの最低限の実装をした実態を使いテストをする。
+
+# ディレクトリ構造とドメインの関係
+
+- app にはLaravelが作成するPHPプログラムのみ保持する。
+- 機能ごとの役割は `TripQuote` に機能に相応する名前のサブディレクトリを作成し、その中にある `<ドメイン名>Service` クラスで実装をする。
+- Controller 内は Service クラスを使うのみである。
