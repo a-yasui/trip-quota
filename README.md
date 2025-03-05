@@ -100,6 +100,9 @@ Aさん、Bさん、Cさんの三人で日本から韓国のソウルへ旅行�
 
 - PHP 8.3
 - Laravel 11
+- Docker (開発環境)
+- MySQL (データベース)
+- Node.js (フロントエンド)
 
 ## プロジェクト構造
 
@@ -107,7 +110,45 @@ Aさん、Bさん、Cさんの三人で日本から韓国のソウルへ旅行�
 .clinerules-dev # プロンプト
 app/*           # Laravel Application
 TripQuota/*     # namespace が TripQuota\ で始まる各種機能
+tests/*         # Laravel のテストが入っている
+tests/resources/* # テストで使用するダミーデータを保存している
+docker/*        # Docker設定ファイル
 ```
+
+## 開発環境のセットアップ
+
+### Dockerを使った開発環境
+
+このプロジェクトはDockerを使用して開発環境を構築しています。以下の手順で開発環境を起動できます：
+
+1. リポジトリをクローン
+2. `docker-compose up -d` を実行
+3. コンテナ内で `composer install` を実行
+4. `.env` ファイルを設定
+5. `php artisan migrate` を実行してデータベースをセットアップ
+
+VSCodeを使用している場合は、Dev Containersを使用して開発環境を簡単に起動できます：
+
+1. VSCodeでプロジェクトを開く
+2. 「Reopen in Container」を選択
+3. 開発環境が自動的に構築され、必要な拡張機能がインストールされます
+
+### データベース構造
+
+TripQuotaは以下の主要なテーブルを使用しています：
+
+- `users` - ユーザー情報
+- `travel_plans` - 旅行計画の基本情報
+- `groups` - 旅行メンバーのグループ
+- `members` - 旅行に参加するメンバー
+- `accommodations` - 宿泊先情報
+- `itineraries` - 旅程情報
+- `expenses` - 支出情報
+- `notifications` - 通知情報
+- `group_invitations` - グループへの招待情報
+- `currency_exchange_rates` - 通貨間の為替レート
+
+詳細なER図については、プロジェクトドキュメントを参照してください。
 
 ## 開発ガイドライン
 
