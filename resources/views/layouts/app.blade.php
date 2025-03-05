@@ -13,22 +13,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
     <!-- Scripts and Styles -->
-    @if(app()->environment() !== 'testing')
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @else
-        <!-- Simplified styles for testing -->
-        <style>
-            body {
-                font-family: 'Noto Sans JP', sans-serif;
-                background-color: #f9fafb;
-                color: #1f2937;
-            }
-            .text-lime-500 { color: #84cc16; }
-            .bg-lime-100 { background-color: #ecfccb; }
-            .text-lime-900 { color: #365314; }
-        </style>
-    @endif
-    
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <!-- Additional Styles -->
     @stack('styles')
 </head>

@@ -35,6 +35,11 @@ Route::get('/settings', function () {
     return view('welcome'); // Placeholder
 })->name('settings');
 
+// Vue.js Test Page
+Route::get('/vue-test', function () {
+    return view('vue-test');
+})->name('vue-test');
+
 // Authentication
 Route::post('/logout', function () {
     return redirect('/'); // Placeholder
