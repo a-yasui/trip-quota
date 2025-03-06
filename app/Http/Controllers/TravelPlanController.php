@@ -9,6 +9,7 @@ use App\Models\TravelPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class TravelPlanController extends Controller
 {
@@ -113,5 +114,84 @@ class TravelPlanController extends Controller
         $members = $coreGroup ? $coreGroup->members : collect();
         
         return view('travel-plans.show', compact('travelPlan', 'coreGroup', 'members'));
+    }
+
+    /**
+     * Show the form for editing the specified travel plan.
+     *
+     * @param  \App\Models\TravelPlan  $travelPlan
+     * @return \Illuminate\View\View
+     */
+    public function edit(TravelPlan $travelPlan)
+    {
+        // 権限チェック
+        $user = Auth::user();
+        if ($user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
+            abort(403, '旅行計画を編集する権限がありません。');
+        }
+        
+        return view('travel-plans.edit', compact('travelPlan'));
+    }
+
+    /**
+     * Update the specified travel plan in storage.
+     *
+     * @param  \App\Http\Requests\TravelPlanRequest  $request
+     * @param  \App\Models\TravelPlan  $travelPlan
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(TravelPlanRequest $request, TravelPlan $travelPlan)
+    {
+        // 権限チェック
+        $user = Auth::user();
+        if ($user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
+            abort(403, '旅行計画を編集する権限がありません。');
+        }
+        
+        try {
+            DB::beginTransaction();
+            
+            // 出発日前日かどうかチェック
+            $isBeforeDeparture = now()->startOfDay()->lt($travelPlan->departure_date);
+            
+            // 出発日前日の場合は全ての項目を更新可能
+            if ($isBeforeDeparture) {
+                $travelPlan->title = $request->title;
+                $travelPlan->departure_date = $request->departure_date;
+                $travelPlan->timezone = $request->timezone;
+                
+                // 帰宅日も更新
+                if ($request->has('return_date')) {
+                    $travelPlan->return_date = $request->return_date;
+                }
+            } else {
+                // 出発日以降は帰宅日のみ更新可能（未記入の場合のみ）
+                if ($travelPlan->return_date === null && $request->has('return_date')) {
+                    $travelPlan->return_date = $request->return_date;
+                }
+            }
+            
+            $travelPlan->save();
+            
+            // コアグループの名前も更新（旅行計画名と同期）
+            if ($isBeforeDeparture) {
+                $coreGroup = $travelPlan->groups()->where('type', 'core')->first();
+                if ($coreGroup) {
+                    $coreGroup->name = $travelPlan->title;
+                    $coreGroup->save();
+                }
+            }
+            
+            DB::commit();
+            
+            return redirect()->route('travel-plans.show', $travelPlan)
+                ->with('success', '旅行計画「' . $travelPlan->title . '」を更新しました。');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', '旅行計画の更新に失敗しました。' . $e->getMessage());
+        }
     }
 }

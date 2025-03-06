@@ -185,4 +185,232 @@ class TravelPlanTest extends TestCase
         $response->assertSee($travelPlan->title);
         $response->assertSee($user->name);
     }
+
+    /**
+     * Test that a travel plan edit page can be rendered.
+     */
+    public function test_travel_plan_edit_page_can_be_rendered(): void
+    {
+        $user = User::factory()->create();
+        
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+            'departure_date' => now()->addDays(10),
+        ]);
+
+        $response = $this->actingAs($user)
+                         ->get('/travel-plans/' . $travelPlan->id . '/edit');
+
+        $response->assertStatus(200);
+        $response->assertViewIs('travel-plans.edit');
+        $response->assertSee($travelPlan->title);
+        $response->assertSee('旅行計画編集');
+    }
+
+    /**
+     * Test that a travel plan can be updated before departure date.
+     */
+    public function test_travel_plan_can_be_updated_before_departure(): void
+    {
+        $user = User::factory()->create();
+        
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+            'title' => '韓国ソウル旅行',
+            'departure_date' => now()->addDays(10),
+            'return_date' => now()->addDays(15),
+            'timezone' => 'Asia/Tokyo',
+        ]);
+        
+        $coreGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'core',
+            'name' => $travelPlan->title,
+        ]);
+
+        $updatedData = [
+            'title' => '韓国ソウル旅行（更新）',
+            'departure_date' => now()->addDays(12)->format('Y-m-d'),
+            'return_date' => now()->addDays(17)->format('Y-m-d'),
+            'timezone' => 'Asia/Seoul',
+        ];
+
+        $response = $this->actingAs($user)
+                         ->put('/travel-plans/' . $travelPlan->id, $updatedData);
+
+        $response->assertRedirect(route('travel-plans.show', $travelPlan));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('travel_plans', [
+            'id' => $travelPlan->id,
+            'title' => '韓国ソウル旅行（更新）',
+            'timezone' => 'Asia/Seoul',
+        ]);
+
+        // コアグループの名前も更新されていることを確認
+        $this->assertDatabaseHas('groups', [
+            'id' => $coreGroup->id,
+            'name' => '韓国ソウル旅行（更新）',
+        ]);
+    }
+
+    /**
+     * Test that a travel plan cannot be updated after departure date except for return date.
+     */
+    public function test_travel_plan_cannot_be_updated_after_departure_except_return_date(): void
+    {
+        $user = User::factory()->create();
+        
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+            'title' => '韓国ソウル旅行',
+            'departure_date' => now()->subDays(2), // 2日前に出発済み
+            'return_date' => null, // 帰宅日は未設定
+            'timezone' => 'Asia/Tokyo',
+        ]);
+        
+        $coreGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'core',
+            'name' => $travelPlan->title,
+        ]);
+
+        $updatedData = [
+            'title' => '韓国ソウル旅行（更新）',
+            'departure_date' => now()->subDays(1)->format('Y-m-d'), // 変更しようとしても
+            'return_date' => now()->addDays(3)->format('Y-m-d'), // 帰宅日のみ設定可能
+            'timezone' => 'Asia/Seoul', // 変更しようとしても
+        ];
+
+        $response = $this->actingAs($user)
+                         ->put('/travel-plans/' . $travelPlan->id, $updatedData);
+
+        $response->assertRedirect(route('travel-plans.show', $travelPlan));
+        $response->assertSessionHas('success');
+
+        // タイトル、出発日、タイムゾーンは変更されていないことを確認
+        $this->assertDatabaseHas('travel_plans', [
+            'id' => $travelPlan->id,
+            'title' => '韓国ソウル旅行', // 変更されていない
+            'timezone' => 'Asia/Tokyo', // 変更されていない
+        ]);
+
+        // 帰宅日のみ更新されていることを確認
+        $updatedTravelPlan = TravelPlan::find($travelPlan->id);
+        $this->assertEquals(now()->addDays(3)->format('Y-m-d'), $updatedTravelPlan->return_date->format('Y-m-d'));
+
+        // コアグループの名前も変更されていないことを確認
+        $this->assertDatabaseHas('groups', [
+            'id' => $coreGroup->id,
+            'name' => '韓国ソウル旅行', // 変更されていない
+        ]);
+    }
+
+    /**
+     * Test that a travel plan's return date cannot be updated after departure if already set.
+     */
+    public function test_travel_plan_return_date_cannot_be_updated_after_departure_if_already_set(): void
+    {
+        $user = User::factory()->create();
+        
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+            'title' => '韓国ソウル旅行',
+            'departure_date' => now()->subDays(2), // 2日前に出発済み
+            'return_date' => now()->addDays(3), // 帰宅日は既に設定済み
+            'timezone' => 'Asia/Tokyo',
+        ]);
+
+        $updatedData = [
+            'title' => '韓国ソウル旅行（更新）',
+            'departure_date' => now()->subDays(1)->format('Y-m-d'),
+            'return_date' => now()->addDays(5)->format('Y-m-d'), // 変更しようとしても
+            'timezone' => 'Asia/Seoul',
+        ];
+
+        $response = $this->actingAs($user)
+                         ->put('/travel-plans/' . $travelPlan->id, $updatedData);
+
+        $response->assertRedirect(route('travel-plans.show', $travelPlan));
+        $response->assertSessionHas('success');
+
+        // 帰宅日も含めて何も変更されていないことを確認
+        $this->assertDatabaseHas('travel_plans', [
+            'id' => $travelPlan->id,
+            'title' => '韓国ソウル旅行',
+            'timezone' => 'Asia/Tokyo',
+        ]);
+
+        $updatedTravelPlan = TravelPlan::find($travelPlan->id);
+        $this->assertEquals(now()->addDays(3)->format('Y-m-d'), $updatedTravelPlan->return_date->format('Y-m-d'));
+    }
+
+    /**
+     * Test that edit button is shown only before departure or when return date is not set.
+     */
+    public function test_edit_button_is_shown_only_before_departure_or_when_return_date_not_set(): void
+    {
+        $user = User::factory()->create();
+        
+        // ケース1: 出発前の旅行計画
+        $travelPlanBefore = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+            'departure_date' => now()->addDays(10),
+            'return_date' => now()->addDays(15),
+        ]);
+        
+        Group::factory()->create([
+            'travel_plan_id' => $travelPlanBefore->id,
+            'type' => 'core',
+        ]);
+
+        $response = $this->actingAs($user)
+                         ->get('/travel-plans/' . $travelPlanBefore->id);
+
+        $response->assertStatus(200);
+        $response->assertSee('編集');
+        
+        // ケース2: 出発後だが帰宅日が未設定の旅行計画
+        $travelPlanAfterNoReturn = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+            'departure_date' => now()->subDays(2),
+            'return_date' => null,
+        ]);
+        
+        Group::factory()->create([
+            'travel_plan_id' => $travelPlanAfterNoReturn->id,
+            'type' => 'core',
+        ]);
+
+        $response = $this->actingAs($user)
+                         ->get('/travel-plans/' . $travelPlanAfterNoReturn->id);
+
+        $response->assertStatus(200);
+        $response->assertSee('編集');
+        
+        // ケース3: 出発後で帰宅日が設定済みの旅行計画
+        $travelPlanAfterWithReturn = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+            'departure_date' => now()->subDays(2),
+            'return_date' => now()->addDays(3),
+        ]);
+        
+        Group::factory()->create([
+            'travel_plan_id' => $travelPlanAfterWithReturn->id,
+            'type' => 'core',
+        ]);
+
+        $response = $this->actingAs($user)
+                         ->get('/travel-plans/' . $travelPlanAfterWithReturn->id);
+
+        $response->assertStatus(200);
+        $response->assertDontSee('編集'); // 編集ボタンが表示されないことを確認
+    }
 }
