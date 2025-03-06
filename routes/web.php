@@ -21,6 +21,8 @@ Route::middleware('auth')->group(function () {
     // 旅行計画ルート
     Route::get('/travel-plans', [TravelPlanController::class, 'index'])->name('travel-plans.index');
     Route::get('/travel-plans/create', [TravelPlanController::class, 'create'])->name('travel-plans.create');
+    Route::post('/travel-plans', [TravelPlanController::class, 'store'])->name('travel-plans.store');
+    Route::get('/travel-plans/{travelPlan}', [TravelPlanController::class, 'show'])->name('travel-plans.show');
     
     // グループルート
     Route::get('/groups', function () {
