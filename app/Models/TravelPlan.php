@@ -87,6 +87,7 @@ class TravelPlan extends Model
         'departure_date' => 'date',
         'return_date' => 'date',
         'is_active' => 'boolean',
+        'timezone' => \App\Enums\Timezone::class,
     ];
 
     /**

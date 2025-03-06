@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Timezone;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -36,7 +37,7 @@ class TravelPlanRequest extends FormRequest
                 $rules['departure_date'][] = 'after_or_equal:today';
             }
             
-            $rules['timezone'] = ['required', 'string', Rule::in(timezone_identifiers_list())];
+            $rules['timezone'] = ['required', 'string', Rule::in(Timezone::values())];
         }
         
         // 帰宅日のルール

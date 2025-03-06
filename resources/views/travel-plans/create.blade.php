@@ -50,16 +50,15 @@
                             <label for="timezone" class="block text-sm font-medium text-gray-700">タイムゾーン</label>
                             <select name="timezone" id="timezone"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-lime-500 focus:ring focus:ring-lime-500 focus:ring-opacity-50 @error('timezone') border-red-500 @enderror">
-                                <option value="Asia/Tokyo" {{ old('timezone', 'Asia/Tokyo') == 'Asia/Tokyo' ? 'selected' : '' }}>日本時間 (Asia/Tokyo)</option>
-                                <option value="Asia/Seoul" {{ old('timezone') == 'Asia/Seoul' ? 'selected' : '' }}>韓国時間 (Asia/Seoul)</option>
-                                <option value="Asia/Shanghai" {{ old('timezone') == 'Asia/Shanghai' ? 'selected' : '' }}>中国時間 (Asia/Shanghai)</option>
-                                <option value="Asia/Singapore" {{ old('timezone') == 'Asia/Singapore' ? 'selected' : '' }}>シンガポール時間 (Asia/Singapore)</option>
-                                <option value="Asia/Bangkok" {{ old('timezone') == 'Asia/Bangkok' ? 'selected' : '' }}>タイ時間 (Asia/Bangkok)</option>
-                                <option value="Europe/London" {{ old('timezone') == 'Europe/London' ? 'selected' : '' }}>イギリス時間 (Europe/London)</option>
-                                <option value="Europe/Paris" {{ old('timezone') == 'Europe/Paris' ? 'selected' : '' }}>フランス時間 (Europe/Paris)</option>
-                                <option value="America/New_York" {{ old('timezone') == 'America/New_York' ? 'selected' : '' }}>アメリカ東部時間 (America/New_York)</option>
-                                <option value="America/Los_Angeles" {{ old('timezone') == 'America/Los_Angeles' ? 'selected' : '' }}>アメリカ西部時間 (America/Los_Angeles)</option>
-                                <option value="Pacific/Honolulu" {{ old('timezone') == 'Pacific/Honolulu' ? 'selected' : '' }}>ハワイ時間 (Pacific/Honolulu)</option>
+                                @foreach(\App\Enums\Timezone::grouped() as $region => $timezones)
+                                    <optgroup label="{{ $region }}">
+                                        @foreach($timezones as $value => $label)
+                                            <option value="{{ $value }}" {{ old('timezone', 'Asia/Tokyo') == $value ? 'selected' : '' }}>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
                             </select>
                             @error('timezone')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
