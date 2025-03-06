@@ -2,16 +2,22 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class TravelPlanTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * Test that the travel plans index page can be rendered.
      */
     public function test_travel_plans_index_page_can_be_rendered(): void
     {
-        $response = $this->get('/travel-plans');
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/travel-plans');
 
         $response->assertStatus(200);
         $response->assertViewIs('travel-plans.index');
@@ -22,7 +28,9 @@ class TravelPlanTest extends TestCase
      */
     public function test_travel_plans_index_contains_expected_elements(): void
     {
-        $response = $this->get('/travel-plans');
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/travel-plans');
 
         $response->assertSee('旅行計画一覧');
         $response->assertSee('旅行名');

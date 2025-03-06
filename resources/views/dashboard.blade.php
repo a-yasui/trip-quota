@@ -52,13 +52,49 @@
         </div>
     </div>
 
-    <!-- 最近の活動 -->
+    <!-- 現在の旅行計画 -->
     <div class="mt-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">最近の活動</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">現在の旅行計画</h3>
         <div class="bg-white overflow-hidden shadow-sm rounded-lg">
             <div class="p-6">
                 <div class="space-y-4">
-                    <p class="text-gray-600">まだ活動はありません。旅行計画を作成して始めましょう！</p>
+                    <p class="text-gray-600">まだ旅行計画はありません。新しい旅行計画を作成しましょう！</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最近の経費 -->
+    <div class="mt-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">最近の経費</h3>
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+            <div class="p-6">
+                <div class="space-y-4">
+                    <p class="text-gray-600">まだ経費の記録はありません。旅行中に経費を記録しましょう！</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最近の通知 -->
+    <div class="mt-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">最近の通知</h3>
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+            <div class="p-6">
+                <div class="space-y-4">
+                    <p class="text-gray-600">新しい通知はありません。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 今後の予定 -->
+    <div class="mt-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">今後の予定</h3>
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+            <div class="p-6">
+                <div class="space-y-4">
+                    <p class="text-gray-600">今後の予定はありません。旅行計画を作成して予定を追加しましょう！</p>
                 </div>
             </div>
         </div>
