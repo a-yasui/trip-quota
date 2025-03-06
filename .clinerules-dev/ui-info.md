@@ -2,6 +2,7 @@
 
 - 基調色は #cbf542 とする
 - PC とスマートフォンでサイトを見る。
+- VueJS Router は使わない
 
 ## Styling Guildline
 

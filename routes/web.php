@@ -1,46 +1,20 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DashboardController;
 
-// Welcome page
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Dashboard
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-// Travel Plans
-Route::get('/travel-plans', [App\Http\Controllers\TravelPlanController::class, 'index'])->name('travel-plans.index');
-Route::get('/travel-plans/create', [App\Http\Controllers\TravelPlanController::class, 'create'])->name('travel-plans.create');
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-// Groups
-Route::get('/groups', function () {
-    return view('welcome'); // Placeholder
-})->name('groups.index');
-
-// Expenses
-Route::get('/expenses', function () {
-    return view('welcome'); // Placeholder
-})->name('expenses.index');
-
-// Profile
-Route::get('/profile/edit', function () {
-    return view('welcome'); // Placeholder
-})->name('profile.edit');
-
-// Settings
-Route::get('/settings', function () {
-    return view('welcome'); // Placeholder
-})->name('settings');
-
-// Vue.js Test Page
-Route::get('/vue-test', function () {
-    return view('vue-test');
-})->name('vue-test');
-
-// Authentication
-Route::post('/logout', function () {
-    return redirect('/'); // Placeholder
-})->name('logout');
+require __DIR__.'/auth.php';

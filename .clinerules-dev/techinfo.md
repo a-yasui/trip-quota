@@ -17,6 +17,26 @@
 
 そのドメインは、その機能内で完結しており、**他の機能にあるクラスを使ってはならない**。ただし、`<ドメイン名>Service` クラスは除く。
 
+### ドメインモデル
+
+- namespace `App\Model` のクラスを使う時は、 `TripQuota\~~\Model\` 以下に継承したクラスを置き、それを利用する
+- テストは `tests/<domain>/` 以下に配置する。
+    - テストに使う Factory は `App\Model` の物を使う。
+- ドメインの Service クラスを外部から使う時、引数および返り値は全て `TripQuota\~~\Repository\` 以下に配置したインターフェースを実装した物を使用する。
+    - ドメインの Service クラスのメソッドに使う引数が Eloquent Model の時は、`App\Mapping\<Domain>\` 以下に Mapping クラスを用意して、それを使う。
+
+#### Bisection クラス例
+
+`App\Model\User` と `App\Http\Request\UserUpdateRequest` を `TripQuota\Account\AccountService::update(UserRepository $user, UpdateDataRepository $data): UserRepository` に渡すとする。
+
+##### UserRepository の Mapping クラス
+
+```
+<?php
+namespace App\Mapping\Account;
+class UserMapping implements \TripQuota\Account\Repository\UserRepository {}
+```
+
 ## テストデータとmock
 
 Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Service は Repository でやり取りをする。DummyというRepositoryの最低限の実装をした実態を使いテストをする。

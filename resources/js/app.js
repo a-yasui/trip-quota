@@ -1,14 +1,7 @@
 import './bootstrap';
-import { createApp } from 'vue/dist/vue.esm-bundler.js';
 
-// Import Vue components
-import ExampleComponent from './components/ExampleComponent.vue';
+import Alpine from 'alpinejs';
 
-// Create Vue app and mount it
-const app = createApp({});
+window.Alpine = Alpine;
 
-// Register global components
-app.component('example-component', ExampleComponent);
-
-// Mount the app to the #app element in the layout
-app.mount('#app');
+Alpine.start();
