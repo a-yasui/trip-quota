@@ -8,8 +8,18 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+
+// ソーシャルログイン
+Route::get('auth/{provider}', [SocialiteController::class, 'redirect'])
+    ->name('socialite.redirect')
+    ->whereIn('provider', ['google', 'facebook']);
+
+Route::get('auth/{provider}/callback', [SocialiteController::class, 'callback'])
+    ->name('socialite.callback')
+    ->whereIn('provider', ['google', 'facebook']);
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
@@ -56,4 +66,17 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+        
+    // ソーシャルアカウント連携
+    Route::post('auth/{provider}/connect', [SocialiteController::class, 'connect'])
+        ->name('socialite.connect')
+        ->whereIn('provider', ['google', 'facebook']);
+        
+    Route::get('auth/{provider}/connect/callback', [SocialiteController::class, 'connectCallback'])
+        ->name('socialite.connect.callback')
+        ->whereIn('provider', ['google', 'facebook']);
+        
+    Route::delete('auth/{provider}/disconnect', [SocialiteController::class, 'disconnect'])
+        ->name('socialite.disconnect')
+        ->whereIn('provider', ['google', 'facebook']);
 });

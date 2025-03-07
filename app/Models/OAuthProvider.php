@@ -20,6 +20,13 @@ class OAuthProvider extends Model
 {
     /** @use HasFactory<\Database\Factories\OAuthProviderFactory> */
     use HasFactory;
+    
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'oauth_providers';
 
     /**
      * The attributes that are mass assignable.
