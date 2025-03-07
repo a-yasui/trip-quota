@@ -214,7 +214,7 @@ class GroupMemberTest extends TestCase
             ]);
         
         $response->assertRedirect();
-        $response->assertSessionHas('error', '同じ名前のメンバーが既に登録されています');
+        $response->assertSessionHasErrors(['name' => '同じ名前のメンバーが既に登録されています']);
         
         // データベースに1人しか登録されていないことを確認
         $this->assertEquals(1, Member::where('name', '重複名前テスト')->count());
@@ -252,7 +252,7 @@ class GroupMemberTest extends TestCase
             ]);
         
         $response->assertRedirect();
-        $response->assertSessionHas('error', 'このメールアドレスは既に登録されています');
+        $response->assertSessionHasErrors(['email' => 'このメールアドレスは既に登録されています']);
         
         // データベースに1人しか登録されていないことを確認
         $this->assertEquals(1, Member::where('email', 'duplicate@example.com')->count());
@@ -291,7 +291,7 @@ class GroupMemberTest extends TestCase
             ]);
         
         $response->assertRedirect();
-        $response->assertSessionHas('error', 'このメールアドレスは既に登録されています');
+        $response->assertSessionHasErrors(['email' => 'このメールアドレスは既に登録されています']);
         
         // データベースに1人しか登録されていないことを確認
         $this->assertEquals(1, Member::where('user_id', $otherUser->id)->count());
@@ -320,5 +320,39 @@ class GroupMemberTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHasErrors(['name', 'email']);
+        
+        // エラーメッセージの内容も確認
+        $response->assertSessionHasErrors([
+            'name' => '名前かメールアドレスのどちらかを入力してください',
+            'email' => '名前かメールアドレスのどちらかを入力してください'
+        ]);
+    }
+    
+    /**
+     * メールアドレスの形式が不正な場合にバリデーションエラーになるかテスト
+     */
+    public function test_validation_fails_when_email_format_is_invalid()
+    {
+        $user = User::factory()->create();
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+        ]);
+        $group = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'core',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('groups.members.store', $group), [
+                'name' => 'テストユーザー',
+                'email' => '不正なメールアドレス',
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasErrors(['email']);
+        $response->assertSessionHasErrors([
+            'email' => '有効なメールアドレス形式で入力してください'
+        ]);
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Member;
 use App\Models\TravelPlan;
 use App\Models\User;
 use App\Models\ActivityLog;
+use App\Http\Requests\GroupMemberStoreRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,48 +25,13 @@ class GroupMemberController extends Controller
     /**
      * 新しいメンバーを保存
      */
-    public function store(Request $request, Group $group)
+    public function store(GroupMemberStoreRequest $request, Group $group)
     {
-        // バリデーション
-        $request->validate([
-            'name' => 'required_without:email|string|max:255',
-            'email' => 'required_without:name|nullable|email|max:255',
-        ], [
-            'name.required_without' => '名前かメールアドレスのどちらかを入力してください',
-            'email.required_without' => '名前かメールアドレスのどちらかを入力してください',
-            'email.email' => '有効なメールアドレス形式で入力してください',
-        ]);
 
         try {
             // トランザクションが既に開始されていない場合のみ開始
             if (DB::transactionLevel() === 0) {
                 DB::beginTransaction();
-            }
-            
-            // 名前の重複チェック
-            if ($request->name) {
-                $existingMemberWithName = Member::where('group_id', $group->id)
-                    ->where('name', $request->name)
-                    ->first();
-                
-                if ($existingMemberWithName) {
-                    return redirect()->route('groups.members.create', $group)
-                        ->withInput()
-                        ->with('error', '同じ名前のメンバーが既に登録されています');
-                }
-            }
-            
-            // メールアドレスの重複チェック
-            if ($request->email) {
-                $existingMemberWithEmail = Member::where('group_id', $group->id)
-                    ->where('email', $request->email)
-                    ->first();
-                
-                if ($existingMemberWithEmail) {
-                    return redirect()->route('groups.members.create', $group)
-                        ->withInput()
-                        ->with('error', 'このメールアドレスは既に登録されています');
-                }
             }
             
             $member = new Member();
