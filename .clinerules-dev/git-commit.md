@@ -9,13 +9,13 @@
 1. 変更の確認
    ```bash
    # 未追跡ファイルと変更の確認
-   git status
+   git --no-pager status --porcelain
 
    # 変更内容の詳細確認
-   git diff
+   git --no-pager diff
 
    # コミットメッセージのスタイル確認
-   git log
+   git --no-pager log
    ```
 
 2. 変更の分析
@@ -56,16 +56,16 @@
 1. ブランチの状態確認
    ```bash
    # 未コミットの変更確認
-   git status
+   git --no-pager status
 
    # 変更内容の確認
-   git diff
+   git --no-pager diff
 
    # mainからの差分確認
-   git diff main...HEAD
+   git --no-pager diff main...HEAD
 
    # コミット履歴の確認
-   git log
+   git --no-pager log
    ```
 
 2. 変更の分析
