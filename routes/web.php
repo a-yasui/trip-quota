@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/branch-groups/{group}/edit', [App\Http\Controllers\BranchGroupController::class, 'edit'])->name('branch-groups.edit');
     Route::put('/branch-groups/{group}', [App\Http\Controllers\BranchGroupController::class, 'update'])->name('branch-groups.update');
     Route::delete('/branch-groups/{group}', [App\Http\Controllers\BranchGroupController::class, 'destroy'])->name('branch-groups.destroy');
+    Route::get('/branch-groups/{group}/duplicate', [App\Http\Controllers\BranchGroupController::class, 'duplicate'])->name('branch-groups.duplicate');
+    Route::post('/branch-groups/{group}/duplicate', [App\Http\Controllers\BranchGroupController::class, 'storeDuplicate'])->name('branch-groups.store-duplicate');
     
     // 班グループメンバー管理
     Route::post('/branch-groups/{group}/members', [App\Http\Controllers\BranchGroupMemberController::class, 'store'])->name('branch-groups.members.store');

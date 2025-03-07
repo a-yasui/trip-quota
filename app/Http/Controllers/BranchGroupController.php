@@ -10,6 +10,7 @@ use App\Models\TravelPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class BranchGroupController extends Controller
 {
@@ -266,6 +267,99 @@ class BranchGroupController extends Controller
             DB::rollBack();
             return redirect()->back()
                 ->with('error', '班グループの削除に失敗しました: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * 班グループ複製フォームを表示
+     */
+    public function duplicate(Group $group)
+    {
+        // 班グループであることを確認
+        if ($group->type !== 'branch') {
+            return redirect()->route('travel-plans.show', $group->travelPlan)
+                ->with('error', '指定されたグループは班グループではありません');
+        }
+        
+        // メンバーを取得
+        $members = $group->members()->active()->get();
+        
+        return view('branch-groups.duplicate', compact('group', 'members'));
+    }
+
+    /**
+     * 班グループの複製を保存
+     */
+    public function storeDuplicate(Request $request, Group $group)
+    {
+        // 班グループであることを確認
+        if ($group->type !== 'branch') {
+            return redirect()->route('travel-plans.show', $group->travelPlan)
+                ->with('error', '指定されたグループは班グループではありません');
+        }
+        
+        // バリデーション
+        $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('groups', 'name')->where(function ($query) use ($group) {
+                    return $query->where('travel_plan_id', $group->travel_plan_id)
+                                ->where('type', 'branch');
+                }),
+            ],
+            'description' => 'nullable|string|max:1000',
+        ], [
+            'name.required' => '班グループ名は必須です',
+            'name.unique' => 'この班グループ名は既に使用されています',
+        ]);
+        
+        try {
+            DB::beginTransaction();
+            
+            // 新しい班グループを作成
+            $newGroup = new Group();
+            $newGroup->name = $request->name;
+            $newGroup->description = $request->description;
+            $newGroup->type = 'branch';
+            $newGroup->travel_plan_id = $group->travel_plan_id;
+            $newGroup->parent_group_id = $group->parent_group_id;
+            $newGroup->save();
+            
+            // 元の班グループのメンバーを複製
+            $members = $group->members()->active()->get();
+            foreach ($members as $member) {
+                $newMember = new Member();
+                $newMember->name = $member->name;
+                $newMember->email = $member->email;
+                $newMember->user_id = $member->user_id;
+                $newMember->group_id = $newGroup->id;
+                $newMember->is_registered = $member->is_registered;
+                $newMember->is_active = true;
+                $newMember->save();
+            }
+            
+            // 活動ログを記録
+            $activityLog = new ActivityLog();
+            $activityLog->user_id = Auth::id();
+            $activityLog->subject_type = TravelPlan::class;
+            $activityLog->subject_id = $group->travel_plan_id;
+            $activityLog->action = 'branch_group_duplicated';
+            $activityLog->description = Auth::user()->name . 'さんが班グループ「' . $group->name . '」から「' . $newGroup->name . '」を複製しました';
+            $activityLog->ip_address = request()->ip();
+            $activityLog->save();
+            
+            DB::commit();
+            
+            return redirect()->route('branch-groups.show', $newGroup)
+                ->with('success', '班グループを複製しました');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', '班グループの複製に失敗しました: ' . $e->getMessage());
         }
     }
 }

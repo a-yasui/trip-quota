@@ -317,4 +317,169 @@ class BranchGroupTest extends TestCase
             'travel_plan_id' => $travelPlan->id,
         ]);
     }
+
+    /**
+     * 班グループ複製フォームが表示されるかテスト
+     */
+    public function test_user_can_view_branch_group_duplicate_form()
+    {
+        $user = User::factory()->create();
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+        ]);
+        $coreGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'core',
+        ]);
+        $branchGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'branch',
+            'parent_group_id' => $coreGroup->id,
+            'name' => 'テスト班グループ',
+        ]);
+        
+        // コアグループにメンバーを追加
+        $member = Member::factory()->create([
+            'group_id' => $coreGroup->id,
+            'user_id' => $user->id,
+            'is_registered' => true,
+        ]);
+        
+        // 班グループにメンバーを追加
+        Member::factory()->create([
+            'group_id' => $branchGroup->id,
+            'name' => $member->name,
+            'email' => $member->email,
+            'user_id' => $user->id,
+            'is_registered' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get(route('branch-groups.duplicate', $branchGroup));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('branch-groups.duplicate');
+        $response->assertSee('テスト班グループ');
+    }
+
+    /**
+     * 班グループを複製できるかテスト
+     */
+    public function test_user_can_duplicate_branch_group()
+    {
+        $user = User::factory()->create();
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+        ]);
+        $coreGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'core',
+        ]);
+        $branchGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'branch',
+            'parent_group_id' => $coreGroup->id,
+            'name' => 'テスト班グループ',
+        ]);
+        
+        // コアグループにメンバーを追加
+        $member = Member::factory()->create([
+            'group_id' => $coreGroup->id,
+            'user_id' => $user->id,
+            'is_registered' => true,
+        ]);
+        
+        // 班グループにメンバーを追加
+        $branchMember = Member::factory()->create([
+            'group_id' => $branchGroup->id,
+            'name' => $member->name,
+            'email' => $member->email,
+            'user_id' => $user->id,
+            'is_registered' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('branch-groups.store-duplicate', $branchGroup), [
+                'name' => '複製された班グループ',
+                'description' => 'これは複製された班グループです',
+            ]);
+
+        $response->assertRedirect();
+        
+        // 新しい班グループが作成されたことを確認
+        $this->assertDatabaseHas('groups', [
+            'name' => '複製された班グループ',
+            'description' => 'これは複製された班グループです',
+            'type' => 'branch',
+            'travel_plan_id' => $travelPlan->id,
+            'parent_group_id' => $coreGroup->id,
+        ]);
+        
+        // 複製された班グループにメンバーが追加されているか確認
+        $duplicatedGroup = Group::where('name', '複製された班グループ')->first();
+        $this->assertDatabaseHas('members', [
+            'name' => $branchMember->name,
+            'email' => $branchMember->email,
+            'user_id' => $user->id,
+            'group_id' => $duplicatedGroup->id,
+        ]);
+    }
+
+    /**
+     * 同じ名前の班グループを複製しようとした場合にエラーになるかテスト
+     */
+    public function test_cannot_duplicate_branch_group_with_duplicate_name()
+    {
+        $user = User::factory()->create();
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+        ]);
+        $coreGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'core',
+        ]);
+        $branchGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'branch',
+            'parent_group_id' => $coreGroup->id,
+            'name' => 'テスト班グループ',
+        ]);
+        $existingGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'branch',
+            'parent_group_id' => $coreGroup->id,
+            'name' => '既存の班グループ',
+        ]);
+        
+        // コアグループにメンバーを追加
+        $member = Member::factory()->create([
+            'group_id' => $coreGroup->id,
+            'user_id' => $user->id,
+            'is_registered' => true,
+        ]);
+        
+        // 班グループにメンバーを追加
+        Member::factory()->create([
+            'group_id' => $branchGroup->id,
+            'name' => $member->name,
+            'email' => $member->email,
+            'user_id' => $user->id,
+            'is_registered' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('branch-groups.store-duplicate', $branchGroup), [
+                'name' => '既存の班グループ',
+                'description' => 'これは複製された班グループです',
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasErrors(['name' => 'この班グループ名は既に使用されています']);
+        
+        // 同じ名前の班グループが1つしか存在しないことを確認
+        $this->assertEquals(1, Group::where('name', '既存の班グループ')->count());
+    }
 }
