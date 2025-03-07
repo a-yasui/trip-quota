@@ -27,9 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/travel-plans/{travelPlan}', [TravelPlanController::class, 'update'])->name('travel-plans.update');
     
     // グループルート
-    Route::get('/groups', function () {
-        return view('welcome'); // 仮のビュー
-    })->name('groups.index');
+    Route::get('/groups', [App\Http\Controllers\GroupController::class, 'index'])->name('groups.index');
     
     // グループメンバー管理
     Route::get('/groups/{group}/members/create', [App\Http\Controllers\GroupMemberController::class, 'create'])->name('groups.members.create');
