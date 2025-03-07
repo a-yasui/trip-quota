@@ -52,3 +52,9 @@ Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Ser
 - フロントは Blade および VueJS3 で作成する。
 - CSS Framework は Tailwind を使う。
 
+# PHP Coding
+
+## トランザクションの扱い
+
+- DB トランザクションは `DB::transaction(function(){ /* 追加,変更,削除の処理 */ } )` を実行する。
+- `DB::beginTransaction(); ... DB::commmit();` は使用しない。
