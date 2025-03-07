@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\GroupType;
 use App\Http\Requests\BranchGroupRequest;
 use App\Models\ActivityLog;
 use App\Models\Group;
@@ -20,7 +21,7 @@ class BranchGroupController extends Controller
     public function create(TravelPlan $travelPlan)
     {
         // コアグループを取得
-        $coreGroup = $travelPlan->groups()->where('type', 'core')->first();
+        $coreGroup = $travelPlan->groups()->where('type', GroupType::CORE)->first();
         
         if (!$coreGroup) {
             return redirect()->route('travel-plans.show', $travelPlan)
@@ -42,7 +43,7 @@ class BranchGroupController extends Controller
             DB::beginTransaction();
             
             // コアグループを取得
-            $coreGroup = $travelPlan->groups()->where('type', 'core')->first();
+            $coreGroup = $travelPlan->groups()->where('type', GroupType::CORE)->first();
             
             if (!$coreGroup) {
                 return redirect()->route('travel-plans.show', $travelPlan)
@@ -52,7 +53,7 @@ class BranchGroupController extends Controller
             // 班グループを作成
             $branchGroup = new Group();
             $branchGroup->name = $request->name;
-            $branchGroup->type = 'branch';
+            $branchGroup->type = GroupType::BRANCH;
             $branchGroup->travel_plan_id = $travelPlan->id;
             $branchGroup->parent_group_id = $coreGroup->id;
             $branchGroup->save();
@@ -113,7 +114,7 @@ class BranchGroupController extends Controller
     public function show(Group $group)
     {
         // 班グループであることを確認
-        if ($group->type !== 'branch') {
+        if ($group->type !== GroupType::BRANCH) {
             return redirect()->route('travel-plans.show', $group->travelPlan)
                 ->with('error', '指定されたグループは班グループではありません');
         }
@@ -152,7 +153,7 @@ class BranchGroupController extends Controller
     public function edit(Group $group)
     {
         // 班グループであることを確認
-        if ($group->type !== 'branch') {
+        if ($group->type !== GroupType::BRANCH) {
             return redirect()->route('travel-plans.show', $group->travelPlan)
                 ->with('error', '指定されたグループは班グループではありません');
         }
@@ -169,7 +170,7 @@ class BranchGroupController extends Controller
     public function update(Request $request, Group $group)
     {
         // 班グループであることを確認
-        if ($group->type !== 'branch') {
+        if ($group->type !== GroupType::BRANCH) {
             return redirect()->route('travel-plans.show', $group->travelPlan)
                 ->with('error', '指定されたグループは班グループではありません');
         }
@@ -183,7 +184,7 @@ class BranchGroupController extends Controller
                 \Illuminate\Validation\Rule::unique('groups', 'name')
                     ->where(function ($query) use ($group) {
                         return $query->where('travel_plan_id', $group->travel_plan_id)
-                                     ->where('type', 'branch');
+                                     ->where('type', GroupType::BRANCH);
                     })
                     ->ignore($group->id),
             ],
@@ -229,7 +230,7 @@ class BranchGroupController extends Controller
     public function destroy(Group $group)
     {
         // 班グループであることを確認
-        if ($group->type !== 'branch') {
+        if ($group->type !== GroupType::BRANCH) {
             return redirect()->route('travel-plans.show', $group->travelPlan)
                 ->with('error', '指定されたグループは班グループではありません');
         }
@@ -276,7 +277,7 @@ class BranchGroupController extends Controller
     public function duplicate(Group $group)
     {
         // 班グループであることを確認
-        if ($group->type !== 'branch') {
+        if ($group->type !== GroupType::BRANCH) {
             return redirect()->route('travel-plans.show', $group->travelPlan)
                 ->with('error', '指定されたグループは班グループではありません');
         }
@@ -293,7 +294,7 @@ class BranchGroupController extends Controller
     public function storeDuplicate(Request $request, Group $group)
     {
         // 班グループであることを確認
-        if ($group->type !== 'branch') {
+        if ($group->type !== GroupType::BRANCH) {
             return redirect()->route('travel-plans.show', $group->travelPlan)
                 ->with('error', '指定されたグループは班グループではありません');
         }
@@ -306,7 +307,7 @@ class BranchGroupController extends Controller
                 'max:255',
                 Rule::unique('groups', 'name')->where(function ($query) use ($group) {
                     return $query->where('travel_plan_id', $group->travel_plan_id)
-                                ->where('type', 'branch');
+                                ->where('type', GroupType::BRANCH);
                 }),
             ],
             'description' => 'nullable|string|max:1000',
@@ -322,7 +323,7 @@ class BranchGroupController extends Controller
             $newGroup = new Group();
             $newGroup->name = $request->name;
             $newGroup->description = $request->description;
-            $newGroup->type = 'branch';
+            $newGroup->type = GroupType::BRANCH;
             $newGroup->travel_plan_id = $group->travel_plan_id;
             $newGroup->parent_group_id = $group->parent_group_id;
             $newGroup->save();

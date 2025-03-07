@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\GroupType;
 use App\Models\ActivityLog;
 use App\Models\Group;
 use App\Models\Member;
@@ -18,7 +19,7 @@ class BranchGroupMemberController extends Controller
     public function store(Request $request, Group $group)
     {
         // 班グループであることを確認
-        if ($group->type !== 'branch') {
+        if ($group->type !== GroupType::BRANCH) {
             return redirect()->route('travel-plans.show', $group->travelPlan)
                 ->with('error', '指定されたグループは班グループではありません');
         }
@@ -103,7 +104,7 @@ class BranchGroupMemberController extends Controller
     public function destroy(Group $group, Member $member)
     {
         // 班グループであることを確認
-        if ($group->type !== 'branch') {
+        if ($group->type !== GroupType::BRANCH) {
             return redirect()->route('travel-plans.show', $group->travelPlan)
                 ->with('error', '指定されたグループは班グループではありません');
         }

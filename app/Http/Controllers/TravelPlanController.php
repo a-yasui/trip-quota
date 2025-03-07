@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\GroupType;
 use App\Http\Requests\TravelPlanRequest;
 use App\Models\Group;
 use App\Models\Member;
@@ -68,7 +69,7 @@ class TravelPlanController extends Controller
             // コアグループの作成
             $coreGroup = new Group();
             $coreGroup->name = $travelPlan->title;
-            $coreGroup->type = 'core';
+            $coreGroup->type = GroupType::CORE;
             $coreGroup->travel_plan_id = $travelPlan->id;
             $coreGroup->description = 'メインメンバーグループ';
             $coreGroup->save();
@@ -108,7 +109,7 @@ class TravelPlanController extends Controller
         $travelPlan->load(['groups.members', 'accommodations', 'itineraries']);
         
         // コアグループを取得
-        $coreGroup = $travelPlan->groups()->where('type', 'core')->first();
+        $coreGroup = $travelPlan->groups()->where('type', GroupType::CORE)->first();
         
         // メンバー一覧を取得
         $members = $coreGroup ? $coreGroup->members : collect();
@@ -175,7 +176,7 @@ class TravelPlanController extends Controller
             
             // コアグループの名前も更新（旅行計画名と同期）
             if ($isBeforeDeparture) {
-                $coreGroup = $travelPlan->groups()->where('type', 'core')->first();
+                $coreGroup = $travelPlan->groups()->where('type', GroupType::CORE)->first();
                 if ($coreGroup) {
                     $coreGroup->name = $travelPlan->title;
                     $coreGroup->save();

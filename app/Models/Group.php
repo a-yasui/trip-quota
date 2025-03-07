@@ -78,7 +78,7 @@ class Group extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'type' => 'string',
+        'type' => \App\Enums\GroupType::class,
     ];
 
     /**
@@ -158,7 +158,7 @@ class Group extends Model
      */
     public function scopeCore($query)
     {
-        return $query->where('type', 'core');
+        return $query->where('type', \App\Enums\GroupType::CORE);
     }
 
     /**
@@ -166,6 +166,6 @@ class Group extends Model
      */
     public function scopeBranch($query)
     {
-        return $query->where('type', 'branch');
+        return $query->where('type', \App\Enums\GroupType::BRANCH);
     }
 }
