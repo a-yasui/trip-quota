@@ -204,7 +204,12 @@
 </template>
 
 <script>
+import MemberSelector from './MemberSelector.vue';
+
 export default {
+  components: {
+    MemberSelector
+  },
   props: {
     transportationTypes: {
       type: Array,

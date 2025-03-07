@@ -8,24 +8,25 @@ import ItineraryForm from './components/ItineraryForm.vue';
 window.Alpine = Alpine;
 Alpine.start();
 
-// Vue.js
+// Vue.js - 単一のアプリケーションインスタンスを作成
 document.addEventListener('DOMContentLoaded', () => {
-    // Vue.jsのコンポーネントが必要な要素だけをマウント
-    const memberSelectorElements = document.querySelectorAll('.vue-member-selector');
-    if (memberSelectorElements.length > 0) {
-        const memberSelectorApp = createApp({});
-        memberSelectorApp.component('member-selector', MemberSelector);
-        memberSelectorElements.forEach(el => {
-            memberSelectorApp.mount(el);
-        });
-    }
-
-    const itineraryFormElements = document.querySelectorAll('.vue-itinerary-form');
-    if (itineraryFormElements.length > 0) {
-        const itineraryFormApp = createApp({});
-        itineraryFormApp.component('itinerary-form', ItineraryForm);
-        itineraryFormElements.forEach(el => {
-            itineraryFormApp.mount(el);
+    // Vue.jsのコンポーネントが必要な要素を検索
+    const vueElements = document.querySelectorAll('.vue-itinerary-form, .vue-member-selector');
+    
+    if (vueElements.length > 0) {
+        // 単一のVueアプリケーションインスタンスを作成
+        const app = createApp({});
+        
+        // すべてのコンポーネントを登録
+        app.component('member-selector', MemberSelector);
+        app.component('itinerary-form', ItineraryForm);
+        
+        // 各要素にマウント
+        vueElements.forEach(el => {
+            // 既にマウントされている場合はスキップ
+            if (!el.__vue_app__) {
+                app.mount(el);
+            }
         });
     }
 });
