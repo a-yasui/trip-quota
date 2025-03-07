@@ -350,6 +350,91 @@ class TravelPlanTest extends TestCase
     }
 
     /**
+     * Test that branch groups in travel plan detail page have links to branch group detail page.
+     */
+    public function test_travel_plan_detail_shows_branch_group_links(): void
+    {
+        $user = User::factory()->create();
+        
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+        ]);
+        
+        // コアグループを作成
+        $coreGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => \App\Enums\GroupType::CORE,
+            'name' => 'コアグループ',
+        ]);
+        
+        // 班グループを作成
+        $branchGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => \App\Enums\GroupType::BRANCH,
+            'name' => '班グループA',
+        ]);
+        
+        // ユーザーをメンバーとして追加
+        Member::factory()->create([
+            'group_id' => $coreGroup->id,
+            'user_id' => $user->id,
+            'is_registered' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+                         ->get('/travel-plans/' . $travelPlan->id);
+
+        $response->assertStatus(200);
+        
+        // 班グループの名前が表示されていることを確認
+        $response->assertSee('班グループA');
+        
+        // 班グループへのリンクが存在することを確認
+        $branchGroupUrl = route('branch-groups.show', $branchGroup);
+        $response->assertSee($branchGroupUrl);
+    }
+
+    /**
+     * Test that core groups in travel plan detail page do not have links.
+     */
+    public function test_travel_plan_detail_does_not_show_core_group_links(): void
+    {
+        $user = User::factory()->create();
+        
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+        ]);
+        
+        // コアグループを作成
+        $coreGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => \App\Enums\GroupType::CORE,
+            'name' => 'コアグループ',
+        ]);
+        
+        // ユーザーをメンバーとして追加
+        Member::factory()->create([
+            'group_id' => $coreGroup->id,
+            'user_id' => $user->id,
+            'is_registered' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+                         ->get('/travel-plans/' . $travelPlan->id);
+
+        $response->assertStatus(200);
+        
+        // コアグループの名前が表示されていることを確認
+        $response->assertSee('コアグループ');
+        
+        // コアグループへのリンクが存在しないことを確認
+        $coreGroupUrl = route('branch-groups.show', $coreGroup);
+        $response->assertDontSee($coreGroupUrl);
+    }
+
+    /**
      * Test that edit button is shown only before departure or when return date is not set.
      */
     public function test_edit_button_is_shown_only_before_departure_or_when_return_date_not_set(): void

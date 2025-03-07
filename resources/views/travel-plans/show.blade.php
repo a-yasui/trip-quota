@@ -242,9 +242,15 @@
                                         </svg>
                                     </div>
                                     <div class="ml-3">
-                                        <p class="text-sm font-medium text-gray-900">{{ $group->name }}</p>
+                                        @if($group->type === \App\Enums\GroupType::BRANCH)
+                                            <a href="{{ route('branch-groups.show', $group) }}" class="text-gray-900 hover:text-lime-500">
+                                                <p class="text-sm font-medium">{{ $group->name }}</p>
+                                            </a>
+                                        @else
+                                            <p class="text-sm font-medium text-gray-900">{{ $group->name }}</p>
+                                        @endif
                                         <p class="text-xs text-gray-500">
-                                            @if($group->type === 'core')
+                                            @if($group->type === \App\Enums\GroupType::CORE)
                                                 コアグループ
                                             @else
                                                 班グループ
@@ -253,7 +259,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                @if($group->type === 'branch')
+                                @if($group->type === \App\Enums\GroupType::BRANCH)
                                     <a href="{{ route('branch-groups.show', $group) }}" class="text-lime-600 hover:text-lime-500">
                                         <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
