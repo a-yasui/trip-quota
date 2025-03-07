@@ -508,7 +508,7 @@ Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Ser
 
 ## トランザクションの扱い
 
-- DB トランザクションは `DB::transaction(function(){ /* 追加,変更,削除の処理 */ } )` を実行する。
+- DB トランザクションは `DB::transaction(function(){ /* 追加,変更,削除の処理 */ } )` で実装をする。
 - `DB::beginTransaction(); ... DB::commmit();` は使用しない。
 # UI 設計
 
