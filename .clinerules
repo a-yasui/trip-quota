@@ -254,6 +254,45 @@ git status で現在の git のコンテキストを確認します。 もし指
     - 作業の最後にはテストを実行し、テストが全てgreenになる事を確認する。どれか一つでも落ちたら修正をする。
     - テストの実行は `php artisan test` で実行する。
 3. 実装作業が終了した時はコミットをする。
+
+## テーブル概要
+
+### 認証・ユーザー関連
+- `users`: ユーザー認証情報
+- `accounts`: ユーザープロフィール情報（アカウント名、サムネイル画像など）
+- `oauth_providers`: OAuth認証プロバイダー連携情報
+- `user_settings`: ユーザー設定情報（言語、タイムゾーン、通知設定など）
+- `password_reset_tokens`: パスワードリセット用トークン
+- `sessions`: ユーザーセッション情報
+- `admin_users`: サイト管理者情報
+
+### 旅行計画関連
+- `travel_plans`: 旅行計画の基本情報
+- `groups`: 旅行メンバーのグループ（コアグループと班グループ）
+- `system_branch_group_keys`: 班グループの一意識別子
+- `branch_group_connections`: 異なる旅行計画の班グループ間の接続情報
+- `members`: 旅行に参加するメンバー情報
+- `member_account_associations`: メンバーとアカウントの関連付け（アカウント変更履歴）
+
+### 旅程・宿泊関連
+- `accommodations`: 宿泊先情報
+- `accommodation_member`: 宿泊先とメンバーの関連付け
+- `itineraries`: 旅程情報
+- `itinerary_member`: 旅程とメンバーの関連付け
+- `travel_locations`: 旅行先の場所情報（観光地、レストランなど）
+- `travel_documents`: 旅行関連ドキュメント（チケット、予約確認書など）
+- `document_member`: ドキュメントの閲覧権限
+
+### 費用・精算関連
+- `expenses`: 旅行中の支出情報
+- `expense_member`: 支出とメンバーの関連付け
+- `expense_settlements`: 割り勘の最終精算状況
+- `currency_exchange_rates`: 通貨間の為替レート
+
+### システム機能関連
+- `notifications`: 通知情報
+- `group_invitations`: グループへの招待情報
+- `activity_logs`: システム内の活動ログ
 # ディレクトリ配置規則
 
 ```
@@ -514,7 +553,7 @@ Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Ser
 
 - 基調色は #cbf542 とする
 - PC とスマートフォンでサイトを見る。
-- VueJS Router は使わない
+- Vue Router は使わない
 
 ## Styling Guildline
 
@@ -522,5 +561,21 @@ Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Ser
 - VSCode CSS variables must be added to webview-ui/src/index.css before using them in Tailwind classes
 - Example: `<div className="text-md text-vscode-descriptionForeground mb-2" />` instead of style objects
 
-## 画面設計
+## Laravel 画面設計
 
+基本 `resources/views` にテンプレートはあり、URLに対応したディレクトリ内にbladeのファイルを設置している。
+
+```
+resources/views
+├── auth   認証（ログイン・登録）で使うテンプレート
+├── branch-groups		班グループの操作系のテンプレートディレクトリ
+├── components			UIパーツのディレクトリ
+├── dashboard.blade.php	ログイン直下の画面ディレクトリ
+├── group-members		班グループ等の画面ディレクトリ
+├── groups				参加しているグループの一覧画面ディレクトリ
+├── itineraries			旅程の編集画面ディレクトリ
+├── layouts				ベースレイアウトディレクトリ
+├── profile				ユーザのプロフィール編集画面ディレクトリ
+├── travel-plans		旅行計画の閲覧編集画面ディレクトリ
+└── welcome.blade.php	トップ画面
+```
