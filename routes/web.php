@@ -36,6 +36,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/groups/{group}/members', [App\Http\Controllers\GroupMemberController::class, 'store'])->name('groups.members.store');
     Route::delete('/groups/{group}/members/{member}', [App\Http\Controllers\GroupMemberController::class, 'destroy'])->name('groups.members.destroy');
     
+    // 班グループ管理
+    Route::get('/travel-plans/{travelPlan}/branch-groups/create', [App\Http\Controllers\BranchGroupController::class, 'create'])->name('travel-plans.branch-groups.create');
+    Route::post('/travel-plans/{travelPlan}/branch-groups', [App\Http\Controllers\BranchGroupController::class, 'store'])->name('travel-plans.branch-groups.store');
+    Route::get('/branch-groups/{group}', [App\Http\Controllers\BranchGroupController::class, 'show'])->name('branch-groups.show');
+    Route::get('/branch-groups/{group}/edit', [App\Http\Controllers\BranchGroupController::class, 'edit'])->name('branch-groups.edit');
+    Route::put('/branch-groups/{group}', [App\Http\Controllers\BranchGroupController::class, 'update'])->name('branch-groups.update');
+    Route::delete('/branch-groups/{group}', [App\Http\Controllers\BranchGroupController::class, 'destroy'])->name('branch-groups.destroy');
+    
+    // 班グループメンバー管理
+    Route::post('/branch-groups/{group}/members', [App\Http\Controllers\BranchGroupMemberController::class, 'store'])->name('branch-groups.members.store');
+    Route::delete('/branch-groups/{group}/members/{member}', [App\Http\Controllers\BranchGroupMemberController::class, 'destroy'])->name('branch-groups.members.destroy');
+    
     // 経費ルート
     Route::get('/expenses', function () {
         return view('welcome'); // 仮のビュー
