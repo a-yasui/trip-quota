@@ -22,7 +22,14 @@ class ItineraryController extends Controller
     public function index(TravelPlan $travelPlan)
     {
         // 権限チェック
-        Gate::authorize('view', $travelPlan);
+        $user = Auth::user();
+        $isMember = $travelPlan->groups()->whereHas('members', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->exists();
+        
+        if (!$isMember && $user->id !== $travelPlan->creator_id) {
+            abort(403, '旅行計画を閲覧する権限がありません。');
+        }
         
         $itineraries = $travelPlan->itineraries()->orderBy('departure_time')->get();
         
@@ -38,10 +45,18 @@ class ItineraryController extends Controller
     public function create(TravelPlan $travelPlan)
     {
         // 権限チェック
-        Gate::authorize('update', $travelPlan);
+        $user = Auth::user();
+        $isMember = $travelPlan->groups()->whereHas('members', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->exists();
+        
+        if (!$isMember && $user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
+            abort(403, '旅行計画を編集する権限がありません。');
+        }
         
         // コアグループのメンバー一覧を取得
-        $members = $travelPlan->coreGroup->members;
+        $coreGroup = $travelPlan->groups()->where('type', \App\Enums\GroupType::CORE)->first();
+        $members = $coreGroup ? $coreGroup->members : collect();
         
         // 交通手段の選択肢を取得
         $transportationTypes = Transportation::cases();
@@ -59,7 +74,14 @@ class ItineraryController extends Controller
     public function store(Request $request, TravelPlan $travelPlan)
     {
         // 権限チェック
-        Gate::authorize('update', $travelPlan);
+        $user = Auth::user();
+        $isMember = $travelPlan->groups()->whereHas('members', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->exists();
+        
+        if (!$isMember && $user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
+            abort(403, '旅行計画を編集する権限がありません。');
+        }
         
         // バリデーション
         $validated = $request->validate([
@@ -127,7 +149,14 @@ class ItineraryController extends Controller
     public function show(TravelPlan $travelPlan, Itinerary $itinerary)
     {
         // 権限チェック
-        Gate::authorize('view', $travelPlan);
+        $user = Auth::user();
+        $isMember = $travelPlan->groups()->whereHas('members', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->exists();
+        
+        if (!$isMember && $user->id !== $travelPlan->creator_id) {
+            abort(403, '旅行計画を閲覧する権限がありません。');
+        }
         
         // 旅程が指定された旅行計画に属しているか確認
         if ($itinerary->travel_plan_id !== $travelPlan->id) {
@@ -150,7 +179,14 @@ class ItineraryController extends Controller
     public function edit(TravelPlan $travelPlan, Itinerary $itinerary)
     {
         // 権限チェック
-        Gate::authorize('update', $travelPlan);
+        $user = Auth::user();
+        $isMember = $travelPlan->groups()->whereHas('members', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->exists();
+        
+        if (!$isMember && $user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
+            abort(403, '旅行計画を編集する権限がありません。');
+        }
         
         // 旅程が指定された旅行計画に属しているか確認
         if ($itinerary->travel_plan_id !== $travelPlan->id) {
@@ -158,7 +194,8 @@ class ItineraryController extends Controller
         }
         
         // コアグループのメンバー一覧を取得
-        $members = $travelPlan->coreGroup->members;
+        $coreGroup = $travelPlan->groups()->where('type', \App\Enums\GroupType::CORE)->first();
+        $members = $coreGroup ? $coreGroup->members : collect();
         
         // 現在選択されているメンバーIDのリストを取得
         $selectedMemberIds = $itinerary->members->pluck('id')->toArray();
@@ -180,7 +217,14 @@ class ItineraryController extends Controller
     public function update(Request $request, TravelPlan $travelPlan, Itinerary $itinerary)
     {
         // 権限チェック
-        $this->authorize('update', $travelPlan);
+        $user = Auth::user();
+        $isMember = $travelPlan->groups()->whereHas('members', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->exists();
+        
+        if (!$isMember && $user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
+            abort(403, '旅行計画を編集する権限がありません。');
+        }
         
         // 旅程が指定された旅行計画に属しているか確認
         if ($itinerary->travel_plan_id !== $travelPlan->id) {
@@ -253,7 +297,14 @@ class ItineraryController extends Controller
     public function destroy(TravelPlan $travelPlan, Itinerary $itinerary)
     {
         // 権限チェック
-        $this->authorize('update', $travelPlan);
+        $user = Auth::user();
+        $isMember = $travelPlan->groups()->whereHas('members', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->exists();
+        
+        if (!$isMember && $user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
+            abort(403, '旅行計画を編集する権限がありません。');
+        }
         
         // 旅程が指定された旅行計画に属しているか確認
         if ($itinerary->travel_plan_id !== $travelPlan->id) {
