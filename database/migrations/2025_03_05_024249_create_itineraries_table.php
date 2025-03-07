@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('itineraries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('travel_plan_id')->constrained()->cascadeOnDelete();
-            $table->enum('transportation_type', ['flight', 'train', 'bus', 'ferry', 'car', 'walk', 'bike', 'other']);
+            $table->string('transportation_type');
             $table->string('departure_location');
             $table->string('arrival_location');
             $table->dateTime('departure_time');
