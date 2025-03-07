@@ -21,189 +21,103 @@
                         </a>
                     </div>
 
-                    <form method="POST" action="{{ route('travel-plans.itineraries.store', $travelPlan) }}">
-                        @csrf
+                    <itinerary-form
+                        class="vue-itinerary-form"
+                        :transportation-types="{{ json_encode($transportationTypes) }}"
+                        :timezones="{{ json_encode($timezones) }}"
+                        :default-timezone="'{{ $defaultTimezone }}'"
+                        :departure-date="'{{ $departureDate }}'"
+                        :next-day="'{{ $nextDay }}'"
+                        :branch-groups="{{ json_encode($branchGroups) }}"
+                        :members="{{ json_encode($members) }}"
+                        :selected-member-ids="{{ json_encode(old('member_ids', [])) }}"
+                        :form-action="'{{ route('travel-plans.itineraries.store', $travelPlan) }}'"
+                        :old-values="{{ json_encode(old()) }}"
+                    >
+                        <template #csrf>
+                            @csrf
+                        </template>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- 交通手段 -->
-                            <div>
-                                <label for="transportation_type" class="block text-sm font-medium text-gray-700">{{ __('交通手段') }} <span class="text-red-500">*</span></label>
-                                <select id="transportation_type" name="transportation_type" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
-                                    <option value="">{{ __('選択してください') }}</option>
-                                    @foreach($transportationTypes as $type)
-                                        <option value="{{ $type->value }}" {{ old('transportation_type') == $type->value ? 'selected' : '' }}>
-                                            @switch($type->value)
-                                                @case('flight')
-                                                    {{ __('飛行機') }}
-                                                    @break
-                                                @case('train')
-                                                    {{ __('電車') }}
-                                                    @break
-                                                @case('bus')
-                                                    {{ __('バス') }}
-                                                    @break
-                                                @case('ferry')
-                                                    {{ __('フェリー') }}
-                                                    @break
-                                                @case('car')
-                                                    {{ __('車') }}
-                                                    @break
-                                                @case('walk')
-                                                    {{ __('徒歩') }}
-                                                    @break
-                                                @case('bike')
-                                                    {{ __('バイク') }}
-                                                    @break
-                                                @default
-                                                    {{ __('その他') }}
-                                            @endswitch
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('transportation_type')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <template #transportation_type_error>
+                            @error('transportation_type')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
 
-                            <!-- 出発地 -->
-                            <div>
-                                <label for="departure_location" class="block text-sm font-medium text-gray-700">{{ __('出発地') }} <span class="text-red-500">*</span></label>
-                                <input type="text" name="departure_location" id="departure_location" value="{{ old('departure_location') }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
-                                @error('departure_location')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <template #departure_location_error>
+                            @error('departure_location')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
 
-                            <!-- 到着地 -->
-                            <div>
-                                <label for="arrival_location" class="block text-sm font-medium text-gray-700">{{ __('到着地') }} <span class="text-red-500">*</span></label>
-                                <input type="text" name="arrival_location" id="arrival_location" value="{{ old('arrival_location') }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
-                                @error('arrival_location')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <template #arrival_location_error>
+                            @error('arrival_location')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
 
-                            <!-- 出発時刻 -->
-                            <div>
-                                <label for="departure_time" class="block text-sm font-medium text-gray-700">{{ __('出発時刻') }} <span class="text-red-500">*</span></label>
-                                <input type="datetime-local" name="departure_time" id="departure_time" value="{{ old('departure_time') }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
-                                @error('departure_time')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <template #departure_time_error>
+                            @error('departure_time')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
 
-                            <!-- 到着時刻 -->
-                            <div>
-                                <label for="arrival_time" class="block text-sm font-medium text-gray-700">{{ __('到着時刻') }} <span class="text-red-500">*</span></label>
-                                <input type="datetime-local" name="arrival_time" id="arrival_time" value="{{ old('arrival_time') }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
-                                @error('arrival_time')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <template #departure_timezone_error>
+                            @error('departure_timezone')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
 
-                            <!-- 会社名 -->
-                            <div>
-                                <label for="company_name" class="block text-sm font-medium text-gray-700">{{ __('会社名') }} <span class="text-red-500 flight-required hidden">*</span></label>
-                                <input type="text" name="company_name" id="company_name" value="{{ old('company_name') }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                                <p class="mt-1 text-sm text-gray-500 flight-note hidden">{{ __('飛行機の場合は必須です') }}</p>
-                                @error('company_name')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <template #arrival_time_error>
+                            @error('arrival_time')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
 
-                            <!-- 便名・列車番号など -->
-                            <div>
-                                <label for="reference_number" class="block text-sm font-medium text-gray-700">{{ __('便名・列車番号など') }} <span class="text-red-500 flight-required hidden">*</span></label>
-                                <input type="text" name="reference_number" id="reference_number" value="{{ old('reference_number') }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                                <p class="mt-1 text-sm text-gray-500 flight-note hidden">{{ __('飛行機の場合は必須です') }}</p>
-                                @error('reference_number')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <template #arrival_timezone_error>
+                            @error('arrival_timezone')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
 
-                            <!-- メモ -->
-                            <div class="md:col-span-2">
-                                <label for="notes" class="block text-sm font-medium text-gray-700">{{ __('メモ') }}</label>
-                                <textarea name="notes" id="notes" rows="3" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('notes') }}</textarea>
-                                @error('notes')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <template #company_name_error>
+                            @error('company_name')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
 
-                            <!-- 参加メンバー -->
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('参加メンバー') }}</label>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                    @foreach($members as $member)
-                                        <div class="flex items-center">
-                                            <input type="checkbox" id="member_{{ $member->id }}" name="member_ids[]" value="{{ $member->id }}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" {{ in_array($member->id, old('member_ids', [])) ? 'checked' : '' }}>
-                                            <label for="member_{{ $member->id }}" class="ml-2 block text-sm text-gray-900">
-                                                {{ $member->name }}
-                                            </label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                @error('member_ids')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
+                        <template #reference_number_error>
+                            @error('reference_number')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
 
-                        <div class="mt-6 flex justify-end">
+                        <template #notes_error>
+                            @error('notes')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
+
+                        <template #member_ids_error>
+                            @error('member_ids')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </template>
+
+                        <template #cancel_button>
                             <a href="{{ route('travel-plans.itineraries.index', $travelPlan) }}" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-3">
                                 {{ __('キャンセル') }}
                             </a>
+                        </template>
+
+                        <template #submit_button>
                             <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 {{ __('保存') }}
                             </button>
-                        </div>
-                    </form>
+                        </template>
+                    </itinerary-form>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const transportationTypeSelect = document.getElementById('transportation_type');
-            const flightRequiredElements = document.querySelectorAll('.flight-required');
-            const flightNoteElements = document.querySelectorAll('.flight-note');
-            
-            function updateFlightFields() {
-                const isFlightSelected = transportationTypeSelect.value === 'flight';
-                
-                flightRequiredElements.forEach(element => {
-                    if (isFlightSelected) {
-                        element.classList.remove('hidden');
-                    } else {
-                        element.classList.add('hidden');
-                    }
-                });
-                
-                flightNoteElements.forEach(element => {
-                    if (isFlightSelected) {
-                        element.classList.remove('hidden');
-                    } else {
-                        element.classList.add('hidden');
-                    }
-                });
-                
-                const companyNameInput = document.getElementById('company_name');
-                const referenceNumberInput = document.getElementById('reference_number');
-                
-                if (isFlightSelected) {
-                    companyNameInput.setAttribute('required', 'required');
-                    referenceNumberInput.setAttribute('required', 'required');
-                } else {
-                    companyNameInput.removeAttribute('required');
-                    referenceNumberInput.removeAttribute('required');
-                }
-            }
-            
-            transportationTypeSelect.addEventListener('change', updateFlightFields);
-            
-            // 初期表示時にも実行
-            updateFlightFields();
-        });
-    </script>
 </x-app-layout>
