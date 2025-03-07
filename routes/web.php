@@ -31,6 +31,11 @@ Route::middleware('auth')->group(function () {
         return view('welcome'); // 仮のビュー
     })->name('groups.index');
     
+    // グループメンバー管理
+    Route::get('/groups/{group}/members/create', [App\Http\Controllers\GroupMemberController::class, 'create'])->name('groups.members.create');
+    Route::post('/groups/{group}/members', [App\Http\Controllers\GroupMemberController::class, 'store'])->name('groups.members.store');
+    Route::delete('/groups/{group}/members/{member}', [App\Http\Controllers\GroupMemberController::class, 'destroy'])->name('groups.members.destroy');
+    
     // 経費ルート
     Route::get('/expenses', function () {
         return view('welcome'); // 仮のビュー

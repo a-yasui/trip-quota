@@ -176,28 +176,43 @@
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900">メンバー</h3>
-                        <a href="#" class="inline-flex items-center text-sm font-medium text-lime-600 hover:text-lime-500">
+                        <a href="{{ route('groups.members.create', $coreGroup) }}" class="inline-flex items-center text-sm font-medium text-lime-600 hover:text-lime-500">
                             <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            招待する
+                            メンバー追加
                         </a>
                     </div>
                     
                     <div class="space-y-3">
                         @foreach($members as $member)
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-lime-100 flex items-center justify-center text-lime-500">
-                                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-lime-100 flex items-center justify-center text-lime-500">
+                                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">{{ $member->name }}</p>
+                                        @if($member->email)
+                                            <p class="text-xs text-gray-500">{{ $member->email }}</p>
+                                        @endif
+                                    </div>
                                 </div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">{{ $member->name }}</p>
-                                    @if($member->email)
-                                        <p class="text-xs text-gray-500">{{ $member->email }}</p>
-                                    @endif
-                                </div>
+                                
+                                <!-- 削除ボタン（自分自身は削除できない） -->
+                                @if(Auth::id() !== $member->user_id)
+                                    <form method="POST" action="{{ route('groups.members.destroy', [$coreGroup, $member]) }}" onsubmit="return confirm('このメンバーを削除してもよろしいですか？');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 hover:text-red-700">
+                                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         @endforeach
                     </div>
