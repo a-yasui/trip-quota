@@ -96,4 +96,30 @@ class ProfileTest extends TestCase
 
         $this->assertNotNull($user->fresh());
     }
+
+    public function test_profile_page_displays_password_update_form(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->get('/profile');
+
+        $response->assertSee('Update Password');
+        $response->assertSee('Current Password');
+        $response->assertSee('New Password');
+    }
+
+    public function test_profile_page_displays_social_connections_form(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->get('/profile');
+
+        $response->assertSee('ソーシャルアカウント連携');
+        $response->assertSee('Googleでログイン');
+        $response->assertSee('Facebookでログイン');
+    }
 }
