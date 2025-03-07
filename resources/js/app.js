@@ -1,26 +1,26 @@
 import './bootstrap';
-import Alpine from 'alpinejs';
+// import Alpine from 'alpinejs';
 import { createApp } from 'vue';
 import MemberSelector from './components/MemberSelector.vue';
 import ItineraryForm from './components/ItineraryForm.vue';
 
 // Alpine.js
-window.Alpine = Alpine;
-Alpine.start();
+// window.Alpine = Alpine;
+// Alpine.start();
 
 // Vue.js - 単一のアプリケーションインスタンスを作成
 document.addEventListener('DOMContentLoaded', () => {
     // Vue.jsのコンポーネントが必要な要素を検索
     const vueElements = document.querySelectorAll('.vue-itinerary-form, .vue-member-selector');
-    
+
     if (vueElements.length > 0) {
         // 単一のVueアプリケーションインスタンスを作成
         const app = createApp({});
-        
+
         // すべてのコンポーネントを登録
         app.component('member-selector', MemberSelector);
         app.component('itinerary-form', ItineraryForm);
-        
+
         // 各要素にマウント
         vueElements.forEach(el => {
             // 既にマウントされている場合はスキップ

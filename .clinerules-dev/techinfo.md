@@ -58,3 +58,8 @@ Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Ser
 
 - DB トランザクションは `DB::transaction(function(){ /* 追加,変更,削除の処理 */ } )` で実装をする。
 - `DB::beginTransaction(); ... DB::commmit();` は使用しない。
+
+# 開発者用コマンド
+
+- developer:create-account --email=<email> --password=<password
+    開発者用コマンドで、コンソールからログインできるアカウントを作成します。

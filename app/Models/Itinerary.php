@@ -68,7 +68,9 @@ class Itinerary extends Model
         'departure_location',
         'arrival_location',
         'departure_time',
+        'departure_timezone',
         'arrival_time',
+        'arrival_timezone',
         'company_name',
         'reference_number',
         'notes',
@@ -83,6 +85,8 @@ class Itinerary extends Model
         'departure_time' => 'datetime',
         'arrival_time' => 'datetime',
         'transportation_type' => Transportation::class,
+        'departure_timezone' => \App\Enums\Timezone::class,
+        'arrival_timezone' => \App\Enums\Timezone::class,
     ];
 
     /**

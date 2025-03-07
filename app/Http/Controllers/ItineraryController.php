@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Timezone;
 use App\Enums\Transportation;
 use App\Models\Itinerary;
 use App\Models\TravelPlan;
@@ -58,10 +59,36 @@ class ItineraryController extends Controller
         $coreGroup = $travelPlan->groups()->where('type', \App\Enums\GroupType::CORE)->first();
         $members = $coreGroup ? $coreGroup->members : collect();
         
-        // 交通手段の選択肢を取得
-        $transportationTypes = Transportation::cases();
+        // 班グループ（ブランチグループ）の一覧を取得
+        $branchGroups = $travelPlan->groups()->where('type', \App\Enums\GroupType::BRANCH)->with('members')->get();
         
-        return view('itineraries.create', compact('travelPlan', 'members', 'transportationTypes'));
+        // 交通手段の選択肢を取得
+        $transportationTypes = array_map(function($type) {
+            return ['value' => $type->value, 'name' => $type->name];
+        }, Transportation::cases());
+        
+        // タイムゾーンの選択肢を取得
+        $timezones = Timezone::options();
+        
+        // 旅行計画のタイムゾーンをデフォルトとして設定
+        $defaultTimezone = $travelPlan->timezone->value;
+        
+        // 旅行計画の開始日を出発時刻の初期値として設定
+        $departureDate = $travelPlan->departure_date->format('Y-m-d\TH:i');
+        
+        // 翌日の日付を到着時刻の初期値として設定
+        $nextDay = $travelPlan->departure_date->copy()->addDay()->format('Y-m-d\TH:i');
+        
+        return view('itineraries.create', compact(
+            'travelPlan', 
+            'members', 
+            'branchGroups',
+            'transportationTypes', 
+            'timezones', 
+            'defaultTimezone',
+            'departureDate',
+            'nextDay'
+        ));
     }
 
     /**
@@ -89,7 +116,9 @@ class ItineraryController extends Controller
             'departure_location' => 'required|string|max:255',
             'arrival_location' => 'required|string|max:255',
             'departure_time' => 'required|date',
+            'departure_timezone' => 'required|string|in:' . implode(',', Timezone::values()),
             'arrival_time' => 'required|date|after:departure_time',
+            'arrival_timezone' => 'required|string|in:' . implode(',', Timezone::values()),
             'company_name' => 'nullable|string|max:255',
             'reference_number' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
@@ -115,7 +144,9 @@ class ItineraryController extends Controller
             $itinerary->departure_location = $request->departure_location;
             $itinerary->arrival_location = $request->arrival_location;
             $itinerary->departure_time = $request->departure_time;
+            $itinerary->departure_timezone = $request->departure_timezone;
             $itinerary->arrival_time = $request->arrival_time;
+            $itinerary->arrival_timezone = $request->arrival_timezone;
             $itinerary->company_name = $request->company_name;
             $itinerary->reference_number = $request->reference_number;
             $itinerary->notes = $request->notes;
@@ -197,13 +228,33 @@ class ItineraryController extends Controller
         $coreGroup = $travelPlan->groups()->where('type', \App\Enums\GroupType::CORE)->first();
         $members = $coreGroup ? $coreGroup->members : collect();
         
+        // 班グループ（ブランチグループ）の一覧を取得
+        $branchGroups = $travelPlan->groups()->where('type', \App\Enums\GroupType::BRANCH)->with('members')->get();
+        
         // 現在選択されているメンバーIDのリストを取得
         $selectedMemberIds = $itinerary->members->pluck('id')->toArray();
         
         // 交通手段の選択肢を取得
-        $transportationTypes = Transportation::cases();
+        $transportationTypes = array_map(function($type) {
+            return ['value' => $type->value, 'name' => $type->name];
+        }, Transportation::cases());
         
-        return view('itineraries.edit', compact('travelPlan', 'itinerary', 'members', 'selectedMemberIds', 'transportationTypes'));
+        // タイムゾーンの選択肢を取得
+        $timezones = Timezone::options();
+        
+        // 旅行計画のタイムゾーンをデフォルトとして設定
+        $defaultTimezone = $travelPlan->timezone->value;
+        
+        return view('itineraries.edit', compact(
+            'travelPlan', 
+            'itinerary', 
+            'members', 
+            'branchGroups',
+            'selectedMemberIds', 
+            'transportationTypes', 
+            'timezones', 
+            'defaultTimezone'
+        ));
     }
 
     /**
@@ -237,7 +288,9 @@ class ItineraryController extends Controller
             'departure_location' => 'required|string|max:255',
             'arrival_location' => 'required|string|max:255',
             'departure_time' => 'required|date',
+            'departure_timezone' => 'required|string|in:' . implode(',', Timezone::values()),
             'arrival_time' => 'required|date|after:departure_time',
+            'arrival_timezone' => 'required|string|in:' . implode(',', Timezone::values()),
             'company_name' => 'nullable|string|max:255',
             'reference_number' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
@@ -261,7 +314,9 @@ class ItineraryController extends Controller
             $itinerary->departure_location = $request->departure_location;
             $itinerary->arrival_location = $request->arrival_location;
             $itinerary->departure_time = $request->departure_time;
+            $itinerary->departure_timezone = $request->departure_timezone;
             $itinerary->arrival_time = $request->arrival_time;
+            $itinerary->arrival_timezone = $request->arrival_timezone;
             $itinerary->company_name = $request->company_name;
             $itinerary->reference_number = $request->reference_number;
             $itinerary->notes = $request->notes;
