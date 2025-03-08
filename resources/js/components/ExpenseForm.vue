@@ -162,16 +162,16 @@
         <div class="flex items-center space-x-4 w-2/3">
           <div class="w-1/2 relative">
             <div class="mt-1 relative rounded-md shadow-sm">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                {{ formData.currency }}
+              </div>
               <input
                 type="text"
                 :name="`member_share_amounts[${member.id}]`"
                 :value="formatAmount(memberShareAmounts[member.id])"
-                class="focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-right pr-16"
+                class="focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-right pl-16"
                 @input="updateMemberAmount($event, member.id)"
               >
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                {{ formData.currency }}
-              </div>
             </div>
           </div>
           <div class="flex items-center justify-end w-1/2">
