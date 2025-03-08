@@ -56,6 +56,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('expenses', \App\Http\Controllers\ExpenseController::class);
     Route::get('/travel-plans/{travelPlan}/expenses/create', [\App\Http\Controllers\ExpenseController::class, 'create'])->name('travel-plans.expenses.create');
     Route::post('/travel-plans/{travelPlan}/expenses', [\App\Http\Controllers\ExpenseController::class, 'store'])->name('travel-plans.expenses.store');
+    
+    // 経費メンバーの支払い状態を更新
+    Route::patch('/expenses/{expense}/members/{member}/toggle-payment', [\App\Http\Controllers\ExpenseController::class, 'togglePaymentStatus'])
+        ->name('expenses.members.toggle-payment');
 });
 
 require __DIR__.'/auth.php';
