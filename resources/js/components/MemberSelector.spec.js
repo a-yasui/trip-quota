@@ -28,9 +28,13 @@ describe('MemberSelector', () => {
       }
     })
 
-    // 直接メソッドを呼び出す
-    wrapper.vm.selectedGroups[1] = true
-    await wrapper.vm.updateMembersByGroup(branchGroups[0])
+    // グループのチェックボックスをクリック
+    const checkbox = wrapper.find('#group_1')
+    await checkbox.setValue(true)
+    await wrapper.vm.$nextTick()
+    
+    // 複数の非同期処理を待つ
+    await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
 
     // グループに所属するメンバーが選択されていることを確認
@@ -41,7 +45,7 @@ describe('MemberSelector', () => {
     // 親コンポーネントにイベントが発行されたことを確認
     const emittedEvents = wrapper.emitted('update:selected')
     expect(emittedEvents).toBeTruthy()
-    expect(emittedEvents[0][0]).toEqual(expect.arrayContaining([1, 2]))
+    expect(emittedEvents[emittedEvents.length - 1][0]).toEqual(expect.arrayContaining([1, 2]))
   })
 
   it('班グループのチェックボックスをクリックすると親コンポーネントに通知される', async () => {
@@ -69,14 +73,18 @@ describe('MemberSelector', () => {
       }
     })
 
-    // 直接メソッドを呼び出す
-    wrapper.vm.selectedGroups[1] = true
-    await wrapper.vm.updateMembersByGroup(branchGroups[0])
+    // グループのチェックボックスをクリック
+    const checkbox = wrapper.find('#group_1')
+    await checkbox.setValue(true)
+    await wrapper.vm.$nextTick()
+    
+    // 複数の非同期処理を待つ
+    await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
 
     // 親コンポーネントにイベントが発行されたことを確認
     const emittedEvents = wrapper.emitted('update:selected')
     expect(emittedEvents).toBeTruthy()
-    expect(emittedEvents[0][0]).toEqual(expect.arrayContaining([1, 2]))
+    expect(emittedEvents[emittedEvents.length - 1][0]).toEqual(expect.arrayContaining([1, 2]))
   })
 })

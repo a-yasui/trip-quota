@@ -27,8 +27,8 @@
           :id="'member_' + member.id"
           :name="inputName + '[]'"
           :value="member.id"
-          v-model="selectedMembers[member.id]"
-          @change="updateGroupsByMember"
+          :checked="selectedMembers[member.id]"
+          @change="toggleMember(member.id, $event)"
           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
         >
         <label :for="'member_' + member.id" class="ml-2 block text-sm text-gray-900">
@@ -66,6 +66,12 @@ export default {
     }
   },
   created() {
+    // デバッグ情報：グループとメンバーの一覧
+    console.log('=== デバッグ情報：起動時 ===');
+    console.log('グループ一覧:', this.branchGroups.map(group => ({ id: group.id, name: group.name, members: group.members.map(m => typeof m === 'object' ? m.id : m) })));
+    console.log('メンバー一覧:', this.members.map(member => ({ id: member.id, name: member.name })));
+    console.log('初期選択メンバー:', this.initialSelectedMembers);
+    
     // 初期選択状態を設定
     this.members.forEach(member => {
       this.selectedMembers[member.id] = this.initialSelectedMembers.includes(Number(member.id));
@@ -73,6 +79,11 @@ export default {
     
     // グループの初期状態を設定
     this.updateGroupsByMember();
+    
+    // デバッグ情報：初期化後の状態
+    console.log('初期化後のselectedMembers:', {...this.selectedMembers});
+    console.log('初期化後のselectedGroups:', {...this.selectedGroups});
+    console.log('=== デバッグ情報終了 ===');
   },
   methods: {
     // __ 関数の定義（Laravel Blade の __ 関数の代替）
@@ -84,14 +95,39 @@ export default {
     updateMembersByGroup(group) {
       console.log('updateMembersByGroup called', group);
       const isChecked = this.selectedGroups[group.id];
+      console.log('班グループが選択されました:', group.name, 'チェック状態:', isChecked);
       console.log('isChecked:', isChecked);
       
       if (group.members && Array.isArray(group.members)) {
+        console.log('グループのメンバー数:', group.members.length);
+        
+        // 新しいselectedMembersオブジェクトを作成して、リアクティビティを確保
+        const newSelectedMembers = { ...this.selectedMembers };
+        
         group.members.forEach(member => {
-          const memberId = typeof member === 'object' ? member.id : member;
-          this.selectedMembers[memberId] = isChecked;
-          console.log(`Member ${memberId} selected:`, this.selectedMembers[memberId]);
+          // メンバーがオブジェクトの場合
+          if (typeof member === 'object' && member !== null) {
+            console.log('メンバー処理:', member.name, 'ID:', member.id);
+            newSelectedMembers[member.id] = isChecked;
+          } 
+          // メンバーが数値や文字列の場合（IDとして扱う）
+          else if (typeof member === 'number' || typeof member === 'string') {
+            console.log('メンバーIDとして処理:', member);
+            newSelectedMembers[member] = isChecked;
+          } 
+          // その他の形式
+          else {
+            console.log('メンバーが不正な形式です:', member);
+          }
         });
+        
+        // 新しいオブジェクトを代入して、リアクティビティをトリガー
+        this.selectedMembers = newSelectedMembers;
+        
+        // 更新後のselectedMembersの状態をログ出力
+        console.log('更新後のselectedMembers:', {...this.selectedMembers});
+      } else {
+        console.log('グループにメンバーがないか、membersが配列ではありません');
       }
       
       // 追加: メンバー選択変更後に親コンポーネントに通知
@@ -99,20 +135,62 @@ export default {
       this.updateGroupsByMember();
     },
     
+    // メンバーのチェック状態を切り替える
+    toggleMember(memberId, event) {
+      console.log('メンバーのチェック状態を切り替えます:', memberId, 'チェック状態:', event.target.checked);
+      
+      // 新しいselectedMembersオブジェクトを作成して、リアクティビティを確保
+      const newSelectedMembers = { ...this.selectedMembers };
+      newSelectedMembers[memberId] = event.target.checked;
+      
+      // 新しいオブジェクトを代入して、リアクティビティをトリガー
+      this.selectedMembers = newSelectedMembers;
+      
+      // 更新後のselectedMembersの状態をログ出力
+      console.log('更新後のselectedMembers:', {...this.selectedMembers});
+      
+      // グループの状態を更新
+      this.updateGroupsByMember();
+    },
+    
     // メンバーが選択された時、班グループの状態を更新
     updateGroupsByMember() {
+      console.log('メンバー選択状態が変更されました');
       console.log('updateGroupsByMember called');
+      
+      // 新しいselectedGroupsオブジェクトを作成して、リアクティビティを確保
+      const newSelectedGroups = { ...this.selectedGroups };
       
       this.branchGroups.forEach(group => {
         if (group.members && Array.isArray(group.members)) {
+          // すべてのメンバーがチェックされているか確認
           const allChecked = group.members.every(member => {
-            const memberId = typeof member === 'object' ? member.id : member;
-            return this.selectedMembers[memberId];
+            // メンバーがオブジェクトの場合
+            if (typeof member === 'object' && member !== null) {
+              const isChecked = Boolean(this.selectedMembers[member.id]);
+              console.log(`グループ ${group.name} のメンバー ${member.name} (ID: ${member.id}) のチェック状態: ${isChecked}`);
+              return isChecked;
+            }
+            // メンバーが数値や文字列の場合（IDとして扱う）
+            else if (typeof member === 'number' || typeof member === 'string') {
+              const isChecked = Boolean(this.selectedMembers[member]);
+              console.log(`グループ ${group.name} のメンバーID ${member} のチェック状態: ${isChecked}`);
+              return isChecked;
+            }
+            return false;
           });
-          this.selectedGroups[group.id] = allChecked;
+          
+          console.log(`グループ ${group.name} の全メンバーチェック状態: ${allChecked}`);
+          newSelectedGroups[group.id] = allChecked;
           console.log(`Group ${group.id} allChecked:`, allChecked);
         }
       });
+      
+      // 新しいオブジェクトを代入して、リアクティビティをトリガー
+      this.selectedGroups = newSelectedGroups;
+      
+      // 更新後のselectedGroupsの状態をログ出力
+      console.log('更新後のselectedGroups:', {...this.selectedGroups});
       
       // 選択されたメンバーIDのリストを作成
       const selectedIds = Object.entries(this.selectedMembers)

@@ -25,7 +25,7 @@
               {{ getTransportationLabel(type.value) }}
             </option>
           </select>
-          <slot name="transportation_type_error" :text>{{ text }}</slot>
+          <slot name="transportation_type_error"></slot>
         </div>
 
         <!-- 出発地 -->
@@ -39,7 +39,7 @@
             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
             required
           >
-          <slot name="departure_location_error" :text>{{ text}}</slot>
+          <slot name="departure_location_error"></slot>
         </div>
 
         <!-- 到着地 -->
@@ -309,11 +309,11 @@ export default {
 
     // 初期値を取得
     getInitialValue(field, defaultValue) {
-      // oldValues（バリデーションエラー時の入力値）があればそれを優先
-      if (this.oldValues && this.oldValues[field] !== undefined) {
+      if (this.oldValues && this.oldValues[field] !== undefined && this.oldValues[field] !== '') {
         return this.oldValues[field];
+      } else if (this.itinerary && this.itinerary[field] !== undefined && this.itinerary[field] !== '') {
+        return this.itinerary[field];
       }
-      // デフォルト値を返す
       return defaultValue;
     }
   }
