@@ -132,7 +132,7 @@
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900">旅程</h3>
-                        <a href="#" class="inline-flex items-center text-sm font-medium text-lime-600 hover:text-lime-500">
+                        <a href="{{ route('travel-plans.itineraries.create', $travelPlan) }}" class="inline-flex items-center text-sm font-medium text-lime-600 hover:text-lime-500">
                             <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
@@ -143,11 +143,42 @@
                     @if($travelPlan->itineraries->isEmpty())
                         <p class="text-gray-500">旅程情報はまだ登録されていません。</p>
                     @else
+                        <div class="mb-2">
+                            <a href="{{ route('travel-plans.itineraries.index', $travelPlan) }}" class="text-sm text-blue-600 hover:text-blue-800">
+                                すべての旅程を表示 &rarr;
+                            </a>
+                        </div>
                         <div class="space-y-4">
                             @foreach($travelPlan->itineraries as $itinerary)
                                 <div class="border rounded-lg p-4">
                                     <div class="flex justify-between">
-                                        <h4 class="font-medium">{{ $itinerary->transportation_type }}</h4>
+                                        <h4 class="font-medium">
+                                            @switch($itinerary->transportation_type->value)
+                                                @case('flight')
+                                                    {{ __('飛行機') }}
+                                                    @break
+                                                @case('train')
+                                                    {{ __('電車') }}
+                                                    @break
+                                                @case('bus')
+                                                    {{ __('バス') }}
+                                                    @break
+                                                @case('ferry')
+                                                    {{ __('フェリー') }}
+                                                    @break
+                                                @case('car')
+                                                    {{ __('車') }}
+                                                    @break
+                                                @case('walk')
+                                                    {{ __('徒歩') }}
+                                                    @break
+                                                @case('bike')
+                                                    {{ __('バイク') }}
+                                                    @break
+                                                @default
+                                                    {{ __('その他') }}
+                                            @endswitch
+                                        </h4>
                                         <div class="text-sm text-gray-500">
                                             {{ $itinerary->departure_time->format('Y/m/d H:i') }}
                                         </div>

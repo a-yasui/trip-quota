@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Transportation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int $id
  * @property int $travel_plan_id
- * @property string $transportation_type
+ * @property \App\Enums\Transportation $transportation_type
  * @property string $departure_location
  * @property string $arrival_location
  * @property \Illuminate\Support\Carbon $departure_time
@@ -67,7 +68,9 @@ class Itinerary extends Model
         'departure_location',
         'arrival_location',
         'departure_time',
+        'departure_timezone',
         'arrival_time',
+        'arrival_timezone',
         'company_name',
         'reference_number',
         'notes',
@@ -81,6 +84,9 @@ class Itinerary extends Model
     protected $casts = [
         'departure_time' => 'datetime',
         'arrival_time' => 'datetime',
+        'transportation_type' => Transportation::class,
+        'departure_timezone' => \App\Enums\Timezone::class,
+        'arrival_timezone' => \App\Enums\Timezone::class,
     ];
 
     /**

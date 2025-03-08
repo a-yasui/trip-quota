@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TravelPlanController;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,9 @@ Route::middleware('auth')->group(function () {
     // 班グループメンバー管理
     Route::post('/branch-groups/{group}/members', [App\Http\Controllers\BranchGroupMemberController::class, 'store'])->name('branch-groups.members.store');
     Route::delete('/branch-groups/{group}/members/{member}', [App\Http\Controllers\BranchGroupMemberController::class, 'destroy'])->name('branch-groups.members.destroy');
+    
+    // 旅程管理ルート
+    Route::resource('travel-plans.itineraries', ItineraryController::class);
     
     // 経費ルート
     Route::get('/expenses', function () {
