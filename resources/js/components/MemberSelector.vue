@@ -82,18 +82,27 @@ export default {
     
     // 班グループが選択された時、所属メンバーを更新
     updateMembersByGroup(group) {
+      console.log('updateMembersByGroup called', group);
       const isChecked = this.selectedGroups[group.id];
+      console.log('isChecked:', isChecked);
       
       if (group.members && Array.isArray(group.members)) {
         group.members.forEach(member => {
           const memberId = typeof member === 'object' ? member.id : member;
           this.selectedMembers[memberId] = isChecked;
+          console.log(`Member ${memberId} selected:`, this.selectedMembers[memberId]);
         });
       }
+      
+      // 追加: メンバー選択変更後に親コンポーネントに通知
+      console.log('Calling updateGroupsByMember from updateMembersByGroup');
+      this.updateGroupsByMember();
     },
     
     // メンバーが選択された時、班グループの状態を更新
     updateGroupsByMember() {
+      console.log('updateGroupsByMember called');
+      
       this.branchGroups.forEach(group => {
         if (group.members && Array.isArray(group.members)) {
           const allChecked = group.members.every(member => {
@@ -101,8 +110,20 @@ export default {
             return this.selectedMembers[memberId];
           });
           this.selectedGroups[group.id] = allChecked;
+          console.log(`Group ${group.id} allChecked:`, allChecked);
         }
       });
+      
+      // 選択されたメンバーIDのリストを作成
+      const selectedIds = Object.entries(this.selectedMembers)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([id, _]) => Number(id));
+      
+      console.log('Selected member IDs:', selectedIds);
+      
+      // 親コンポーネントに選択変更を通知
+      console.log('Emitting update:selected event');
+      this.$emit('update:selected', selectedIds);
     }
   }
 }

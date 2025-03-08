@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $travel_plan_id
  * @property int $payer_member_id
  * @property numeric $amount
- * @property string $currency
+ * @property \App\Enums\Currency $currency
  * @property string $description
  * @property \Illuminate\Support\Carbon $expense_date
  * @property string|null $category
@@ -84,6 +85,7 @@ class Expense extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'expense_date' => 'date',
+        'currency' => Currency::class,
         'is_settled' => 'boolean',
     ];
 
