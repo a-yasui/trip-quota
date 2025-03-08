@@ -160,7 +160,7 @@
           </span>
         </div>
         <div class="flex items-center space-x-4 w-2/3">
-          <div class="w-1/2">
+          <div class="w-1/2 relative">
             <input
               type="number"
               :name="`member_share_amounts[${member.id}]`"
@@ -168,15 +168,18 @@
               step="0.01"
               min="0"
               :max="formData.amount"
-              class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-right"
+              class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-right pr-12"
               @input="updateTotalShareAmount"
             >
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pt-1 pointer-events-none text-gray-500">
+              {{ formData.currency }}
+            </div>
           </div>
           <div class="flex items-center justify-end w-1/2">
             <button
               type="button"
               :class="[
-                'px-3 py-1 text-xs font-semibold rounded-md transition-colors duration-200 ease-in-out',
+                'px-3 py-1 text-xs font-semibold rounded-md transition-colors duration-200 ease-in-out w-20 text-center',
                 memberPaidStatus[member.id] 
                   ? 'bg-green-500 text-white hover:bg-green-600' 
                   : 'bg-red-500 text-white hover:bg-red-600'
