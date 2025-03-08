@@ -152,40 +152,46 @@
             </div>
             
             <div class="space-y-3">
-              <div v-for="member in selectedMembersList" :key="member.id" class="flex items-center">
-                <div class="w-1/4">
-                  <span class="text-sm font-medium text-gray-700">{{ member.name }}</span>
-                  <span v-if="formData.payer_member_id == member.id" class="ml-2 text-xs bg-lime-100 text-lime-800 px-2 py-0.5 rounded-full">
-                    {{ __('支払者') }}
-                  </span>
-                </div>
-                <div class="w-1/2">
-                  <input
-                    type="number"
-                    :name="`member_share_amounts[${member.id}]`"
-                    v-model="memberShareAmounts[member.id]"
-                    step="0.01"
-                    min="0"
-                    :max="formData.amount"
-                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                    @input="updateTotalShareAmount"
-                  >
-                </div>
-                <div class="w-1/4 flex items-center justify-center">
-                  <input
-                    type="checkbox"
-                    :id="`member_paid_${member.id}`"
-                    :name="`member_paid_status[${member.id}]`"
-                    :value="1"
-                    v-model="memberPaidStatus[member.id]"
-                    :disabled="isPaidStatusDisabled(member.id)"
-                    class="h-4 w-4 text-lime-600 focus:ring-lime-500 border-gray-300 rounded"
-                  >
-                  <label :for="`member_paid_${member.id}`" class="ml-2 text-sm text-gray-700">
-                    {{ memberPaidStatus[member.id] ? __('精算済み') : __('未精算') }}
-                  </label>
-                </div>
-              </div>
+      <div v-for="member in selectedMembersList" :key="member.id" class="flex items-center">
+        <div class="w-1/4">
+          <span class="text-sm font-medium text-gray-700">{{ member.name }}</span>
+          <span v-if="formData.payer_member_id == member.id" class="ml-2 text-xs bg-lime-100 text-lime-800 px-2 py-0.5 rounded-full">
+            {{ __('支払者') }}
+          </span>
+        </div>
+        <div class="w-1/4 flex items-center justify-center">
+          <button
+            type="button"
+            :class="[
+              'px-3 py-1 text-xs font-semibold rounded-md transition-colors duration-200 ease-in-out',
+              memberPaidStatus[member.id] 
+                ? 'bg-green-500 text-white hover:bg-green-600' 
+                : 'bg-red-500 text-white hover:bg-red-600'
+            ]"
+            @click="togglePaidStatus(member.id)"
+            :disabled="isPaidStatusDisabled(member.id)"
+          >
+            {{ memberPaidStatus[member.id] ? __('精算済み') : __('未精算') }}
+          </button>
+          <input
+            type="hidden"
+            :name="`member_paid_status[${member.id}]`"
+            :value="memberPaidStatus[member.id] ? 1 : 0"
+          >
+        </div>
+        <div class="w-1/2">
+          <input
+            type="number"
+            :name="`member_share_amounts[${member.id}]`"
+            v-model="memberShareAmounts[member.id]"
+            step="0.01"
+            min="0"
+            :max="formData.amount"
+            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-right"
+            @input="updateTotalShareAmount"
+          >
+        </div>
+      </div>
               
               <!-- 合計と差額の表示 -->
               <div class="flex justify-between pt-3 border-t border-gray-200">
@@ -500,6 +506,15 @@ export default {
           this.memberPaidStatus[member.id] = member.id == this.formData.payer_member_id;
         });
       }
+    },
+    
+    // 支払い状態を切り替える
+    togglePaidStatus(memberId) {
+      if (this.isPaidStatusDisabled(memberId)) {
+        return;
+      }
+      
+      this.memberPaidStatus[memberId] = !this.memberPaidStatus[memberId];
     },
     
     // 支払い状態の変更が無効かどうかを判定
