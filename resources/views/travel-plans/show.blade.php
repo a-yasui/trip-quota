@@ -308,7 +308,7 @@
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900">経費</h3>
-                        <a href="#" class="inline-flex items-center text-sm font-medium text-lime-600 hover:text-lime-500">
+                        <a href="{{ route('travel-plans.expenses.create', $travelPlan) }}" class="inline-flex items-center text-sm font-medium text-lime-600 hover:text-lime-500">
                             <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
@@ -319,11 +319,16 @@
                     @if($travelPlan->expenses->isEmpty())
                         <p class="text-gray-500">経費情報はまだ登録されていません。</p>
                     @else
+                        <div class="mb-2">
+                            <a href="{{ route('expenses.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                                すべての経費を表示 &rarr;
+                            </a>
+                        </div>
                         <div class="space-y-3">
-                            @foreach($travelPlan->expenses as $expense)
+                            @foreach($travelPlan->expenses->take(5) as $expense)
                                 <div class="flex justify-between items-center">
                                     <div>
-                                        <p class="text-sm font-medium text-gray-900">{{ $expense->description }}</p>
+                                        <a href="{{ route('expenses.show', $expense) }}" class="text-sm font-medium text-gray-900 hover:text-lime-600">{{ $expense->description }}</a>
                                         <p class="text-xs text-gray-500">{{ $expense->expense_date->format('Y/m/d') }}</p>
                                     </div>
                                     <div class="text-sm font-medium">

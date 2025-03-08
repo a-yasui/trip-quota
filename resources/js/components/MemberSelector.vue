@@ -93,8 +93,10 @@ export default {
     
     // 班グループが選択された時、所属メンバーを更新
     updateMembersByGroup(group) {
+      console.log('updateMembersByGroup called', group);
       const isChecked = this.selectedGroups[group.id];
       console.log('班グループが選択されました:', group.name, 'チェック状態:', isChecked);
+      console.log('isChecked:', isChecked);
       
       if (group.members && Array.isArray(group.members)) {
         console.log('グループのメンバー数:', group.members.length);
@@ -127,6 +129,10 @@ export default {
       } else {
         console.log('グループにメンバーがないか、membersが配列ではありません');
       }
+      
+      // 追加: メンバー選択変更後に親コンポーネントに通知
+      console.log('Calling updateGroupsByMember from updateMembersByGroup');
+      this.updateGroupsByMember();
     },
     
     // メンバーのチェック状態を切り替える
@@ -150,6 +156,7 @@ export default {
     // メンバーが選択された時、班グループの状態を更新
     updateGroupsByMember() {
       console.log('メンバー選択状態が変更されました');
+      console.log('updateGroupsByMember called');
       
       // 新しいselectedGroupsオブジェクトを作成して、リアクティビティを確保
       const newSelectedGroups = { ...this.selectedGroups };
@@ -175,6 +182,7 @@ export default {
           
           console.log(`グループ ${group.name} の全メンバーチェック状態: ${allChecked}`);
           newSelectedGroups[group.id] = allChecked;
+          console.log(`Group ${group.id} allChecked:`, allChecked);
         }
       });
       
@@ -183,6 +191,17 @@ export default {
       
       // 更新後のselectedGroupsの状態をログ出力
       console.log('更新後のselectedGroups:', {...this.selectedGroups});
+      
+      // 選択されたメンバーIDのリストを作成
+      const selectedIds = Object.entries(this.selectedMembers)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([id, _]) => Number(id));
+      
+      console.log('Selected member IDs:', selectedIds);
+      
+      // 親コンポーネントに選択変更を通知
+      console.log('Emitting update:selected event');
+      this.$emit('update:selected', selectedIds);
     }
   }
 }
