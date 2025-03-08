@@ -305,4 +305,53 @@ class BranchGroupMemberTest extends TestCase
             ->where('user_id', $otherUser->id)
             ->count());
     }
+
+    /**
+     * コアグループにメンバーがいるか確認するテスト
+     */
+    public function test_member_must_be_in_core_group_before_adding_to_branch_group()
+    {
+        $user = User::factory()->create();
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+        ]);
+        $coreGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'core',
+        ]);
+        $branchGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => 'branch',
+            'parent_group_id' => $coreGroup->id,
+            'name' => 'テスト班グループ',
+        ]);
+
+        // コアグループにメンバーを追加
+        $coreMember = Member::factory()->create([
+            'group_id' => $coreGroup->id,
+            'user_id' => $user->id,
+            'is_registered' => true,
+        ]);
+
+        // コアグループにいないメンバーを作成
+        $nonCoreMember = Member::factory()->create([
+            'user_id' => $user->id,
+            'is_registered' => true,
+        ]);
+
+        // コアグループにいないメンバーを班グループに追加しようとする
+        $response = $this->actingAs($user)
+            ->post(route('branch-groups.members.store', $branchGroup), [
+                'member_id' => $nonCoreMember->id,
+            ]);
+
+        $response->assertSessionHas('error', 'このメンバーはコアグループに存在しません');
+
+        // メンバーが班グループに追加されていないことを確認
+        $this->assertDatabaseMissing('members', [
+            'id' => $nonCoreMember->id,
+            'group_id' => $branchGroup->id,
+        ]);
+    }
 }

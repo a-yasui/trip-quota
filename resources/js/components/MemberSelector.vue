@@ -76,6 +76,16 @@ export default {
     this.members.forEach(member => {
       this.selectedMembers[member.id] = this.initialSelectedMembers.includes(Number(member.id));
     });
+    // 追加: branchGroupsのメンバーもselectedMembersに含める
+    this.branchGroups.forEach(group => {
+      group.members.forEach(member => {
+        if (typeof member === 'object' && member !== null) {
+          this.selectedMembers[member.id] = this.initialSelectedMembers.includes(Number(member.id));
+        } else if (typeof member === 'number' || typeof member === 'string') {
+          this.selectedMembers[member] = this.initialSelectedMembers.includes(Number(member));
+        }
+      });
+    });
     
     // グループの初期状態を設定
     this.updateGroupsByMember();
