@@ -1,0 +1,149 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\ExpenseRequest;
+use App\Models\Expense;
+use App\Models\Group;
+use App\Models\Member;
+use App\Models\TravelPlan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class ExpenseController extends Controller
+{
+    /**
+     * 経費一覧を表示
+     */
+    public function index()
+    {
+        $expenses = Expense::with(['payerMember', 'members', 'travelPlan'])
+            ->orderBy('expense_date', 'desc')
+            ->paginate(20);
+            
+        return view('expenses.index', compact('expenses'));
+    }
+
+    /**
+     * 経費作成フォームを表示
+     */
+    public function create(TravelPlan $travelPlan)
+    {
+        $coreGroup = $travelPlan->groups()->core()->first();
+        $branchGroups = $travelPlan->groups()->branch()->with('members')->get();
+        $members = $coreGroup->members;
+        
+        return view('expenses.create', compact('travelPlan', 'branchGroups', 'members'));
+    }
+
+    /**
+     * 経費を保存
+     */
+    public function store(ExpenseRequest $request, TravelPlan $travelPlan)
+    {
+        $validated = $request->validated();
+        
+        DB::transaction(function () use ($validated, $travelPlan) {
+            $expense = Expense::create([
+                'travel_plan_id' => $travelPlan->id,
+                'payer_member_id' => $validated['payer_member_id'],
+                'amount' => $validated['amount'],
+                'currency' => $validated['currency'],
+                'description' => $validated['description'],
+                'expense_date' => $validated['expense_date'],
+                'category' => $validated['category'],
+                'notes' => $validated['notes'],
+                'is_settled' => false,
+            ]);
+            
+            // 参加メンバーを追加
+            $memberCount = count($validated['member_ids']);
+            $shareAmount = $validated['amount'] / $memberCount;
+            
+            foreach ($validated['member_ids'] as $memberId) {
+                $expense->members()->attach($memberId, [
+                    'share_amount' => $shareAmount,
+                    'is_paid' => $memberId == $validated['payer_member_id'], // 支払者は支払い済みとする
+                ]);
+            }
+        });
+        
+        return redirect()->route('travel-plans.show', $travelPlan)
+            ->with('success', '経費を登録しました。');
+    }
+
+    /**
+     * 経費詳細を表示
+     */
+    public function show(Expense $expense)
+    {
+        $expense->load(['payerMember', 'members', 'travelPlan']);
+        
+        return view('expenses.show', compact('expense'));
+    }
+
+    /**
+     * 経費編集フォームを表示
+     */
+    public function edit(Expense $expense)
+    {
+        $expense->load(['payerMember', 'members', 'travelPlan']);
+        
+        $travelPlan = $expense->travelPlan;
+        $coreGroup = $travelPlan->groups()->core()->first();
+        $branchGroups = $travelPlan->groups()->branch()->with('members')->get();
+        $members = $coreGroup->members;
+        $selectedMemberIds = $expense->members->pluck('id')->toArray();
+        
+        return view('expenses.edit', compact('expense', 'travelPlan', 'branchGroups', 'members', 'selectedMemberIds'));
+    }
+
+    /**
+     * 経費を更新
+     */
+    public function update(ExpenseRequest $request, Expense $expense)
+    {
+        $validated = $request->validated();
+        
+        DB::transaction(function () use ($validated, $expense) {
+            $expense->update([
+                'payer_member_id' => $validated['payer_member_id'],
+                'amount' => $validated['amount'],
+                'currency' => $validated['currency'],
+                'description' => $validated['description'],
+                'expense_date' => $validated['expense_date'],
+                'category' => $validated['category'],
+                'notes' => $validated['notes'],
+            ]);
+            
+            // 参加メンバーを更新
+            $expense->members()->detach();
+            
+            $memberCount = count($validated['member_ids']);
+            $shareAmount = $validated['amount'] / $memberCount;
+            
+            foreach ($validated['member_ids'] as $memberId) {
+                $expense->members()->attach($memberId, [
+                    'share_amount' => $shareAmount,
+                    'is_paid' => $memberId == $validated['payer_member_id'], // 支払者は支払い済みとする
+                ]);
+            }
+        });
+        
+        return redirect()->route('expenses.show', $expense)
+            ->with('success', '経費を更新しました。');
+    }
+
+    /**
+     * 経費を削除
+     */
+    public function destroy(Expense $expense)
+    {
+        $travelPlan = $expense->travelPlan;
+        
+        $expense->delete();
+        
+        return redirect()->route('travel-plans.show', $travelPlan)
+            ->with('success', '経費を削除しました。');
+    }
+}

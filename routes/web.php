@@ -53,9 +53,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('travel-plans.itineraries', ItineraryController::class);
     
     // 経費ルート
-    Route::get('/expenses', function () {
-        return view('welcome'); // 仮のビュー
-    })->name('expenses.index');
+    Route::resource('expenses', \App\Http\Controllers\ExpenseController::class);
+    Route::get('/travel-plans/{travelPlan}/expenses/create', [\App\Http\Controllers\ExpenseController::class, 'create'])->name('travel-plans.expenses.create');
+    Route::post('/travel-plans/{travelPlan}/expenses', [\App\Http\Controllers\ExpenseController::class, 'store'])->name('travel-plans.expenses.store');
 });
 
 require __DIR__.'/auth.php';
