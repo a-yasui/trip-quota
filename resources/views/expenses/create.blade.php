@@ -27,7 +27,7 @@
                             :old-values='@json(old())'
                             :currencies='@json($currencies)'
                         >
-                            @csrf
+                            <template v-slot:csrf>@csrf</template>
 
                             @error('description')
                                 <template #description_error>

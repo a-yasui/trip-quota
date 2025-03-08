@@ -33,6 +33,10 @@ class ExpenseRequest extends FormRequest
             'payer_member_id' => 'required|exists:members,id',
             'member_ids' => 'required|array',
             'member_ids.*' => 'exists:members,id',
+            'member_share_amounts' => 'nullable|array',
+            'member_share_amounts.*' => 'nullable|numeric|min:0',
+            'member_paid_status' => 'nullable|array',
+            'member_paid_status.*' => 'nullable|boolean',
         ];
     }
 
@@ -53,6 +57,10 @@ class ExpenseRequest extends FormRequest
             'payer_member_id' => '支払者',
             'member_ids' => '参加メンバー',
             'member_ids.*' => '参加メンバー',
+            'member_share_amounts' => 'メンバーごとの支払い金額',
+            'member_share_amounts.*' => 'メンバーごとの支払い金額',
+            'member_paid_status' => 'メンバーごとの精算状態',
+            'member_paid_status.*' => 'メンバーごとの精算状態',
         ];
     }
 }

@@ -46,7 +46,7 @@ class ExpenseController extends Controller
     {
         $validated = $request->validated();
         
-        DB::transaction(function () use ($validated, $travelPlan) {
+        $expense = DB::transaction(function () use ($validated, $request, $travelPlan) {
             $expense = Expense::create([
                 'travel_plan_id' => $travelPlan->id,
                 'payer_member_id' => $validated['payer_member_id'],
@@ -54,24 +54,54 @@ class ExpenseController extends Controller
                 'currency' => $validated['currency'],
                 'description' => $validated['description'],
                 'expense_date' => $validated['expense_date'],
-                'category' => $validated['category'],
-                'notes' => $validated['notes'],
+                'category' => $validated['category'] ?? null,
+                'notes' => $validated['notes'] ?? null,
                 'is_settled' => false,
             ]);
             
             // 参加メンバーを追加
             $memberCount = count($validated['member_ids']);
-            $shareAmount = $validated['amount'] / $memberCount;
+            $defaultShareAmount = $validated['amount'] / $memberCount;
+            
+            // カスタム分配金額があれば使用、なければ均等に分配
+            $memberShareAmounts = $request->input('member_share_amounts', []);
+            
+            // 支払い状態を取得
+            $memberPaidStatus = $request->input('member_paid_status', []);
+            
+            // 全メンバーが支払い済みかどうかを確認するためのフラグ
+            $allMembersPaid = true;
             
             foreach ($validated['member_ids'] as $memberId) {
+                $shareAmount = isset($memberShareAmounts[$memberId]) && is_numeric($memberShareAmounts[$memberId])
+                    ? $memberShareAmounts[$memberId] 
+                    : $defaultShareAmount;
+                
+                // 支払者は常に支払い済み、それ以外はフォームの値を使用
+                $isPaid = $memberId == $validated['payer_member_id'] 
+                    ? true 
+                    : (isset($memberPaidStatus[$memberId]) && $memberPaidStatus[$memberId]);
+                
+                // 未払いのメンバーがいれば、全員支払い済みフラグをfalseに
+                if (!$isPaid) {
+                    $allMembersPaid = false;
+                }
+                
                 $expense->members()->attach($memberId, [
                     'share_amount' => $shareAmount,
-                    'is_paid' => $memberId == $validated['payer_member_id'], // 支払者は支払い済みとする
+                    'is_paid' => $isPaid,
                 ]);
             }
+            
+            // 全メンバーが支払い済みの場合、経費全体を精算済みに設定
+            if ($allMembersPaid) {
+                $expense->update(['is_settled' => true]);
+            }
+            
+            return $expense;
         });
         
-        return redirect()->route('travel-plans.show', $travelPlan)
+        return redirect()->route('expenses.show', $expense)
             ->with('success', '経費を登録しました。');
     }
 
@@ -110,28 +140,58 @@ class ExpenseController extends Controller
     {
         $validated = $request->validated();
         
-        DB::transaction(function () use ($validated, $expense) {
+        DB::transaction(function () use ($validated, $request, $expense) {
             $expense->update([
                 'payer_member_id' => $validated['payer_member_id'],
                 'amount' => $validated['amount'],
                 'currency' => $validated['currency'],
                 'description' => $validated['description'],
                 'expense_date' => $validated['expense_date'],
-                'category' => $validated['category'],
-                'notes' => $validated['notes'],
+                'category' => $validated['category'] ?? null,
+                'notes' => $validated['notes'] ?? null,
             ]);
             
             // 参加メンバーを更新
             $expense->members()->detach();
             
             $memberCount = count($validated['member_ids']);
-            $shareAmount = $validated['amount'] / $memberCount;
+            $defaultShareAmount = $validated['amount'] / $memberCount;
+            
+            // カスタム分配金額があれば使用、なければ均等に分配
+            $memberShareAmounts = $request->input('member_share_amounts', []);
+            
+            // 支払い状態を取得
+            $memberPaidStatus = $request->input('member_paid_status', []);
+            
+            // 全メンバーが支払い済みかどうかを確認するためのフラグ
+            $allMembersPaid = true;
             
             foreach ($validated['member_ids'] as $memberId) {
+                $shareAmount = isset($memberShareAmounts[$memberId]) && is_numeric($memberShareAmounts[$memberId])
+                    ? $memberShareAmounts[$memberId] 
+                    : $defaultShareAmount;
+                
+                // 支払者は常に支払い済み、それ以外はフォームの値を使用
+                $isPaid = $memberId == $validated['payer_member_id'] 
+                    ? true 
+                    : (isset($memberPaidStatus[$memberId]) && $memberPaidStatus[$memberId]);
+                
+                // 未払いのメンバーがいれば、全員支払い済みフラグをfalseに
+                if (!$isPaid) {
+                    $allMembersPaid = false;
+                }
+                
                 $expense->members()->attach($memberId, [
                     'share_amount' => $shareAmount,
-                    'is_paid' => $memberId == $validated['payer_member_id'], // 支払者は支払い済みとする
+                    'is_paid' => $isPaid,
                 ]);
+            }
+            
+            // 全メンバーが支払い済みの場合、経費全体を精算済みに設定
+            if ($allMembersPaid) {
+                $expense->update(['is_settled' => true]);
+            } else {
+                $expense->update(['is_settled' => false]);
             }
         });
         
@@ -144,11 +204,9 @@ class ExpenseController extends Controller
      */
     public function destroy(Expense $expense)
     {
-        $travelPlan = $expense->travelPlan;
-        
         $expense->delete();
         
-        return redirect()->route('travel-plans.show', $travelPlan)
+        return redirect()->route('expenses.index')
             ->with('success', '経費を削除しました。');
     }
 }

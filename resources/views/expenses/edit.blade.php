@@ -28,8 +28,8 @@
                             :old-values='@json(old())'
                             :currencies='@json($currencies)'
                         >
-                            @csrf
-                            @method('PUT')
+                            <template v-slot:csrf>@csrf</template>
+                            <template v-slot:method>@method('PUT')</template>
 
                             @error('description')
                                 <template #description_error>

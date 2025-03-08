@@ -136,7 +136,7 @@
         </div>
 
         <!-- メンバーごとの支払い金額 -->
-        <div v-if="formData.amount > 0 && selectedMembersList.length > 0" class="md:col-span-2 mt-4">
+        <div v-if="selectedMembersList.length > 0" class="md:col-span-2 mt-4">
           <h3 class="text-lg font-medium text-gray-900 mb-3">{{ __('メンバーごとの支払い金額') }}</h3>
           
           <div class="bg-gray-50 p-4 rounded-lg">
@@ -153,13 +153,13 @@
             
             <div class="space-y-3">
               <div v-for="member in selectedMembersList" :key="member.id" class="flex items-center">
-                <div class="w-1/3">
+                <div class="w-1/4">
                   <span class="text-sm font-medium text-gray-700">{{ member.name }}</span>
                   <span v-if="formData.payer_member_id == member.id" class="ml-2 text-xs bg-lime-100 text-lime-800 px-2 py-0.5 rounded-full">
                     {{ __('支払者') }}
                   </span>
                 </div>
-                <div class="w-2/3">
+                <div class="w-1/2">
                   <input
                     type="number"
                     :name="`member_share_amounts[${member.id}]`"
@@ -170,6 +170,20 @@
                     class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                     @input="updateTotalShareAmount"
                   >
+                </div>
+                <div class="w-1/4 flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    :id="`member_paid_${member.id}`"
+                    :name="`member_paid_status[${member.id}]`"
+                    :value="1"
+                    v-model="memberPaidStatus[member.id]"
+                    :disabled="isPaidStatusDisabled(member.id)"
+                    class="h-4 w-4 text-lime-600 focus:ring-lime-500 border-gray-300 rounded"
+                  >
+                  <label :for="`member_paid_${member.id}`" class="ml-2 text-sm text-gray-700">
+                    {{ memberPaidStatus[member.id] ? __('精算済み') : __('未精算') }}
+                  </label>
                 </div>
               </div>
               
@@ -266,7 +280,9 @@ export default {
       },
       selectedMembersList: [],
       memberShareAmounts: {},
-      totalShareAmount: 0
+      memberPaidStatus: {}, // メンバーごとの支払い状態
+      totalShareAmount: 0,
+      currentUserId: document.querySelector('meta[name="user-id"]')?.getAttribute('content') || null
     }
   },
   computed: {
@@ -282,27 +298,53 @@ export default {
   watch: {
     // 金額が変更されたら分配金額を再計算
     'formData.amount': function(newVal) {
-      if (newVal > 0 && this.selectedMembersList.length > 0) {
+      if (this.selectedMembersList.length > 0) {
         this.resetShareAmounts();
       }
+    },
+    
+    // 支払者が変更されたら支払い状態を更新
+    'formData.payer_member_id': function(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        // 古い支払者の支払い状態を更新（支払者でなくなった場合は未支払いに）
+        if (oldVal && this.memberPaidStatus[oldVal] !== undefined) {
+          this.memberPaidStatus[oldVal] = false;
+        }
+        
+        // 新しい支払者の支払い状態を更新（支払者になった場合は支払い済みに）
+        if (newVal) {
+          this.memberPaidStatus[newVal] = true;
+        }
+      }
+    },
+    
+    // 選択されたメンバーリストが変更されたら支払い状態を更新
+    selectedMembersList: {
+      handler: function(newVal) {
+        this.initializePaidStatus();
+      },
+      deep: true
     }
   },
   created() {
     // 初期選択メンバーを設定
     this.initializeSelectedMembers();
     
-    // 既存の経費データがある場合、メンバーごとの分配金額を設定
+    // 既存の経費データがある場合、メンバーごとの分配金額と支払い状態を設定
     if (this.expense && this.expense.members) {
       this.initializeShareAmounts();
+      this.initializePaidStatus();
     } else {
       this.resetShareAmounts();
+      this.initializePaidStatus();
     }
   },
   mounted() {
-    // コンポーネントがマウントされた後に、選択されたメンバーの分配金額を初期化
+    // コンポーネントがマウントされた後に、選択されたメンバーの分配金額と支払い状態を初期化
     this.$nextTick(() => {
       if (this.expense && this.expense.members) {
         this.initializeShareAmounts();
+        this.initializePaidStatus();
       }
     });
   },
@@ -339,13 +381,17 @@ export default {
     
     // 選択されたメンバーを更新
     updateSelectedMembers(selectedIds) {
+      console.log('updateSelectedMembers called with selectedIds:', selectedIds);
+      
       this.selectedMembersList = this.members.filter(member => selectedIds.includes(member.id));
+      console.log('Updated selectedMembersList:', this.selectedMembersList);
       
       // 新しく選択されたメンバーの分配金額を初期化
       this.selectedMembersList.forEach(member => {
         if (this.memberShareAmounts[member.id] === undefined) {
           // Vue 3では$setの代わりに直接代入を使用
           this.memberShareAmounts[member.id] = 0;
+          console.log(`Initialized share amount for member ${member.id}`);
         }
       });
       
@@ -354,11 +400,21 @@ export default {
         if (!selectedIds.includes(Number(id))) {
           // Vue 3では$deleteの代わりにdeleteを使用
           delete this.memberShareAmounts[id];
+          console.log(`Removed share amount for member ${id}`);
         }
       });
       
       // 分配金額を再計算
+      console.log('Calling resetShareAmounts');
       this.resetShareAmounts();
+      
+      // 条件チェックのログ
+      console.log('Condition check:', {
+        amount: this.formData.amount,
+        amountGreaterThanZero: this.formData.amount > 0,
+        selectedMembersLength: this.selectedMembersList.length,
+        shouldShowShareAmounts: this.formData.amount > 0 && this.selectedMembersList.length > 0
+      });
     },
     
     // 初期選択メンバーを設定
@@ -389,9 +445,10 @@ export default {
     
     // 分配金額を均等に再設定
     resetShareAmounts() {
-      if (this.selectedMembersList.length === 0 || !this.formData.amount) return;
+      if (this.selectedMembersList.length === 0) return;
       
-      const shareAmount = parseFloat(this.formData.amount) / this.selectedMembersList.length;
+      const amount = parseFloat(this.formData.amount) || 0;
+      const shareAmount = amount / this.selectedMembersList.length;
       const roundedShareAmount = Math.round(shareAmount * 100) / 100; // 小数点2桁で四捨五入
       
       this.selectedMembersList.forEach(member => {
@@ -399,8 +456,8 @@ export default {
         this.memberShareAmounts[member.id] = roundedShareAmount;
       });
       
-      // 端数調整（最後のメンバーに調整額を加算）
-      if (this.selectedMembersList.length > 0) {
+      // 端数調整（最後のメンバーに調整額を加算）- 金額が0円の場合は調整しない
+      if (this.selectedMembersList.length > 0 && parseFloat(this.formData.amount) > 0) {
         const lastMemberId = this.selectedMembersList[this.selectedMembersList.length - 1].id;
         const totalBeforeAdjustment = roundedShareAmount * this.selectedMembersList.length;
         const adjustment = parseFloat(this.formData.amount) - totalBeforeAdjustment;
@@ -418,6 +475,53 @@ export default {
       this.totalShareAmount = Object.values(this.memberShareAmounts).reduce((sum, amount) => {
         return sum + parseFloat(amount || 0);
       }, 0).toFixed(2);
+    },
+    
+    // 支払い状態の初期化
+    initializePaidStatus() {
+      // 支払者は常に支払い済み
+      if (this.formData.payer_member_id) {
+        this.memberPaidStatus[this.formData.payer_member_id] = true;
+      }
+      
+      // 既存の経費データがある場合は、その支払い状態を使用
+      if (this.expense && this.expense.members) {
+        this.expense.members.forEach(member => {
+          if (member.pivot && member.pivot.is_paid !== undefined) {
+            this.memberPaidStatus[member.id] = member.pivot.is_paid;
+          } else {
+            // 支払者の場合は常に支払い済み、それ以外はデフォルトで未支払い
+            this.memberPaidStatus[member.id] = member.id == this.formData.payer_member_id;
+          }
+        });
+      } else {
+        // 新規作成時は支払者のみ支払い済み、他は未支払い
+        this.selectedMembersList.forEach(member => {
+          this.memberPaidStatus[member.id] = member.id == this.formData.payer_member_id;
+        });
+      }
+    },
+    
+    // 支払い状態の変更が無効かどうかを判定
+    isPaidStatusDisabled(memberId) {
+      // 支払者は常に支払い済みで変更不可
+      if (memberId == this.formData.payer_member_id) {
+        return true;
+      }
+      
+      // 現在のユーザーが支払者の場合は全メンバーの状態を変更可能
+      const currentUserMember = this.members.find(m => m.user_id == this.currentUserId);
+      if (currentUserMember && currentUserMember.id == this.formData.payer_member_id) {
+        return false;
+      }
+      
+      // 現在のユーザーが自分自身の支払い状態のみ変更可能
+      if (currentUserMember && currentUserMember.id == memberId) {
+        return false;
+      }
+      
+      // それ以外は変更不可
+      return true;
     }
   }
 }

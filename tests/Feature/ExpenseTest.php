@@ -96,9 +96,6 @@ class ExpenseTest extends TestCase
         $response = $this->actingAs($this->user)
             ->post(route('travel-plans.expenses.store', $this->travelPlan), $data);
 
-        $response->assertRedirect(route('travel-plans.show', $this->travelPlan));
-        $response->assertSessionHas('success');
-
         $this->assertDatabaseHas('expenses', [
             'travel_plan_id' => $this->travelPlan->id,
             'payer_member_id' => $this->member->id,
@@ -107,10 +104,13 @@ class ExpenseTest extends TestCase
             'currency' => 'JPY',
             'category' => 'food',
             'notes' => 'テスト経費',
-            'is_settled' => false,
+            'is_settled' => true, // 支払者のみが参加メンバーで、支払者は常に支払い済みのため、全メンバーが支払い済みとなり、経費全体が精算済みになる
         ]);
 
         $expense = Expense::where('description', '食事代')->first();
+        
+        $response->assertRedirect(route('expenses.show', $expense));
+        $response->assertSessionHas('success');
         
         $this->assertDatabaseHas('expense_member', [
             'expense_id' => $expense->id,
@@ -118,6 +118,38 @@ class ExpenseTest extends TestCase
             'share_amount' => 3000, // 一人なので全額
             'is_paid' => true, // 支払者は支払い済み
         ]);
+    }
+
+    /**
+     * カテゴリが未入力でも経費を作成できることをテスト
+     */
+    public function test_expense_can_be_created_without_category(): void
+    {
+        $data = [
+            'description' => '食事代（カテゴリなし）',
+            'amount' => 2500,
+            'currency' => Currency::JPY->value,
+            'expense_date' => now()->format('Y-m-d'),
+            'payer_member_id' => $this->member->id,
+            'member_ids' => [$this->member->id],
+            // categoryとnotesは意図的に省略
+        ];
+
+        $response = $this->actingAs($this->user)
+            ->post(route('travel-plans.expenses.store', $this->travelPlan), $data);
+
+        $this->assertDatabaseHas('expenses', [
+            'travel_plan_id' => $this->travelPlan->id,
+            'description' => '食事代（カテゴリなし）',
+            'amount' => 2500,
+            'category' => null,
+            'is_settled' => true, // 支払者のみが参加メンバーで、支払者は常に支払い済みのため、全メンバーが支払い済みとなり、経費全体が精算済みになる
+        ]);
+
+        $expense = Expense::where('description', '食事代（カテゴリなし）')->first();
+        
+        $response->assertRedirect(route('expenses.show', $expense));
+        $response->assertSessionHas('success');
     }
 
     /**
@@ -233,6 +265,7 @@ class ExpenseTest extends TestCase
             'description' => '夕食代（更新）',
             'amount' => 5000,
             'notes' => '更新テスト',
+            'is_settled' => true, // 支払者のみが参加メンバーで、支払者は常に支払い済みのため、全メンバーが支払い済みとなり、経費全体が精算済みになる
         ]);
 
         $this->assertDatabaseHas('expense_member', [
@@ -260,7 +293,7 @@ class ExpenseTest extends TestCase
         $response = $this->actingAs($this->user)
             ->delete(route('expenses.destroy', $expense));
 
-        $response->assertRedirect(route('travel-plans.show', $this->travelPlan));
+        $response->assertRedirect(route('expenses.index'));
         $response->assertSessionHas('success');
 
         $this->assertSoftDeleted('expenses', [
@@ -296,10 +329,10 @@ class ExpenseTest extends TestCase
         $response = $this->actingAs($this->user)
             ->post(route('travel-plans.expenses.store', $this->travelPlan), $data);
 
-        $response->assertRedirect(route('travel-plans.show', $this->travelPlan));
-        $response->assertSessionHas('success');
-
         $expense = Expense::where('description', 'グループ食事代')->first();
+        
+        $response->assertRedirect(route('expenses.show', $expense));
+        $response->assertSessionHas('success');
         
         // 各メンバーの分担金額が正しいか確認（9000円÷3人=3000円）
         $this->assertDatabaseHas('expense_member', [
