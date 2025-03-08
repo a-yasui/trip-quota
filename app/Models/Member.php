@@ -217,4 +217,15 @@ class Member extends Model
     {
         return $query->where('is_registered', true);
     }
+
+    public function branchGroups()
+    {
+        return $this->belongsToMany(Group::class, 'group_member')
+                    ->withTimestamps();
+    }
+
+    public function coreGroup()
+    {
+        return $this->belongsTo(Group::class);
+    }
 }

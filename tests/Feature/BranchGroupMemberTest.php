@@ -125,7 +125,7 @@ class BranchGroupMemberTest extends TestCase
         $response = $this->actingAs($user)
             ->delete(route('branch-groups.members.destroy', [$branchGroup, $branchMember2]));
 
-        $response->assertRedirect(route('branch-groups.show', $branchGroup));
+        $response->assertRedirect(route('travel-plans.show', $travelPlan));
         $this->assertSoftDeleted('members', [
             'id' => $branchMember2->id,
         ]);

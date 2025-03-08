@@ -112,7 +112,8 @@ class Group extends Model
      */
     public function members()
     {
-        return $this->hasMany(Member::class);
+        return $this->belongsToMany(Member::class, 'group_member')
+                    ->withTimestamps();
     }
 
     /**
@@ -169,5 +170,16 @@ class Group extends Model
     public function scopeBranch($query)
     {
         return $query->where('type', \App\Enums\GroupType::BRANCH);
+    }
+
+    public function branchMembers()
+    {
+        return $this->belongsToMany(Member::class, 'group_member')
+                    ->withTimestamps();
+    }
+
+    public function coreMembers()
+    {
+        return $this->hasMany(Member::class);
     }
 }
