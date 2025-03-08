@@ -19,8 +19,9 @@ class ExpenseController extends Controller
     public function index()
     {
         $expenses = Expense::with(['payerMember', 'members', 'travelPlan'])
-            ->orderBy('expense_date', 'desc')
-            ->paginate(20);
+        ->orderBy('is_settled', 'asc')
+        ->orderBy('expense_date', 'desc')
+        ->paginate(5);
             
         return view('expenses.index', compact('expenses'));
     }

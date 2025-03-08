@@ -90,17 +90,28 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ number_format($expense->amount) }} {{ $expense->currency }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                @if($expense->is_settled)
-                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                        {{ __('精算済み') }}
-                                                    </span>
-                                                @else
-                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                        {{ __('未精算') }}
-                                                    </span>
-                                                @endif
-                                            </td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+    @if(auth()->user()->id == $expense->payerMember->user_id)
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+            {{ __('支払済み') }}
+        </span>
+    @else
+        @php
+            $currentUserMember = $expense->members->first(function($member) {
+                return $member->user_id == auth()->user()->id;
+            });
+        @endphp
+        @if($currentUserMember && $currentUserMember->pivot->is_paid)
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                {{ __('支払済み') }}
+            </span>
+        @else
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                {{ __('未支払い') }}
+            </span>
+        @endif
+    @endif
+</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <div class="flex space-x-2">
                                                     <a href="{{ route('expenses.show', $expense) }}" class="text-indigo-600 hover:text-indigo-900">{{ __('詳細') }}</a>
