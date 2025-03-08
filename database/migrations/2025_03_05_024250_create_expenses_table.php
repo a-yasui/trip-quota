@@ -25,7 +25,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-        
+
         // Pivot table for expense members (who shares this expense)
         Schema::create('expense_member', function (Blueprint $table) {
             $table->id();
@@ -34,7 +34,7 @@ return new class extends Migration
             $table->decimal('share_amount', 10, 2)->nullable(); // Custom amount if not split evenly
             $table->boolean('is_paid')->default(false);
             $table->timestamps();
-            
+
             $table->unique(['expense_id', 'member_id']);
         });
     }

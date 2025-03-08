@@ -23,7 +23,7 @@ class TravelPlanFactory extends Factory
             $departureDate->format('Y-m-d').' +1 day',
             $departureDate->format('Y-m-d').' +10 days'
         );
-        
+
         return [
             'title' => $this->faker->sentence(3),
             'creator_id' => $user->id,

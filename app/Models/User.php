@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 
 /**
  * システムのユーザー情報を管理するテーブル。認証情報、基本プロフィール、およびアカウント関連の情報を保存する。
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -34,6 +34,7 @@ use Illuminate\Notifications\Notifiable;
  * @property-read \App\Models\UserSetting|null $settings
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TravelPlan> $travelPlansWithDeletionPermission
  * @property-read int|null $travel_plans_with_deletion_permission_count
+ *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -46,6 +47,7 @@ use Illuminate\Notifications\Notifiable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class User extends Authenticatable

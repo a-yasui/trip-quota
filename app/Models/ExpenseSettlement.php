@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 割り勘精算情報を管理するテーブル。メンバー間の支払い精算情報を記録し、誰が誰にいくら支払うべきかの情報を保存する。
- * 
+ *
  *
  * @property int $id
  * @property int $travel_plan_id
@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\Member $payerMember
  * @property-read \App\Models\Member $receiverMember
  * @property-read \App\Models\TravelPlan $travelPlan
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement afterDate($date)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement beforeDate($date)
  * @method static \Database\Factories\ExpenseSettlementFactory factory($count = null, $state = [])
@@ -50,6 +51,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class ExpenseSettlement extends Model

@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Member;
 
 class GroupMemberStoreRequest extends FormRequest
 {
@@ -24,7 +23,7 @@ class GroupMemberStoreRequest extends FormRequest
     public function rules(): array
     {
         $groupId = $this->route('group')->id;
-        
+
         return [
             'name' => [
                 'required_without:email',

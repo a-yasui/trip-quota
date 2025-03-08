@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 旅行計画の基本情報を管理するテーブル。タイトル、出発日、帰宅日、タイムゾーンなどの旅行の基本情報と、作成者および削除権限保持者の情報を保存する。
- * 
+ *
  *
  * @property int $id
  * @property string $title
@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $travel_documents_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TravelLocation> $travelLocations
  * @property-read int|null $travel_locations_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelPlan active()
  * @method static \Database\Factories\TravelPlanFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelPlan newModelQuery()
@@ -56,6 +57,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelPlan whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelPlan withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelPlan withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class TravelPlan extends Model

@@ -71,7 +71,7 @@ class GroupsIndexTest extends TestCase
 
         // グループ名が表示されていることを確認
         $response->assertSee('未来旅行グループ');
-        
+
         // リンクが正しく設定されていることを確認
         $response->assertSee(route('travel-plans.show', $travelPlan->id));
     }
@@ -112,7 +112,7 @@ class GroupsIndexTest extends TestCase
 
         // グループ名が表示されていることを確認
         $response->assertSee('現在進行中グループ');
-        
+
         // リンクが正しく設定されていることを確認（ブランチグループの場合）
         $response->assertSee(route('branch-groups.show', $group->id));
     }
@@ -153,7 +153,7 @@ class GroupsIndexTest extends TestCase
 
         // グループ名が表示されていることを確認
         $response->assertSee('過去旅行グループ');
-        
+
         // リンクが正しく設定されていることを確認
         $response->assertSee(route('travel-plans.show', $travelPlan->id));
     }
@@ -165,7 +165,7 @@ class GroupsIndexTest extends TestCase
     {
         // ユーザーAを作成（テスト対象のユーザー）
         $userA = User::factory()->create();
-        
+
         // ユーザーBを作成（グループに所属するユーザー）
         $userB = User::factory()->create();
 
@@ -197,7 +197,7 @@ class GroupsIndexTest extends TestCase
 
         // ユーザーBのグループ名が表示されていないことを確認
         $response->assertDontSee('他人の旅行グループ');
-        
+
         // 「旅行はありません」メッセージが表示されていることを確認
         $response->assertSee('今後の旅行予定はありません');
         $response->assertSee('現在進行中の旅行はありません');

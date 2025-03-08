@@ -23,7 +23,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
-            
+
             // A user can only be a member of a group once
             $table->unique(['user_id', 'group_id']);
         });

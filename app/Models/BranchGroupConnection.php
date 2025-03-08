@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 異なる旅行計画の班グループ間の接続を管理するテーブル。別の旅行計画の班グループと合流する際の関連付けを保存する。
- * 
+ *
  *
  * @property int $id
  * @property int $source_group_id
@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User $createdByUser
  * @property-read \App\Models\Group $sourceGroup
  * @property-read \App\Models\Group $targetGroup
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BranchGroupConnection active()
  * @method static \Database\Factories\BranchGroupConnectionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BranchGroupConnection newModelQuery()
@@ -37,6 +38,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BranchGroupConnection whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BranchGroupConnection withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BranchGroupConnection withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class BranchGroupConnection extends Model

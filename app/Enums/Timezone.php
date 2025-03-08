@@ -2,8 +2,8 @@
 
 namespace App\Enums;
 
-use DateTimeZone;
 use DateTime;
+use DateTimeZone;
 
 enum Timezone: string
 {
@@ -71,12 +71,12 @@ enum Timezone: string
     {
         $timezone = new DateTimeZone($this->value);
         $offset = $timezone->getOffset(new DateTime('now', new DateTimeZone('UTC')));
-        
+
         $hours = abs(intval($offset / 3600));
         $minutes = abs(intval(($offset % 3600) / 60));
-        
+
         $sign = $offset >= 0 ? '+' : '-';
-        
+
         return sprintf('UTC%s%02d:%02d', $sign, $hours, $minutes);
     }
 
@@ -86,8 +86,8 @@ enum Timezone: string
     public function label(): string
     {
         $utcOffset = $this->getUtcOffset();
-        
-        $name = match($this) {
+
+        $name = match ($this) {
             // アジア地域
             self::ASIA_TOKYO => '日本時間',
             self::ASIA_SEOUL => '韓国時間',
@@ -145,7 +145,7 @@ enum Timezone: string
             self::AFRICA_LAGOS => 'ナイジェリア時間',
             self::AFRICA_CASABLANCA => 'モロッコ時間',
         };
-        
+
         return sprintf('%s (%s, %s)', $name, $this->value, $utcOffset);
     }
 
@@ -174,6 +174,7 @@ enum Timezone: string
         foreach (self::cases() as $case) {
             $options[$case->value] = $case->label();
         }
+
         return $options;
     }
 
@@ -203,6 +204,7 @@ enum Timezone: string
                 $timezones[$case->value] = $case->label();
             }
         }
+
         return $timezones;
     }
 
@@ -217,6 +219,7 @@ enum Timezone: string
                 $timezones[$case->value] = $case->label();
             }
         }
+
         return $timezones;
     }
 
@@ -225,16 +228,17 @@ enum Timezone: string
      */
     public static function getNorthAmericaTimezones(): array
     {
-        $northAmerica = ['America/New_York', 'America/Los_Angeles', 'America/Chicago', 
-                         'America/Denver', 'America/Toronto', 'America/Vancouver', 
-                         'America/Mexico_City'];
-        
+        $northAmerica = ['America/New_York', 'America/Los_Angeles', 'America/Chicago',
+            'America/Denver', 'America/Toronto', 'America/Vancouver',
+            'America/Mexico_City'];
+
         $timezones = [];
         foreach (self::cases() as $case) {
             if (in_array($case->value, $northAmerica)) {
                 $timezones[$case->value] = $case->label();
             }
         }
+
         return $timezones;
     }
 
@@ -243,15 +247,16 @@ enum Timezone: string
      */
     public static function getSouthAmericaTimezones(): array
     {
-        $southAmerica = ['America/Sao_Paulo', 'America/Argentina/Buenos_Aires', 
-                         'America/Santiago', 'America/Lima', 'America/Bogota'];
-        
+        $southAmerica = ['America/Sao_Paulo', 'America/Argentina/Buenos_Aires',
+            'America/Santiago', 'America/Lima', 'America/Bogota'];
+
         $timezones = [];
         foreach (self::cases() as $case) {
             if (in_array($case->value, $southAmerica)) {
                 $timezones[$case->value] = $case->label();
             }
         }
+
         return $timezones;
     }
 
@@ -262,11 +267,12 @@ enum Timezone: string
     {
         $timezones = [];
         foreach (self::cases() as $case) {
-            if (str_starts_with($case->value, 'Pacific/') || 
+            if (str_starts_with($case->value, 'Pacific/') ||
                 str_starts_with($case->value, 'Australia/')) {
                 $timezones[$case->value] = $case->label();
             }
         }
+
         return $timezones;
     }
 
@@ -281,6 +287,7 @@ enum Timezone: string
                 $timezones[$case->value] = $case->label();
             }
         }
+
         return $timezones;
     }
 }

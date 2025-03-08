@@ -19,7 +19,7 @@ enum Currency: string
      */
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::JPY => '日本円 (JPY)',
             self::USD => '米ドル (USD)',
             self::EUR => 'ユーロ (EUR)',

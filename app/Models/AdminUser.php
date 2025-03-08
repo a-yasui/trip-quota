@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 
 /**
  * システム管理者情報を管理するテーブル。管理者の認証情報、権限、ログイン履歴などを保存する。一般ユーザーとは別に管理される。
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -26,6 +26,7 @@ use Illuminate\Notifications\Notifiable;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdminUser active()
  * @method static \Database\Factories\AdminUserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdminUser newModelQuery()
@@ -47,6 +48,7 @@ use Illuminate\Notifications\Notifiable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdminUser whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdminUser withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AdminUser withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class AdminUser extends Authenticatable

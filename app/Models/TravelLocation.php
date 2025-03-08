@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 旅行中の訪問場所情報を管理するテーブル。観光地、レストラン、ショッピングスポットなどの位置情報、説明、訪問予定時間などを保存する。
- * 
+ *
  *
  * @property int $id
  * @property int $travel_plan_id
@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\Member $addedByMember
  * @property-read \App\Models\Group $group
  * @property-read \App\Models\TravelPlan $travelPlan
+ *
  * @method static \Database\Factories\TravelLocationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelLocation newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelLocation newQuery()
@@ -57,6 +58,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelLocation whereVisitDatetime($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelLocation withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelLocation withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class TravelLocation extends Model

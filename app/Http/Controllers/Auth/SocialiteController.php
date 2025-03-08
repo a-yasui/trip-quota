@@ -48,6 +48,7 @@ class SocialiteController extends Controller
             ]);
 
             Auth::login($oauthProvider->user);
+
             return redirect()->intended(route('dashboard'));
         }
 
@@ -55,7 +56,7 @@ class SocialiteController extends Controller
         $user = User::where('email', $socialiteUser->getEmail())->first();
 
         // 既存ユーザーがいない場合は新規作成
-        if (!$user) {
+        if (! $user) {
             $user = User::create([
                 'name' => $socialiteUser->getName() ?? $socialiteUser->getNickname() ?? 'User',
                 'email' => $socialiteUser->getEmail(),
@@ -74,6 +75,7 @@ class SocialiteController extends Controller
         ]);
 
         Auth::login($user);
+
         return redirect()->intended(route('dashboard'));
     }
 

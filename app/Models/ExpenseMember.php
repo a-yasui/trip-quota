@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * 支出とメンバーの関連付けを管理する中間テーブル。各メンバーの負担額と支払い状況を記録し、割り勘計算の詳細を保存する。
- * 
+ *
  *
  * @property int $id
  * @property int $expense_id
@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Expense $expense
  * @property-read \App\Models\Member $member
+ *
  * @method static \Database\Factories\ExpenseMemberFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseMember newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseMember newQuery()
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseMember whereMemberId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseMember whereShareAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseMember whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class ExpenseMember extends Model

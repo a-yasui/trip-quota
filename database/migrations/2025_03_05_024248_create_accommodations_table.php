@@ -25,14 +25,14 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-        
+
         // Pivot table for accommodation members
         Schema::create('accommodation_member', function (Blueprint $table) {
             $table->id();
             $table->foreignId('accommodation_id')->constrained()->cascadeOnDelete();
             $table->foreignId('member_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
-            
+
             $table->unique(['accommodation_id', 'member_id']);
         });
     }

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
-            
+
             // A group can only be connected to another group once
             $table->unique(['source_group_id', 'target_group_id'], 'unique_group_connection');
         });

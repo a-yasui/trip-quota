@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * 旅行文書とメンバーの関連付けを管理する中間テーブル。どのメンバーがどの文書を閲覧できるかを記録する。
- * 
+ *
  *
  * @property int $id
  * @property int $travel_document_id
@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Member $member
  * @property-read \App\Models\TravelDocument $travelDocument
+ *
  * @method static \Database\Factories\DocumentMemberFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentMember newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentMember newQuery()
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentMember whereMemberId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentMember whereTravelDocumentId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DocumentMember whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class DocumentMember extends Model

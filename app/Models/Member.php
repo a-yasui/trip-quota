@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 旅行に参加するメンバー情報を管理するテーブル。登録ユーザーと未登録メンバー両方を扱い、各メンバーの到着日・出発日などの情報も保存する。
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -43,6 +43,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TravelDocument> $uploadedTravelDocuments
  * @property-read int|null $uploaded_travel_documents_count
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Member active()
  * @method static \Database\Factories\MemberFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Member newModelQuery()
@@ -64,6 +65,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Member withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Member withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Member extends Model

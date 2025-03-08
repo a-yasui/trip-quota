@@ -25,14 +25,14 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-        
+
         // Pivot table for itinerary members
         Schema::create('itinerary_member', function (Blueprint $table) {
             $table->id();
             $table->foreignId('itinerary_id')->constrained()->cascadeOnDelete();
             $table->foreignId('member_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
-            
+
             $table->unique(['itinerary_id', 'member_id']);
         });
     }

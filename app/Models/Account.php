@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * ユーザーのアカウント情報を管理するテーブル。一人のユーザーが複数のアカウントを持ち、旅行計画ごとに異なるアカウントで参加できる。
- * 
+ *
  *
  * @property int $id
  * @property int $user_id
@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\MemberAccountAssociation> $previousMemberAssociations
  * @property-read int|null $previous_member_associations_count
  * @property-read \App\Models\User $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account active()
  * @method static \Database\Factories\AccountFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account newModelQuery()
@@ -41,6 +42,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Account withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Account extends Model

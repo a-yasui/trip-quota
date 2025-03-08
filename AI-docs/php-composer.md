@@ -18,3 +18,8 @@
 
 `composer up --dev -W`
 
+## 確認用のサーバ起動コマンド
+
+常駐をします。終了する時は Ctrl-C シグナルを投げます。
+
+`composer dev`

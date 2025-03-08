@@ -198,28 +198,28 @@ class GroupMemberTest extends TestCase
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
         ]);
-        
+
         // 最初のメンバーを追加
         $response = $this->actingAs($user)
             ->post(route('groups.members.store', $group), [
                 'name' => '重複名前テスト',
             ]);
-        
+
         $response->assertRedirect();
-        
+
         // 同じ名前で2人目のメンバーを追加しようとする
         $response = $this->actingAs($user)
             ->post(route('groups.members.store', $group), [
                 'name' => '重複名前テスト',
             ]);
-        
+
         $response->assertRedirect();
         $response->assertSessionHasErrors(['name' => '同じ名前のメンバーが既に登録されています']);
-        
+
         // データベースに1人しか登録されていないことを確認
         $this->assertEquals(1, Member::where('name', '重複名前テスト')->count());
     }
-    
+
     /**
      * 同じメールアドレスのメンバーを追加しようとした場合にエラーになるかテスト
      */
@@ -234,30 +234,30 @@ class GroupMemberTest extends TestCase
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
         ]);
-        
+
         // 最初のメンバーを追加
         $response = $this->actingAs($user)
             ->post(route('groups.members.store', $group), [
                 'name' => 'メンバー1',
                 'email' => 'duplicate@example.com',
             ]);
-        
+
         $response->assertRedirect();
-        
+
         // 同じメールアドレスで2人目のメンバーを追加しようとする
         $response = $this->actingAs($user)
             ->post(route('groups.members.store', $group), [
                 'name' => 'メンバー2',
                 'email' => 'duplicate@example.com',
             ]);
-        
+
         $response->assertRedirect();
         $response->assertSessionHasErrors(['email' => 'このメールアドレスは既に登録されています']);
-        
+
         // データベースに1人しか登録されていないことを確認
         $this->assertEquals(1, Member::where('email', 'duplicate@example.com')->count());
     }
-    
+
     /**
      * 同じユーザーを追加しようとした場合にエラーになるかテスト
      */
@@ -273,30 +273,30 @@ class GroupMemberTest extends TestCase
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
         ]);
-        
+
         // 最初のメンバーを追加
         $response = $this->actingAs($user)
             ->post(route('groups.members.store', $group), [
                 'name' => 'テストユーザー',
                 'email' => $otherUser->email,
             ]);
-        
+
         $response->assertRedirect();
-        
+
         // 同じユーザーで2人目のメンバーを追加しようとする
         $response = $this->actingAs($user)
             ->post(route('groups.members.store', $group), [
                 'name' => '別名テストユーザー',
                 'email' => $otherUser->email,
             ]);
-        
+
         $response->assertRedirect();
         $response->assertSessionHasErrors(['email' => 'このメールアドレスは既に登録されています']);
-        
+
         // データベースに1人しか登録されていないことを確認
         $this->assertEquals(1, Member::where('user_id', $otherUser->id)->count());
     }
-    
+
     /**
      * 名前とメールアドレスの両方が未入力の場合にバリデーションエラーになるかテスト
      */
@@ -320,14 +320,14 @@ class GroupMemberTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHasErrors(['name', 'email']);
-        
+
         // エラーメッセージの内容も確認
         $response->assertSessionHasErrors([
             'name' => '名前かメールアドレスのどちらかを入力してください',
-            'email' => '名前かメールアドレスのどちらかを入力してください'
+            'email' => '名前かメールアドレスのどちらかを入力してください',
         ]);
     }
-    
+
     /**
      * メールアドレスの形式が不正な場合にバリデーションエラーになるかテスト
      */
@@ -352,7 +352,7 @@ class GroupMemberTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHasErrors(['email']);
         $response->assertSessionHasErrors([
-            'email' => '有効なメールアドレス形式で入力してください'
+            'email' => '有効なメールアドレス形式で入力してください',
         ]);
     }
 }

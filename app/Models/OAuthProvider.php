@@ -7,20 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * 外部認証プロバイダー（OAuth）との連携情報を管理するテーブル。ユーザーがGoogle、Facebook等の外部サービスでログインするための情報を保存する。
- * 
+ *
  *
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Database\Factories\OAuthProviderFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OAuthProvider newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OAuthProvider newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|OAuthProvider query()
+ *
  * @mixin \Eloquent
  */
 class OAuthProvider extends Model
 {
     /** @use HasFactory<\Database\Factories\OAuthProviderFactory> */
     use HasFactory;
-    
+
     /**
      * The table associated with the model.
      *

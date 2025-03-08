@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 宿泊先情報を管理するテーブル。ホテル名、住所、チェックイン・チェックアウト日、予約番号などの宿泊施設に関する情報を保存する。
- * 
+ *
  *
  * @property int $id
  * @property int $travel_plan_id
@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Member> $members
  * @property-read int|null $members_count
  * @property-read \App\Models\TravelPlan $travelPlan
+ *
  * @method static \Database\Factories\AccommodationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Accommodation newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Accommodation newQuery()
@@ -46,6 +47,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Accommodation whereWebsite($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Accommodation withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Accommodation withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Accommodation extends Model

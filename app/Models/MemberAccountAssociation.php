@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * メンバーとアカウントの関連付けを管理するテーブル。メンバーが使用するアカウントの変更履歴も保存し、アカウント変更の追跡を可能にする。
- * 
+ *
  *
  * @property int $id
  * @property int $member_id
@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \App\Models\User $changedByUser
  * @property-read \App\Models\Member $member
  * @property-read \App\Models\Account|null $previousAccount
+ *
  * @method static \Database\Factories\MemberAccountAssociationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MemberAccountAssociation newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MemberAccountAssociation newQuery()
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MemberAccountAssociation whereMemberId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MemberAccountAssociation wherePreviousAccountId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MemberAccountAssociation whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class MemberAccountAssociation extends Model
