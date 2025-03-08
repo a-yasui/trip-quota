@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * ユーザーの設定情報を管理するテーブル。言語、タイムゾーン、通貨、通知設定などのユーザー固有の設定を保存する。
- * 
+ *
  *
  * @property int $id
  * @property int $user_id
@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\User $user
+ *
  * @method static \Database\Factories\UserSettingFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserSetting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserSetting newQuery()
@@ -36,6 +37,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserSetting whereUiPreferences($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserSetting whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserSetting whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class UserSetting extends Model

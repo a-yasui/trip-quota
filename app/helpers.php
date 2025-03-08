@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('str_random')) {
+if (! function_exists('str_random')) {
     /**
      * ランダムな文字列を生成
      */

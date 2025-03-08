@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * 通貨間の為替レートを管理するテーブル。異なる通貨での支出を一貫した通貨で計算するために使用し、レート適用日やデータソースも記録する。
- * 
+ *
  *
  * @property int $id
  * @property string $from_currency
@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $source
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CurrencyExchangeRate afterDate($date)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CurrencyExchangeRate beforeDate($date)
  * @method static \Database\Factories\CurrencyExchangeRateFactory factory($count = null, $state = [])
@@ -34,6 +35,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CurrencyExchangeRate whereSource($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CurrencyExchangeRate whereToCurrency($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CurrencyExchangeRate whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class CurrencyExchangeRate extends Model

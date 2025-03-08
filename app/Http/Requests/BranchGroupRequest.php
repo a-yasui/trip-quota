@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Group;
 
 class BranchGroupRequest extends FormRequest
 {
@@ -25,7 +24,7 @@ class BranchGroupRequest extends FormRequest
     {
         $travelPlanId = $this->route('travelPlan')->id ?? $this->route('group')->travel_plan_id;
         $groupId = $this->route('group')->id ?? null;
-        
+
         $rules = [
             'name' => [
                 'required',
@@ -33,7 +32,7 @@ class BranchGroupRequest extends FormRequest
                 'max:255',
                 Rule::unique('groups', 'name')->where(function ($query) use ($travelPlanId) {
                     return $query->where('travel_plan_id', $travelPlanId)
-                                 ->where('type', 'branch');
+                        ->where('type', 'branch');
                 })->ignore($groupId),
             ],
             'members' => [
@@ -45,7 +44,7 @@ class BranchGroupRequest extends FormRequest
                 'exists:members,id',
             ],
         ];
-        
+
         return $rules;
     }
 

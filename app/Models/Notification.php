@@ -8,7 +8,7 @@ use Illuminate\Notifications\DatabaseNotification;
 
 /**
  * 通知情報を管理するテーブル。未読/既読状態や通知内容のデータを保存し、Laravelのポリモーフィック関係を使用して様々なエンティティに関連付けられる。
- * 
+ *
  *
  * @property string $id
  * @property string $type
@@ -19,6 +19,7 @@ use Illuminate\Notifications\DatabaseNotification;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read Model|\Eloquent $notifiable
+ *
  * @method static \Illuminate\Notifications\DatabaseNotificationCollection<int, static> all($columns = ['*'])
  * @method static \Database\Factories\NotificationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Notifications\DatabaseNotificationCollection<int, static> get($columns = ['*'])
@@ -35,6 +36,7 @@ use Illuminate\Notifications\DatabaseNotification;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereReadAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class Notification extends DatabaseNotification

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            
+
             // Prevent duplicate settlements between the same members
             $table->unique(['travel_plan_id', 'payer_member_id', 'receiver_member_id'], 'unique_settlement');
         });

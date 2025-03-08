@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 別旅行計画等の班グループを招待するために使用する区別用名前を管理するテーブル。招待時に使用する一意のキーを保存する。
- * 
+ *
  *
  * @property int $id
  * @property int $group_id
@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\Group $group
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemBranchGroupKey active()
  * @method static \Database\Factories\SystemBranchGroupKeyFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemBranchGroupKey newModelQuery()
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemBranchGroupKey whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemBranchGroupKey withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemBranchGroupKey withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class SystemBranchGroupKey extends Model

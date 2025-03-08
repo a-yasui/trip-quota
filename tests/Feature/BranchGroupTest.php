@@ -27,7 +27,7 @@ class BranchGroupTest extends TestCase
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
         ]);
-        
+
         // コアグループにメンバーを追加
         Member::factory()->create([
             'group_id' => $coreGroup->id,
@@ -56,7 +56,7 @@ class BranchGroupTest extends TestCase
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
         ]);
-        
+
         // コアグループにメンバーを追加
         $member = Member::factory()->create([
             'group_id' => $coreGroup->id,
@@ -77,7 +77,7 @@ class BranchGroupTest extends TestCase
             'travel_plan_id' => $travelPlan->id,
             'parent_group_id' => $coreGroup->id,
         ]);
-        
+
         // 班グループにメンバーが追加されているか確認
         $branchGroup = Group::where('name', 'テスト班グループ')->first();
         $this->assertDatabaseHas('members', [
@@ -106,14 +106,14 @@ class BranchGroupTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => 'テスト班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $coreMember = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         // 班グループにメンバーを追加
         $branchMember = Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -152,14 +152,14 @@ class BranchGroupTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => 'テスト班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $member = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         // 班グループにメンバーを追加
         Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -174,7 +174,7 @@ class BranchGroupTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewIs('branch-groups.edit');
-        
+
         $response = $this->actingAs($user)
             ->put(route('branch-groups.update', $branchGroup), [
                 'name' => '更新された班グループ',
@@ -209,14 +209,14 @@ class BranchGroupTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => 'テスト班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $member = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         // 班グループにメンバーを追加
         $branchMember = Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -258,7 +258,7 @@ class BranchGroupTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => '重複名前テスト',
         ]);
-        
+
         // コアグループにメンバーを追加
         $member = Member::factory()->create([
             'group_id' => $coreGroup->id,
@@ -274,7 +274,7 @@ class BranchGroupTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHasErrors(['name' => 'この班グループ名は既に使用されています']);
-        
+
         // 同じ名前の班グループが1つしか存在しないことを確認
         $this->assertEquals(1, Group::where('name', '重複名前テスト')->count());
     }
@@ -293,7 +293,7 @@ class BranchGroupTest extends TestCase
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
         ]);
-        
+
         // コアグループにメンバーを追加
         Member::factory()->create([
             'group_id' => $coreGroup->id,
@@ -309,7 +309,7 @@ class BranchGroupTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHasErrors(['members' => 'メンバーを選択してください']);
-        
+
         // 班グループが作成されていないことを確認
         $this->assertDatabaseMissing('groups', [
             'name' => 'テスト班グループ',
@@ -338,14 +338,14 @@ class BranchGroupTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => 'テスト班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $member = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         // 班グループにメンバーを追加
         Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -383,14 +383,14 @@ class BranchGroupTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => 'テスト班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $member = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         // 班グループにメンバーを追加
         $branchMember = Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -407,7 +407,7 @@ class BranchGroupTest extends TestCase
             ]);
 
         $response->assertRedirect();
-        
+
         // 新しい班グループが作成されたことを確認
         $this->assertDatabaseHas('groups', [
             'name' => '複製された班グループ',
@@ -416,7 +416,7 @@ class BranchGroupTest extends TestCase
             'travel_plan_id' => $travelPlan->id,
             'parent_group_id' => $coreGroup->id,
         ]);
-        
+
         // 複製された班グループにメンバーが追加されているか確認
         $duplicatedGroup = Group::where('name', '複製された班グループ')->first();
         $this->assertDatabaseHas('members', [
@@ -453,14 +453,14 @@ class BranchGroupTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => '既存の班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $member = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         // 班グループにメンバーを追加
         Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -478,7 +478,7 @@ class BranchGroupTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHasErrors(['name' => 'この班グループ名は既に使用されています']);
-        
+
         // 同じ名前の班グループが1つしか存在しないことを確認
         $this->assertEquals(1, Group::where('name', '既存の班グループ')->count());
     }

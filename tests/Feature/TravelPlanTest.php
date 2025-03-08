@@ -75,7 +75,7 @@ class TravelPlanTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
-                         ->post('/travel-plans', $travelPlanData);
+            ->post('/travel-plans', $travelPlanData);
 
         $this->assertDatabaseHas('travel_plans', [
             'title' => '韓国ソウル旅行',
@@ -84,16 +84,16 @@ class TravelPlanTest extends TestCase
         ]);
 
         $travelPlan = TravelPlan::where('title', '韓国ソウル旅行')->first();
-        
+
         $this->assertDatabaseHas('groups', [
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
         ]);
-        
+
         $coreGroup = Group::where('travel_plan_id', $travelPlan->id)
-                          ->where('type', 'core')
-                          ->first();
-                          
+            ->where('type', 'core')
+            ->first();
+
         $this->assertDatabaseHas('members', [
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
@@ -120,10 +120,10 @@ class TravelPlanTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
-                         ->post('/travel-plans', $travelPlanData);
+            ->post('/travel-plans', $travelPlanData);
 
         $response->assertSessionHasErrors('departure_date');
-        
+
         // 帰宅日が出発日より前
         $travelPlanData = [
             'title' => '韓国ソウル旅行',
@@ -133,10 +133,10 @@ class TravelPlanTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
-                         ->post('/travel-plans', $travelPlanData);
+            ->post('/travel-plans', $travelPlanData);
 
         $response->assertSessionHasErrors('return_date');
-        
+
         // タイトルが空
         $travelPlanData = [
             'title' => '',
@@ -146,7 +146,7 @@ class TravelPlanTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
-                         ->post('/travel-plans', $travelPlanData);
+            ->post('/travel-plans', $travelPlanData);
 
         $response->assertSessionHasErrors('title');
     }
@@ -157,18 +157,18 @@ class TravelPlanTest extends TestCase
     public function test_travel_plan_detail_page_can_be_rendered(): void
     {
         $user = User::factory()->create();
-        
+
         $travelPlan = TravelPlan::factory()->create([
             'creator_id' => $user->id,
             'deletion_permission_holder_id' => $user->id,
         ]);
-        
+
         $coreGroup = Group::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
             'name' => $travelPlan->title,
         ]);
-        
+
         $member = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
@@ -178,7 +178,7 @@ class TravelPlanTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)
-                         ->get('/travel-plans/' . $travelPlan->id);
+            ->get('/travel-plans/'.$travelPlan->id);
 
         $response->assertStatus(200);
         $response->assertViewIs('travel-plans.show');
@@ -192,7 +192,7 @@ class TravelPlanTest extends TestCase
     public function test_travel_plan_edit_page_can_be_rendered(): void
     {
         $user = User::factory()->create();
-        
+
         $travelPlan = TravelPlan::factory()->create([
             'creator_id' => $user->id,
             'deletion_permission_holder_id' => $user->id,
@@ -200,7 +200,7 @@ class TravelPlanTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)
-                         ->get('/travel-plans/' . $travelPlan->id . '/edit');
+            ->get('/travel-plans/'.$travelPlan->id.'/edit');
 
         $response->assertStatus(200);
         $response->assertViewIs('travel-plans.edit');
@@ -214,7 +214,7 @@ class TravelPlanTest extends TestCase
     public function test_travel_plan_can_be_updated_before_departure(): void
     {
         $user = User::factory()->create();
-        
+
         $travelPlan = TravelPlan::factory()->create([
             'creator_id' => $user->id,
             'deletion_permission_holder_id' => $user->id,
@@ -223,7 +223,7 @@ class TravelPlanTest extends TestCase
             'return_date' => now()->addDays(15),
             'timezone' => 'Asia/Tokyo',
         ]);
-        
+
         $coreGroup = Group::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
@@ -238,7 +238,7 @@ class TravelPlanTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
-                         ->put('/travel-plans/' . $travelPlan->id, $updatedData);
+            ->put('/travel-plans/'.$travelPlan->id, $updatedData);
 
         $response->assertRedirect(route('travel-plans.show', $travelPlan));
         $response->assertSessionHas('success');
@@ -262,7 +262,7 @@ class TravelPlanTest extends TestCase
     public function test_travel_plan_cannot_be_updated_after_departure_except_return_date(): void
     {
         $user = User::factory()->create();
-        
+
         $travelPlan = TravelPlan::factory()->create([
             'creator_id' => $user->id,
             'deletion_permission_holder_id' => $user->id,
@@ -271,7 +271,7 @@ class TravelPlanTest extends TestCase
             'return_date' => null, // 帰宅日は未設定
             'timezone' => 'Asia/Tokyo',
         ]);
-        
+
         $coreGroup = Group::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
@@ -286,7 +286,7 @@ class TravelPlanTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
-                         ->put('/travel-plans/' . $travelPlan->id, $updatedData);
+            ->put('/travel-plans/'.$travelPlan->id, $updatedData);
 
         $response->assertRedirect(route('travel-plans.show', $travelPlan));
         $response->assertSessionHas('success');
@@ -315,7 +315,7 @@ class TravelPlanTest extends TestCase
     public function test_travel_plan_return_date_cannot_be_updated_after_departure_if_already_set(): void
     {
         $user = User::factory()->create();
-        
+
         $travelPlan = TravelPlan::factory()->create([
             'creator_id' => $user->id,
             'deletion_permission_holder_id' => $user->id,
@@ -333,7 +333,7 @@ class TravelPlanTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
-                         ->put('/travel-plans/' . $travelPlan->id, $updatedData);
+            ->put('/travel-plans/'.$travelPlan->id, $updatedData);
 
         $response->assertRedirect(route('travel-plans.show', $travelPlan));
         $response->assertSessionHas('success');
@@ -355,26 +355,26 @@ class TravelPlanTest extends TestCase
     public function test_travel_plan_detail_shows_branch_group_links(): void
     {
         $user = User::factory()->create();
-        
+
         $travelPlan = TravelPlan::factory()->create([
             'creator_id' => $user->id,
             'deletion_permission_holder_id' => $user->id,
         ]);
-        
+
         // コアグループを作成
         $coreGroup = Group::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'type' => \App\Enums\GroupType::CORE,
             'name' => 'コアグループ',
         ]);
-        
+
         // 班グループを作成
         $branchGroup = Group::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'type' => \App\Enums\GroupType::BRANCH,
             'name' => '班グループA',
         ]);
-        
+
         // ユーザーをメンバーとして追加
         Member::factory()->create([
             'group_id' => $coreGroup->id,
@@ -383,13 +383,13 @@ class TravelPlanTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)
-                         ->get('/travel-plans/' . $travelPlan->id);
+            ->get('/travel-plans/'.$travelPlan->id);
 
         $response->assertStatus(200);
-        
+
         // 班グループの名前が表示されていることを確認
         $response->assertSee('班グループA');
-        
+
         // 班グループへのリンクが存在することを確認
         $branchGroupUrl = route('branch-groups.show', $branchGroup);
         $response->assertSee($branchGroupUrl);
@@ -401,19 +401,19 @@ class TravelPlanTest extends TestCase
     public function test_travel_plan_detail_does_not_show_core_group_links(): void
     {
         $user = User::factory()->create();
-        
+
         $travelPlan = TravelPlan::factory()->create([
             'creator_id' => $user->id,
             'deletion_permission_holder_id' => $user->id,
         ]);
-        
+
         // コアグループを作成
         $coreGroup = Group::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'type' => \App\Enums\GroupType::CORE,
             'name' => 'コアグループ',
         ]);
-        
+
         // ユーザーをメンバーとして追加
         Member::factory()->create([
             'group_id' => $coreGroup->id,
@@ -422,13 +422,13 @@ class TravelPlanTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)
-                         ->get('/travel-plans/' . $travelPlan->id);
+            ->get('/travel-plans/'.$travelPlan->id);
 
         $response->assertStatus(200);
-        
+
         // コアグループの名前が表示されていることを確認
         $response->assertSee('コアグループ');
-        
+
         // コアグループへのリンクが存在しないことを確認
         $coreGroupUrl = route('branch-groups.show', $coreGroup);
         $response->assertDontSee($coreGroupUrl);
@@ -440,7 +440,7 @@ class TravelPlanTest extends TestCase
     public function test_edit_button_is_shown_only_before_departure_or_when_return_date_not_set(): void
     {
         $user = User::factory()->create();
-        
+
         // ケース1: 出発前の旅行計画
         $travelPlanBefore = TravelPlan::factory()->create([
             'creator_id' => $user->id,
@@ -448,18 +448,18 @@ class TravelPlanTest extends TestCase
             'departure_date' => now()->addDays(10),
             'return_date' => now()->addDays(15),
         ]);
-        
+
         Group::factory()->create([
             'travel_plan_id' => $travelPlanBefore->id,
             'type' => 'core',
         ]);
 
         $response = $this->actingAs($user)
-                         ->get('/travel-plans/' . $travelPlanBefore->id);
+            ->get('/travel-plans/'.$travelPlanBefore->id);
 
         $response->assertStatus(200);
         $response->assertSee('編集');
-        
+
         // ケース2: 出発後だが帰宅日が未設定の旅行計画
         $travelPlanAfterNoReturn = TravelPlan::factory()->create([
             'creator_id' => $user->id,
@@ -467,18 +467,18 @@ class TravelPlanTest extends TestCase
             'departure_date' => now()->subDays(2),
             'return_date' => null,
         ]);
-        
+
         Group::factory()->create([
             'travel_plan_id' => $travelPlanAfterNoReturn->id,
             'type' => 'core',
         ]);
 
         $response = $this->actingAs($user)
-                         ->get('/travel-plans/' . $travelPlanAfterNoReturn->id);
+            ->get('/travel-plans/'.$travelPlanAfterNoReturn->id);
 
         $response->assertStatus(200);
         $response->assertSee('編集');
-        
+
         // ケース3: 出発後で帰宅日が設定済みの旅行計画
         $travelPlanAfterWithReturn = TravelPlan::factory()->create([
             'creator_id' => $user->id,
@@ -486,14 +486,14 @@ class TravelPlanTest extends TestCase
             'departure_date' => now()->subDays(2),
             'return_date' => now()->addDays(3),
         ]);
-        
+
         Group::factory()->create([
             'travel_plan_id' => $travelPlanAfterWithReturn->id,
             'type' => 'core',
         ]);
 
         $response = $this->actingAs($user)
-                         ->get('/travel-plans/' . $travelPlanAfterWithReturn->id);
+            ->get('/travel-plans/'.$travelPlanAfterWithReturn->id);
 
         $response->assertStatus(200);
         $response->assertDontSee('編集'); // 編集ボタンが表示されないことを確認

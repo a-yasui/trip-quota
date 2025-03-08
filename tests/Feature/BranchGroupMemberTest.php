@@ -33,20 +33,20 @@ class BranchGroupMemberTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => 'テスト班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $member1 = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         // 別のメンバーをコアグループに追加
         $member2 = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'name' => 'テストメンバー2',
         ]);
-        
+
         // 最初のメンバーを班グループに追加
         Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -90,20 +90,20 @@ class BranchGroupMemberTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => 'テスト班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $coreMember1 = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         $coreMember2 = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $otherUser->id,
             'is_registered' => true,
         ]);
-        
+
         // 班グループにメンバーを追加
         $branchMember1 = Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -112,7 +112,7 @@ class BranchGroupMemberTest extends TestCase
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         $branchMember2 = Member::factory()->create([
             'group_id' => $branchGroup->id,
             'name' => $coreMember2->name,
@@ -129,7 +129,7 @@ class BranchGroupMemberTest extends TestCase
         $this->assertSoftDeleted('members', [
             'id' => $branchMember2->id,
         ]);
-        
+
         // 班グループ自体は削除されていないことを確認
         $this->assertDatabaseHas('groups', [
             'id' => $branchGroup->id,
@@ -157,14 +157,14 @@ class BranchGroupMemberTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => 'テスト班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $coreMember = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         // 班グループにメンバーを追加
         $branchMember = Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -180,7 +180,7 @@ class BranchGroupMemberTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('error', '自分自身をメンバーから削除することはできません');
-        
+
         // メンバーが削除されていないことを確認
         $this->assertDatabaseHas('members', [
             'id' => $branchMember->id,
@@ -209,20 +209,20 @@ class BranchGroupMemberTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => 'テスト班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $coreMember1 = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         $coreMember2 = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $otherUser->id,
             'is_registered' => true,
         ]);
-        
+
         // 班グループにメンバーを追加（他のユーザーのみ）
         $branchMember = Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -240,7 +240,7 @@ class BranchGroupMemberTest extends TestCase
         $this->assertSoftDeleted('members', [
             'id' => $branchMember->id,
         ]);
-        
+
         // 班グループも削除されていることを確認
         $this->assertSoftDeleted('groups', [
             'id' => $branchGroup->id,
@@ -268,20 +268,20 @@ class BranchGroupMemberTest extends TestCase
             'parent_group_id' => $coreGroup->id,
             'name' => 'テスト班グループ',
         ]);
-        
+
         // コアグループにメンバーを追加
         $coreMember1 = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
             'is_registered' => true,
         ]);
-        
+
         $coreMember2 = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $otherUser->id,
             'is_registered' => true,
         ]);
-        
+
         // 班グループにメンバーを追加
         $branchMember = Member::factory()->create([
             'group_id' => $branchGroup->id,
@@ -299,7 +299,7 @@ class BranchGroupMemberTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('error', 'このユーザーは既に班グループのメンバーです');
-        
+
         // 同じユーザーのメンバーが1人だけであることを確認
         $this->assertEquals(1, Member::where('group_id', $branchGroup->id)
             ->where('user_id', $otherUser->id)

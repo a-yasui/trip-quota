@@ -18,8 +18,11 @@ class ExpenseTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     protected $user;
+
     protected $travelPlan;
+
     protected $coreGroup;
+
     protected $member;
 
     protected function setUp(): void
@@ -108,10 +111,10 @@ class ExpenseTest extends TestCase
         ]);
 
         $expense = Expense::where('description', '食事代')->first();
-        
+
         $response->assertRedirect(route('expenses.show', $expense));
         $response->assertSessionHas('success');
-        
+
         $this->assertDatabaseHas('expense_member', [
             'expense_id' => $expense->id,
             'member_id' => $this->member->id,
@@ -147,7 +150,7 @@ class ExpenseTest extends TestCase
         ]);
 
         $expense = Expense::where('description', '食事代（カテゴリなし）')->first();
-        
+
         $response->assertRedirect(route('expenses.show', $expense));
         $response->assertSessionHas('success');
     }
@@ -310,7 +313,7 @@ class ExpenseTest extends TestCase
         $member2 = Member::factory()->create([
             'group_id' => $this->coreGroup->id,
         ]);
-        
+
         $member3 = Member::factory()->create([
             'group_id' => $this->coreGroup->id,
         ]);
@@ -330,10 +333,10 @@ class ExpenseTest extends TestCase
             ->post(route('travel-plans.expenses.store', $this->travelPlan), $data);
 
         $expense = Expense::where('description', 'グループ食事代')->first();
-        
+
         $response->assertRedirect(route('expenses.show', $expense));
         $response->assertSessionHas('success');
-        
+
         // 各メンバーの分担金額が正しいか確認（9000円÷3人=3000円）
         $this->assertDatabaseHas('expense_member', [
             'expense_id' => $expense->id,
@@ -341,14 +344,14 @@ class ExpenseTest extends TestCase
             'share_amount' => 3000,
             'is_paid' => true, // 支払者は支払い済み
         ]);
-        
+
         $this->assertDatabaseHas('expense_member', [
             'expense_id' => $expense->id,
             'member_id' => $member2->id,
             'share_amount' => 3000,
             'is_paid' => false, // 支払者以外は未払い
         ]);
-        
+
         $this->assertDatabaseHas('expense_member', [
             'expense_id' => $expense->id,
             'member_id' => $member3->id,

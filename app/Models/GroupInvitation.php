@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * グループへの招待情報を管理するテーブル。招待者、招待メールアドレス、トークン、ステータスなどを保存し、招待の有効期限や承諾/拒否の日時も記録する。
- * 
+ *
  *
  * @property int $id
  * @property int $group_id
@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\Group $group
  * @property-read \App\Models\User $inviter
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GroupInvitation accepted()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GroupInvitation active()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GroupInvitation declined()
@@ -48,6 +49,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GroupInvitation whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GroupInvitation withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GroupInvitation withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class GroupInvitation extends Model

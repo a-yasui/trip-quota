@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 旅行メンバーのグループを管理するテーブル。コアグループ（全メンバー）と班グループ（一部メンバー）の区別や、親子関係のある班グループの構造を表現する。
- * 
+ *
  *
  * @property int $id
  * @property string $name
@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TravelLocation> $travelLocations
  * @property-read int|null $travel_locations_count
  * @property-read \App\Models\TravelPlan $travelPlan
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Group branch()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Group core()
  * @method static \Database\Factories\GroupFactory factory($count = null, $state = [])
@@ -52,6 +53,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Group whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Group withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Group withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Group extends Model

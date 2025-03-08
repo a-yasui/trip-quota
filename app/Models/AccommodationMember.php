@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * 宿泊先とメンバーの関連付けを管理する中間テーブル。どのメンバーがどの宿泊施設に滞在するかを記録する。
- * 
+ *
  *
  * @property int $id
  * @property int $accommodation_id
@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Accommodation $accommodation
  * @property-read \App\Models\Member $member
+ *
  * @method static \Database\Factories\AccommodationMemberFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccommodationMember newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccommodationMember newQuery()
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccommodationMember whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccommodationMember whereMemberId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccommodationMember whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class AccommodationMember extends Model

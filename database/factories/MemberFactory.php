@@ -21,7 +21,7 @@ class MemberFactory extends Factory
         $user = User::factory()->create();
         $group = Group::factory()->create();
         $travelPlan = $group->travelPlan;
-        
+
         return [
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
@@ -33,7 +33,7 @@ class MemberFactory extends Factory
             'is_active' => true,
         ];
     }
-    
+
     /**
      * Indicate that the member is registered.
      *
@@ -47,7 +47,7 @@ class MemberFactory extends Factory
             ];
         });
     }
-    
+
     /**
      * Indicate that the member is not registered.
      *
@@ -62,7 +62,7 @@ class MemberFactory extends Factory
             ];
         });
     }
-    
+
     /**
      * Indicate that the member is active.
      *
@@ -76,7 +76,7 @@ class MemberFactory extends Factory
             ];
         });
     }
-    
+
     /**
      * Indicate that the member is inactive.
      *

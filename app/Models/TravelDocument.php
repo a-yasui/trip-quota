@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 旅行関連の文書・ファイルを管理するテーブル。チケットのPDF、予約確認書、パスポートのスキャン、旅行ガイドなどのファイル情報を保存する。
- * 
+ *
  *
  * @property int $id
  * @property int $travel_plan_id
@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $shared_with_members_count
  * @property-read \App\Models\TravelPlan $travelPlan
  * @property-read \App\Models\Member $uploadedByMember
+ *
  * @method static \Database\Factories\TravelDocumentFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelDocument newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelDocument newQuery()
@@ -50,6 +51,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelDocument whereUploadedByMemberId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelDocument withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TravelDocument withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class TravelDocument extends Model

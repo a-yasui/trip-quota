@@ -25,14 +25,14 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-        
+
         // Pivot table for document visibility if not shared with all
         Schema::create('document_member', function (Blueprint $table) {
             $table->id();
             $table->foreignId('travel_document_id')->constrained()->cascadeOnDelete();
             $table->foreignId('member_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
-            
+
             $table->unique(['travel_document_id', 'member_id']);
         });
     }

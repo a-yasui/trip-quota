@@ -25,7 +25,7 @@ class GroupFactory extends Factory
             'description' => $this->faker->sentence(),
         ];
     }
-    
+
     /**
      * Indicate that the group is a core group.
      *
@@ -40,7 +40,7 @@ class GroupFactory extends Factory
             ];
         });
     }
-    
+
     /**
      * Indicate that the group is a branch group.
      *

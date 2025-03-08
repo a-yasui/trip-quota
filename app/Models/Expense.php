@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 旅行中の支出情報を管理するテーブル。支払者、金額、通貨、説明、日付、カテゴリなどの情報を保存し、割り勘計算の基礎となるデータを提供する。
- * 
+ *
  *
  * @property int $id
  * @property int $travel_plan_id
@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $members_count
  * @property-read \App\Models\Member $payerMember
  * @property-read \App\Models\TravelPlan $travelPlan
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Expense afterDate($date)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Expense beforeDate($date)
  * @method static \Database\Factories\ExpenseFactory factory($count = null, $state = [])
@@ -53,6 +54,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Expense whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Expense withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Expense withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Expense extends Model

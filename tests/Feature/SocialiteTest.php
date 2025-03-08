@@ -3,15 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Models\OAuthProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class SocialiteTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -39,12 +37,12 @@ class SocialiteTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)
-                         ->get('/profile');
+            ->get('/profile');
 
         $response->assertStatus(200);
         $response->assertSee('Profile');
     }
-    
+
     /**
      * 無効なプロバイダーへのアクセスが404を返すかテスト
      */
@@ -52,10 +50,10 @@ class SocialiteTest extends TestCase
     {
         $response = $this->get('/auth/invalid-provider');
         $response->assertStatus(404);
-        
+
         $user = User::factory()->create();
         $response = $this->actingAs($user)
-                         ->post('/auth/invalid-provider/connect');
+            ->post('/auth/invalid-provider/connect');
         $response->assertStatus(404);
     }
 }

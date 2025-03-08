@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 旅程情報を管理するテーブル。交通手段、出発地、到着地、出発時刻、到着時刻などの移動情報や、航空会社や便名などの参照情報を保存する。
- * 
+ *
  *
  * @property int $id
  * @property int $travel_plan_id
@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Member> $members
  * @property-read int|null $members_count
  * @property-read \App\Models\TravelPlan $travelPlan
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Itinerary arrivingBefore($date)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Itinerary departingAfter($date)
  * @method static \Database\Factories\ItineraryFactory factory($count = null, $state = [])
@@ -50,6 +51,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Itinerary whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Itinerary withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Itinerary withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Itinerary extends Model

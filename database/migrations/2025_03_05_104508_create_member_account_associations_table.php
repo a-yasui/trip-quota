@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('changed_by_user_id')->constrained('users');
             $table->text('change_reason')->nullable();
             $table->timestamps();
-            
+
             // A member can only be associated with one account at a time
             $table->unique('member_id');
         });

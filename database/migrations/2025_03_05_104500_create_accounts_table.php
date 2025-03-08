@@ -20,11 +20,11 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
-            
+
             // Account name must be unique (case-insensitive)
             // This will be enforced at the application level since MySQL's UNIQUE is case-sensitive
         });
-        
+
         // Add index for case-insensitive account name lookups
         DB::statement('CREATE INDEX accounts_name_index ON accounts (LOWER(name))');
     }

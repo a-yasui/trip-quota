@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * 旅程とメンバーの関連付けを管理する中間テーブル。どのメンバーがどの旅程に参加するかを記録する。
- * 
+ *
  *
  * @property int $id
  * @property int $itinerary_id
@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Itinerary $itinerary
  * @property-read \App\Models\Member $member
+ *
  * @method static \Database\Factories\ItineraryMemberFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ItineraryMember newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ItineraryMember newQuery()
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ItineraryMember whereItineraryId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ItineraryMember whereMemberId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ItineraryMember whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class ItineraryMember extends Model

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('rate_date');
             $table->string('source')->nullable(); // Source of the exchange rate data
             $table->timestamps();
-            
+
             // Unique constraint to prevent duplicate entries
             $table->unique(['from_currency', 'to_currency', 'rate_date'], 'currency_rates_unique');
         });

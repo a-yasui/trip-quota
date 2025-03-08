@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * システム内のユーザーアクションを記録するテーブル。ユーザーのアクティビティ、IPアドレス、操作対象などの監査情報を保存する。
- * 
+ *
  *
  * @property int $id
  * @property int|null $user_id
@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read Model|\Eloquent|null $subject
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivityLog byUser($userId)
  * @method static \Database\Factories\ActivityLogFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivityLog fromIp($ipAddress)
@@ -41,6 +42,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivityLog whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivityLog whereUserAgent($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivityLog whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class ActivityLog extends Model

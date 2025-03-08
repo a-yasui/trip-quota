@@ -18,7 +18,9 @@ class ItineraryTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     protected $user;
+
     protected $travelPlan;
+
     protected $coreGroup;
 
     protected function setUp(): void

@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GroupMemberStoreRequest;
+use App\Models\ActivityLog;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\TravelPlan;
 use App\Models\User;
-use App\Models\ActivityLog;
-use App\Http\Requests\GroupMemberStoreRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -33,14 +32,14 @@ class GroupMemberController extends Controller
             if (DB::transactionLevel() === 0) {
                 DB::beginTransaction();
             }
-            
-            $member = new Member();
+
+            $member = new Member;
             $member->name = $request->name ?? $request->email; // メールアドレスのみの場合は名前としても使用
             $member->email = $request->email;
             $member->group_id = $group->id;
             $member->is_registered = false;
             $member->is_active = true;
-            
+
             // メールアドレスが入力され、そのアドレスが登録ユーザーのものである場合
             if ($request->email) {
                 $user = User::where('email', $request->email)->first();
@@ -49,50 +48,51 @@ class GroupMemberController extends Controller
                     $existingMember = Member::where('group_id', $group->id)
                         ->where('user_id', $user->id)
                         ->first();
-                    
+
                     if ($existingMember) {
                         return redirect()->route('groups.members.create', $group)
                             ->withInput()
                             ->with('error', 'このユーザーは既にメンバーとして登録されています');
                     }
-                    
+
                     $member->user_id = $user->id;
                     $member->is_registered = true;
                     // 名前が指定されていない場合はユーザー名を使用
-                    if (!$request->name) {
+                    if (! $request->name) {
                         $member->name = $user->name;
                     }
                 }
             }
-            
+
             $member->save();
-            
+
             // 活動ログを記録
-            $activityLog = new ActivityLog();
+            $activityLog = new ActivityLog;
             $activityLog->user_id = Auth::id();
             $activityLog->subject_type = TravelPlan::class;
             $activityLog->subject_id = $group->travel_plan_id;
             $activityLog->action = 'member_added';
-            $activityLog->description = Auth::user()->name . 'さんが' . $member->name . 'をメンバーに追加しました';
+            $activityLog->description = Auth::user()->name.'さんが'.$member->name.'をメンバーに追加しました';
             $activityLog->ip_address = request()->ip();
             $activityLog->save();
-            
+
             // トランザクションが開始されている場合のみコミット
             if (DB::transactionLevel() > 0) {
                 DB::commit();
             }
-            
+
             return redirect()->route('travel-plans.show', $group->travelPlan)
                 ->with('success', 'メンバーを追加しました');
-                
+
         } catch (\Exception $e) {
             // トランザクションが開始されている場合のみロールバック
             if (DB::transactionLevel() > 0) {
                 DB::rollBack();
             }
+
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'メンバー追加に失敗しました: ' . $e->getMessage());
+                ->with('error', 'メンバー追加に失敗しました: '.$e->getMessage());
         }
     }
 
@@ -105,35 +105,35 @@ class GroupMemberController extends Controller
             // 権限チェック
             $user = Auth::user();
             $travelPlan = $group->travelPlan;
-            
+
             if ($user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
                 abort(403, 'メンバーを削除する権限がありません。');
             }
-            
+
             // 自分自身は削除できない
             if ($user->id === $member->user_id) {
                 return redirect()->back()
                     ->with('error', '自分自身をメンバーから削除することはできません。');
             }
-            
+
             $member->delete();
-            
+
             // 活動ログを記録
-            $activityLog = new ActivityLog();
+            $activityLog = new ActivityLog;
             $activityLog->user_id = Auth::id();
             $activityLog->subject_type = TravelPlan::class;
             $activityLog->subject_id = $group->travel_plan_id;
             $activityLog->action = 'member_removed';
-            $activityLog->description = Auth::user()->name . 'さんが' . $member->name . 'をメンバーから削除しました';
+            $activityLog->description = Auth::user()->name.'さんが'.$member->name.'をメンバーから削除しました';
             $activityLog->ip_address = request()->ip();
             $activityLog->save();
-            
+
             return redirect()->route('travel-plans.show', $travelPlan)
                 ->with('success', 'メンバーを削除しました');
-                
+
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'メンバー削除に失敗しました: ' . $e->getMessage());
+                ->with('error', 'メンバー削除に失敗しました: '.$e->getMessage());
         }
     }
 }

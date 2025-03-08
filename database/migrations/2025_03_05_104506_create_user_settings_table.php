@@ -22,7 +22,7 @@ return new class extends Migration
             $table->json('notification_preferences')->nullable(); // Detailed notification settings
             $table->json('ui_preferences')->nullable(); // UI preferences like theme, etc.
             $table->timestamps();
-            
+
             // A user can only have one settings record
             $table->unique('user_id');
         });
