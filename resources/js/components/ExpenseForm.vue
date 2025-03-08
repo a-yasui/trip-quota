@@ -161,18 +161,17 @@
         </div>
         <div class="flex items-center space-x-4 w-2/3">
           <div class="w-1/2 relative">
-            <input
-              type="number"
-              :name="`member_share_amounts[${member.id}]`"
-              v-model="memberShareAmounts[member.id]"
-              step="0.01"
-              min="0"
-              :max="formData.amount"
-              class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-right pr-12"
-              @input="updateTotalShareAmount"
-            >
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pt-1 pointer-events-none text-gray-500">
-              {{ formData.currency }}
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <input
+                type="text"
+                :name="`member_share_amounts[${member.id}]`"
+                :value="formatAmount(memberShareAmounts[member.id])"
+                class="focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md text-right pr-16"
+                @input="updateMemberAmount($event, member.id)"
+              >
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                {{ formData.currency }}
+              </div>
             </div>
           </div>
           <div class="flex items-center justify-end w-1/2">
@@ -520,6 +519,25 @@ export default {
       }
       
       this.memberPaidStatus[memberId] = !this.memberPaidStatus[memberId];
+    },
+    
+    // 金額を3桁区切りでフォーマット
+    formatAmount(amount) {
+      if (amount === undefined || amount === null) return '';
+      return Number(amount).toLocaleString();
+    },
+    
+    // 入力された金額を更新
+    updateMemberAmount(event, memberId) {
+      // カンマを取り除いて数値に変換
+      const value = event.target.value.replace(/,/g, '');
+      const numValue = parseFloat(value) || 0;
+      
+      // 数値を更新
+      this.memberShareAmounts[memberId] = numValue;
+      
+      // 合計を更新
+      this.updateTotalShareAmount();
     },
     
     // 支払い状態の変更が無効かどうかを判定
