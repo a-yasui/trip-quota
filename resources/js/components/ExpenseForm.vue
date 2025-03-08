@@ -56,15 +56,13 @@
             class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             required
           >
-            <option value="JPY">日本円 (JPY)</option>
-            <option value="USD">米ドル (USD)</option>
-            <option value="EUR">ユーロ (EUR)</option>
-            <option value="KRW">韓国ウォン (KRW)</option>
-            <option value="CNY">中国元 (CNY)</option>
-            <option value="TWD">台湾ドル (TWD)</option>
-            <option value="HKD">香港ドル (HKD)</option>
-            <option value="THB">タイバーツ (THB)</option>
-            <option value="SGD">シンガポールドル (SGD)</option>
+            <option
+              v-for="(label, value) in currencies"
+              :key="value"
+              :value="value"
+            >
+              {{ label }}
+            </option>
           </select>
           <slot name="currency_error"></slot>
         </div>
@@ -192,6 +190,10 @@ export default {
     oldValues: {
       type: Object,
       default: () => ({})
+    },
+    currencies: {
+      type: Object,
+      required: true
     }
   },
   data() {

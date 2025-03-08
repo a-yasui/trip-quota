@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Currency;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class ExpenseRequest extends FormRequest
 {
@@ -24,7 +26,7 @@ class ExpenseRequest extends FormRequest
         return [
             'description' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
-            'currency' => 'required|string|size:3',
+            'currency' => ['required', new Enum(Currency::class)],
             'expense_date' => 'required|date',
             'category' => 'nullable|string|max:255',
             'notes' => 'nullable|string',

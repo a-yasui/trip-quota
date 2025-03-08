@@ -26,6 +26,7 @@
                             form-action="{{ route('expenses.update', $expense) }}"
                             cancel-url="{{ route('expenses.show', $expense) }}"
                             :old-values='@json(old())'
+                            :currencies='@json($currencies)'
                         >
                             @csrf
                             @method('PUT')

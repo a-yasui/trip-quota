@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Currency;
 use App\Http\Requests\ExpenseRequest;
 use App\Models\Expense;
 use App\Models\Group;
@@ -33,7 +34,9 @@ class ExpenseController extends Controller
         $branchGroups = $travelPlan->groups()->branch()->with('members')->get();
         $members = $coreGroup->members;
         
-        return view('expenses.create', compact('travelPlan', 'branchGroups', 'members'));
+        $currencies = Currency::options();
+        
+        return view('expenses.create', compact('travelPlan', 'branchGroups', 'members', 'currencies'));
     }
 
     /**
@@ -95,7 +98,9 @@ class ExpenseController extends Controller
         $members = $coreGroup->members;
         $selectedMemberIds = $expense->members->pluck('id')->toArray();
         
-        return view('expenses.edit', compact('expense', 'travelPlan', 'branchGroups', 'members', 'selectedMemberIds'));
+        $currencies = Currency::options();
+        
+        return view('expenses.edit', compact('expense', 'travelPlan', 'branchGroups', 'members', 'selectedMemberIds', 'currencies'));
     }
 
     /**

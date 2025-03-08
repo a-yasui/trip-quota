@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Currency;
 use App\Models\Member;
 use App\Models\TravelPlan;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -19,14 +20,13 @@ class ExpenseFactory extends Factory
     public function definition(): array
     {
         $categories = ['food', 'transportation', 'accommodation', 'entertainment', 'shopping', 'other'];
-        $currencies = ['JPY', 'USD', 'EUR', 'KRW', 'CNY', 'TWD'];
 
         return [
             'travel_plan_id' => TravelPlan::factory(),
             'payer_member_id' => Member::factory(),
             'description' => $this->faker->sentence(3),
             'amount' => $this->faker->numberBetween(1000, 50000),
-            'currency' => $this->faker->randomElement($currencies),
+            'currency' => $this->faker->randomElement(Currency::cases()),
             'expense_date' => $this->faker->dateTimeBetween('-1 month', '+1 month'),
             'category' => $this->faker->randomElement($categories),
             'notes' => $this->faker->optional(0.7)->paragraph(1),

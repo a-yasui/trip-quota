@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Currency;
 use App\Enums\GroupType;
 use App\Models\Expense;
 use App\Models\Group;
@@ -84,7 +85,7 @@ class ExpenseTest extends TestCase
         $data = [
             'description' => '食事代',
             'amount' => 3000,
-            'currency' => 'JPY',
+            'currency' => Currency::JPY->value,
             'expense_date' => now()->format('Y-m-d'),
             'category' => 'food',
             'notes' => 'テスト経費',
@@ -127,7 +128,7 @@ class ExpenseTest extends TestCase
         $data = [
             'description' => '', // 必須項目を空に
             'amount' => -100, // 負の値
-            'currency' => 'INVALID', // 無効な通貨コード
+            'currency' => 'INVALID', // 無効な通貨コード（Enumに存在しない）
             'expense_date' => '', // 必須項目を空に
             'payer_member_id' => 999, // 存在しないメンバーID
             'member_ids' => [], // 空の配列

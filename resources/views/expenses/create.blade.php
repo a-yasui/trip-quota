@@ -25,6 +25,7 @@
                             form-action="{{ route('travel-plans.expenses.store', $travelPlan) }}"
                             cancel-url="{{ route('travel-plans.show', $travelPlan) }}"
                             :old-values='@json(old())'
+                            :currencies='@json($currencies)'
                         >
                             @csrf
 
