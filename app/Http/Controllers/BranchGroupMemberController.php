@@ -43,6 +43,15 @@ class BranchGroupMemberController extends Controller
                 ->with('error', 'メンバーが見つかりません');
         }
 
+        // コアグループにメンバーがいるか確認
+        $coreGroup = $group->parentGroup;
+        $isCoreMember = $coreGroup->members()->where('id', $coreMember->id)->exists();
+
+        if (! $isCoreMember) {
+            return redirect()->back()
+                ->with('error', 'このメンバーはコアグループに存在しません');
+        }
+
         // 同じユーザーが複数のメンバーとして登録されないようにチェック
         if ($coreMember->user_id) {
             $existingMember = Member::where('group_id', $group->id)

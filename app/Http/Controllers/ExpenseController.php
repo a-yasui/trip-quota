@@ -35,6 +35,8 @@ class ExpenseController extends Controller
 
         $currencies = Currency::options();
 
+        // dump(json_encode($coreGroup, JSON_PRETTY_PRINT), json_encode($branchGroups, JSON_PRETTY_PRINT), json_encode($members, JSON_PRETTY_PRINT));
+
         return view('expenses.create', compact('travelPlan', 'branchGroups', 'members', 'currencies'));
     }
 
