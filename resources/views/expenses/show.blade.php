@@ -93,21 +93,28 @@
                                                     <div class="w-0 flex-1 flex items-center">
                                                         <span class="ml-2 flex-1 w-0 truncate">
                                                             {{ $member->name }}
+                                                            @if($member->id == $expense->payer_member_id)
+                                                                <span class="ml-2 text-xs text-gray-500">{{ __('支払者') }}</span>
+                                                            @endif
                                                         </span>
                                                     </div>
-                                                    <div class="ml-4 flex-shrink-0 flex items-center">
-                                                        <span class="font-medium">
+                                                    <div class="ml-4 flex-shrink-0 flex items-center space-x-4">
+                                                        <!-- 精算済みボタン -->
+                                                        <button 
+                                                            type="button"
+                                                            class="px-3 py-1 text-xs font-semibold rounded-md transition-colors duration-200 ease-in-out {{ $member->pivot->is_paid ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-red-500 text-white hover:bg-red-600' }}"
+                                                            onclick="togglePaymentStatus({{ $expense->id }}, {{ $member->id }})"
+                                                            data-member-id="{{ $member->id }}"
+                                                            data-expense-id="{{ $expense->id }}"
+                                                            data-is-paid="{{ $member->pivot->is_paid ? 'true' : 'false' }}"
+                                                        >
+                                                            {{ $member->pivot->is_paid ? __('精算済み') : __('未精算') }}
+                                                        </button>
+                                                        
+                                                        <!-- 金額（右揃え） -->
+                                                        <span class="font-medium text-right w-24">
                                                             {{ number_format($member->pivot->share_amount) }} {{ $expense->currency }}
                                                         </span>
-                                                        @if($member->pivot->is_paid)
-                                                            <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                                {{ __('支払済') }}
-                                                            </span>
-                                                        @else
-                                                            <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                                {{ __('未支払') }}
-                                                            </span>
-                                                        @endif
                                                     </div>
                                                 </li>
                                             @endforeach
@@ -131,4 +138,67 @@
             </div>
         </div>
     </div>
+@push('scripts')
+<script>
+    function togglePaymentStatus(expenseId, memberId) {
+        // CSRFトークンを取得
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        // ボタン要素を取得
+        const button = document.querySelector(`button[data-member-id="${memberId}"][data-expense-id="${expenseId}"]`);
+        
+        // 現在の状態を取得
+        const isPaid = button.getAttribute('data-is-paid') === 'true';
+        
+        // APIリクエストを送信
+        fetch(`/expenses/${expenseId}/members/${memberId}/toggle-payment`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // ボタンの状態を更新
+                button.setAttribute('data-is-paid', data.is_paid ? 'true' : 'false');
+                
+                // ボタンのテキストを更新
+                button.textContent = data.is_paid ? '精算済み' : '未精算';
+                
+                // ボタンのスタイルを更新
+                if (data.is_paid) {
+                    button.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    button.classList.add('bg-green-500', 'hover:bg-green-600');
+                } else {
+                    button.classList.remove('bg-green-500', 'hover:bg-green-600');
+                    button.classList.add('bg-red-500', 'hover:bg-red-600');
+                }
+                
+                // 経費全体の状態表示も更新
+                const statusElement = document.querySelector('.bg-white.px-4.py-5.sm\\:grid.sm\\:grid-cols-3.sm\\:gap-4.sm\\:px-6 .text-xs.leading-5.font-semibold.rounded-full');
+                if (statusElement) {
+                    if (data.is_settled) {
+                        statusElement.textContent = '精算済み';
+                        statusElement.classList.remove('bg-yellow-100', 'text-yellow-800');
+                        statusElement.classList.add('bg-green-100', 'text-green-800');
+                    } else {
+                        statusElement.textContent = '未精算';
+                        statusElement.classList.remove('bg-green-100', 'text-green-800');
+                        statusElement.classList.add('bg-yellow-100', 'text-yellow-800');
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('更新に失敗しました。');
+        });
+    }
+</script>
+@endpush
+
 </x-app-layout>

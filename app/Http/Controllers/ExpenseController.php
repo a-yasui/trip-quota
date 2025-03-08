@@ -19,8 +19,9 @@ class ExpenseController extends Controller
     public function index()
     {
         $expenses = Expense::with(['payerMember', 'members', 'travelPlan'])
-            ->orderBy('expense_date', 'desc')
-            ->paginate(20);
+        ->orderBy('is_settled', 'asc')
+        ->orderBy('expense_date', 'desc')
+        ->paginate(5);
             
         return view('expenses.index', compact('expenses'));
     }
@@ -208,5 +209,39 @@ class ExpenseController extends Controller
         
         return redirect()->route('expenses.index')
             ->with('success', '経費を削除しました。');
+    }
+    
+    /**
+     * メンバーの支払い状態を切り替える
+     */
+    public function togglePaymentStatus(Expense $expense, Member $member)
+    {
+        // 現在の支払い状態を取得
+        $expenseMember = $expense->members()->where('member_id', $member->id)->first()->pivot;
+        $currentStatus = $expenseMember->is_paid;
+        
+        // 支払い状態を反転
+        $newStatus = !$currentStatus;
+        
+        DB::transaction(function () use ($expense, $member, $newStatus) {
+            // 支払い状態を更新
+            $expense->members()->updateExistingPivot($member->id, [
+                'is_paid' => $newStatus,
+            ]);
+            
+            // 全メンバーが支払い済みかどうかを確認
+            $allPaid = $expense->members()->wherePivot('is_paid', false)->count() === 0;
+            
+            // 経費全体の精算状態を更新
+            $expense->update([
+                'is_settled' => $allPaid,
+            ]);
+        });
+        
+        return response()->json([
+            'success' => true,
+            'is_paid' => $newStatus,
+            'is_settled' => $expense->fresh()->is_settled,
+        ]);
     }
 }

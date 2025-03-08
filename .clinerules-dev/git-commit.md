@@ -77,7 +77,7 @@
 3. プルリクエストの作成
    ```bash
    # プルリクエストの作成（HEREDOCを使用）
-   gh pr create --title "feat: Result型によるエラー処理の改善" --body "$(cat <<'EOF'
+   cat <<'EOF' > pr.md
    ## 概要
 
    エラー処理をより型安全にするため、Result型を導入しました。
@@ -94,7 +94,8 @@
    - エラーケースの網羅性
    - テストの十分性
    EOF
-   )"
+
+   gh pr create --title "feat: Result型によるエラー処理の改善" -F pr.md
    ```
 
 ### 重要な注意事項

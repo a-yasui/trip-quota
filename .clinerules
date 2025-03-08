@@ -383,7 +383,7 @@ tests/resources/*   # テストで使用するダミーデータを保存して�
 3. プルリクエストの作成
    ```bash
    # プルリクエストの作成（HEREDOCを使用）
-   gh pr create --title "feat: Result型によるエラー処理の改善" --body "$(cat <<'EOF'
+   cat <<'EOF' > pr.md
    ## 概要
 
    エラー処理をより型安全にするため、Result型を導入しました。
@@ -400,7 +400,8 @@ tests/resources/*   # テストで使用するダミーデータを保存して�
    - エラーケースの網羅性
    - テストの十分性
    EOF
-   )"
+
+   gh pr create --title "feat: Result型によるエラー処理の改善" -F pr.md
    ```
 
 ### 重要な注意事項
@@ -598,9 +599,9 @@ resources/views
 新規作成および修正作業の時は、TDD の次の手順を踏む。
 
 1. ブランチを作成する。既に main ブランチでない時はそのまま作業を続ける
-  1. ブランチを作成した後、Github pull-request を作成する
+  1. ブランチを作成した後、gh コマンドで Pull Request を作成する
 2. 修正作業の時はテストから修正する
   1. 修正時のテストは、テストを修正してから実行して、テストの失敗から現状のバグを把握する
 3. 作業をする
 4. テストを実行して成功する事を確認する
-5. git commit をしてpushをする
+5. git commit をして push をする
