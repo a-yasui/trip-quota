@@ -178,11 +178,12 @@
             <button
               type="button"
               :class="[
-                'px-3 py-1 text-xs font-semibold rounded-md transition-colors duration-200 ease-in-out w-20 text-center',
+                'px-3 py-1 text-xs font-semibold rounded-md transition-colors duration-200 ease-in-out text-center',
                 memberPaidStatus[member.id] 
                   ? 'bg-green-500 text-white hover:bg-green-600' 
                   : 'bg-red-500 text-white hover:bg-red-600'
               ]"
+              style="min-width: 80px; max-width: 80px;"
               @click="togglePaidStatus(member.id)"
               :disabled="isPaidStatusDisabled(member.id)"
             >
