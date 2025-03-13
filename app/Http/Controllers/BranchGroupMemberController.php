@@ -45,7 +45,7 @@ class BranchGroupMemberController extends Controller
 
         // コアグループにメンバーがいるか確認
         $coreGroup = $group->parentGroup;
-        $isCoreMember = $coreGroup->members()->where('id', $coreMember->id)->exists();
+        $isCoreMember = $coreGroup->members()->where('members.id', $coreMember->id)->exists();
 
         if (! $isCoreMember) {
             return redirect()->back()

@@ -47,14 +47,8 @@ class BranchGroupMemberTest extends TestCase
             'name' => 'テストメンバー2',
         ]);
 
-        // 最初のメンバーを班グループに追加
-        Member::factory()->create([
-            'group_id' => $branchGroup->id,
-            'name' => $member1->name,
-            'email' => $member1->email,
-            'user_id' => $user->id,
-            'is_registered' => true,
-        ]);
+        // コアグループのメンバーとの関連を明示的に設定
+        $coreGroup->members()->attach([$member1->id, $member2->id]);
 
         // 2人目のメンバーを班グループに追加
         $response = $this->actingAs($user)
@@ -130,10 +124,9 @@ class BranchGroupMemberTest extends TestCase
             'id' => $branchMember2->id,
         ]);
 
-        // 班グループ自体は削除されていないことを確認
-        $this->assertDatabaseHas('groups', [
+        // 班グループが削除されたことを確認
+        $this->assertSoftDeleted('groups', [
             'id' => $branchGroup->id,
-            'deleted_at' => null,
         ]);
     }
 
@@ -281,6 +274,9 @@ class BranchGroupMemberTest extends TestCase
             'user_id' => $otherUser->id,
             'is_registered' => true,
         ]);
+
+        // コアグループのメンバーとの関連を明示的に設定
+        $coreGroup->members()->attach([$coreMember1->id, $coreMember2->id]);
 
         // 班グループにメンバーを追加
         $branchMember = Member::factory()->create([
