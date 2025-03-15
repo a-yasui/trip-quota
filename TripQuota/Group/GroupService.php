@@ -45,8 +45,6 @@ class GroupService
         $member->group_id = $coreGroup->id;
         $member->save();
 
-        $coreGroup->members()->attach($member->id);
-
         return $coreGroup;
     }
 
