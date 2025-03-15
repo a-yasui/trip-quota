@@ -78,6 +78,9 @@ class TravelPlanTest extends TestCase
         $response = $this->actingAs($user)
             ->post('/travel-plans', $travelPlanData);
 
+        // トランザクションのエラーを回避するためにRefreshDatabaseトレイトのリフレッシュが完了していることを確認
+        $this->refreshDatabase();
+
         $this->assertDatabaseHas('travel_plans', [
             'title' => '韓国ソウル旅行',
             'creator_id' => $user->id,

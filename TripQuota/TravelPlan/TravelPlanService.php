@@ -19,23 +19,41 @@ class TravelPlanService
      * 旅行計画を作成する
      *
      * @param string $plan_name 旅行計画名
+     * @param int $creator_id 作成者ID
+     * @param int $deletion_permission_holder_id 削除権限保持者ID
+     * @param \DateTimeInterface $departure_date 出発日
+     * @param string $timezone タイムゾーン
+     * @param \DateTimeInterface|null $return_date 帰宅日 (オプション)
+     * @param bool $is_active アクティブフラグ (デフォルト: true)
      * @return GroupCreateResult 作成された旅行計画とコアグループ
      */
-    public function create(string $plan_name): GroupCreateResult
-    {
-        return DB::transaction(function () use ($plan_name) {
+    public function create(
+        string $plan_name,
+        int $creator_id,
+        int $deletion_permission_holder_id,
+        \DateTimeInterface $departure_date,
+        string $timezone,
+        \DateTimeInterface $return_date = null,
+        bool $is_active = true
+    ): GroupCreateResult {
+        return DB::transaction(function () use (
+            $plan_name,
+            $creator_id,
+            $deletion_permission_holder_id,
+            $departure_date,
+            $timezone,
+            $return_date,
+            $is_active
+        ) {
             // 旅行計画を作成
             $plan = new TravelPlan();
             $plan->title = $plan_name;
-            // テスト時に必須フィールドがないとエラーになるため、デフォルト値を設定
-            // 実際のアプリケーションでは、これらの値はコントローラーで設定される
-            // このため、これらのフィールドはアプリケーション層でさらに上書きされる可能性がある
-            if (app()->environment('testing')) {
-                $plan->creator_id = 1; // テスト用のデフォルト値
-                $plan->deletion_permission_holder_id = 1; // テスト用のデフォルト値
-                $plan->departure_date = now()->addDays(30); // テスト用のデフォルト値
-                $plan->timezone = 'Asia/Tokyo'; // テスト用のデフォルト値
-            }
+            $plan->creator_id = $creator_id;
+            $plan->deletion_permission_holder_id = $deletion_permission_holder_id;
+            $plan->departure_date = $departure_date;
+            $plan->timezone = $timezone;
+            $plan->return_date = $return_date;
+            $plan->is_active = $is_active;
             $plan->save();
             
             // コアグループを作成

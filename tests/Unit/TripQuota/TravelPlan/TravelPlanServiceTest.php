@@ -35,9 +35,22 @@ class TravelPlanServiceTest extends TestCase
         
         // テスト用の旅行計画名
         $planName = '韓国ソウル旅行';
+        
+        // 出発日と時間帯を設定
+        $departureDate = now()->addDays(30);
+        $timezone = 'Asia/Tokyo';
+        $returnDate = now()->addDays(35);
 
         // サービスを使用して旅行計画とコアグループを作成
-        $result = $this->travelPlanService->create($planName);
+        $result = $this->travelPlanService->create(
+            $planName,
+            $user->id,
+            $user->id,
+            $departureDate,
+            $timezone,
+            $returnDate,
+            true
+        );
 
         // 戻り値が GroupCreateResult クラスのインスタンスであることを確認
         $this->assertInstanceOf(GroupCreateResult::class, $result);
@@ -49,12 +62,13 @@ class TravelPlanServiceTest extends TestCase
         // 旅行計画名が正しく設定されていることを確認
         $this->assertEquals($planName, $result->plan->title);
         
-        // 必須フィールドを設定
-        $result->plan->creator_id = $user->id;
-        $result->plan->deletion_permission_holder_id = $user->id;
-        $result->plan->departure_date = now()->addDays(30);
-        $result->plan->timezone = 'Asia/Tokyo';
-        $result->plan->save();
+        // 各フィールドが正しく設定されていることを確認
+        $this->assertEquals($user->id, $result->plan->creator_id);
+        $this->assertEquals($user->id, $result->plan->deletion_permission_holder_id);
+        $this->assertEquals($departureDate->format('Y-m-d'), $result->plan->departure_date->format('Y-m-d'));
+        $this->assertEquals($timezone, $result->plan->timezone->value);
+        $this->assertEquals($returnDate->format('Y-m-d'), $result->plan->return_date->format('Y-m-d'));
+        $this->assertTrue($result->plan->is_active);
 
         // コアグループが旅行計画に紐づいていることを確認
         $this->assertEquals($result->plan->id, $result->core_group->travel_plan_id);

@@ -69,18 +69,17 @@ class TravelPlanController extends Controller
             $user = Auth::user();
 
             // TravelPlanServiceを使用して旅行計画とコアグループを作成
-            $result = $this->travelPlanService->create($request->title);
+            $result = $this->travelPlanService->create(
+                $request->title,
+                $user->id,
+                $user->id,
+                $request->departure_date,
+                $request->timezone,
+                $request->return_date,
+                true
+            );
             $travelPlan = $result->plan;
             $coreGroup = $result->core_group;
-            
-            // 旅行計画の追加情報を設定
-            $travelPlan->creator_id = $user->id;
-            $travelPlan->deletion_permission_holder_id = $user->id;
-            $travelPlan->departure_date = $request->departure_date;
-            $travelPlan->return_date = $request->return_date;
-            $travelPlan->timezone = $request->timezone;
-            $travelPlan->is_active = true;
-            $travelPlan->save();
 
             // 作成者をコアグループのメンバーとして追加
             $member = new Member;
