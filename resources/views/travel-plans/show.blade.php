@@ -14,7 +14,7 @@
                 </svg>
                 一覧に戻る
             </a>
-            
+
             @if(now()->startOfDay()->lt($travelPlan->departure_date) || !$travelPlan->return_date)
                 <a href="{{ route('travel-plans.edit', $travelPlan) }}" class="inline-flex items-center px-4 py-2 bg-lime-500 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-lime-400 active:bg-lime-600 focus:outline-none focus:border-lime-600 focus:ring ring-lime-300 disabled:opacity-25 transition ease-in-out duration-150">
                     <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,7 +23,7 @@
                     編集
                 </a>
             @endif
-            
+
             @if(auth()->id() === $travelPlan->creator_id || auth()->id() === $travelPlan->deletion_permission_holder_id)
                 <form class="inline-block" action="{{ route('travel-plans.destroy', $travelPlan) }}" method="POST" onsubmit="return confirm('この旅行計画を削除してもよろしいですか？\nこの操作は取り消せません。');">
                     @csrf
@@ -116,7 +116,7 @@
                             宿泊先を追加
                         </a>
                     </div>
-                    
+
                     @if($travelPlan->accommodations->isEmpty())
                         <p class="text-gray-500">宿泊先情報はまだ登録されていません。</p>
                     @else
@@ -152,7 +152,7 @@
                             旅程を追加
                         </a>
                     </div>
-                    
+
                     @if($travelPlan->itineraries->isEmpty())
                         <p class="text-gray-500">旅程情報はまだ登録されていません。</p>
                     @else
@@ -227,7 +227,7 @@
                             メンバー追加
                         </a>
                     </div>
-                    
+
                     <div class="space-y-3">
                         @foreach($members as $member)
                             <div class="flex items-center justify-between">
@@ -244,7 +244,7 @@
                                         @endif
                                     </div>
                                 </div>
-                                
+
                                 <!-- 削除ボタン（自分自身は削除できない） -->
                                 @if(Auth::id() !== $member->user_id)
                                     <form method="POST" action="{{ route('groups.members.destroy', [$coreGroup, $member]) }}" onsubmit="return confirm('このメンバーを削除してもよろしいですか？');">
@@ -275,7 +275,7 @@
                             班を作成
                         </a>
                     </div>
-                    
+
                     <div class="space-y-3">
                         @foreach($travelPlan->groups as $group)
                             <div class="flex items-center justify-between">
@@ -328,7 +328,7 @@
                             経費を追加
                         </a>
                     </div>
-                    
+
                     @if($travelPlan->expenses->isEmpty())
                         <p class="text-gray-500">経費情報はまだ登録されていません。</p>
                     @else

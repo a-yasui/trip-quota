@@ -99,9 +99,6 @@ class TravelPlanController extends Controller
      */
     public function show(TravelPlan $travelPlan)
     {
-        // 旅行計画の詳細情報を取得
-        $travelPlan->load(['groups.members', 'accommodations', 'itineraries']);
-
         // コアグループを取得
         $coreGroup = $travelPlan->groups()->where('type', GroupType::CORE)->first();
 
