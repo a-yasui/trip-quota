@@ -20,10 +20,10 @@ class UserService
      *
      * @param TravelPlan $plan 旅行計画
      * @param string $name メンバー名
-     * @param string $email メールアドレス（オプション）
+     * @param string|null $email メールアドレス（オプション）
      * @return Member 作成されたメンバー
      */
-    public function createMember(TravelPlan $plan, string $name, string $email = ''): Member
+    public function createMember(TravelPlan $plan, string $name, ?string $email = null): Member
     {
         // コアグループを取得
         $coreGroup = $plan->groups()->core()->firstOrFail();
