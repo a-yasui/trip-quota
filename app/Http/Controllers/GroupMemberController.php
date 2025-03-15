@@ -33,10 +33,18 @@ class GroupMemberController extends Controller
                 DB::beginTransaction();
             }
 
+            // 旅行計画のコアグループを取得
+            $travelPlan = $group->travelPlan;
+            $coreGroup = $travelPlan->groups()->where('type', \App\Enums\GroupType::CORE)->first();
+
+            if (!$coreGroup) {
+                throw new \Exception('コアグループが見つかりません');
+            }
+
             $member = new Member;
             $member->name = $request->name ?? $request->email; // メールアドレスのみの場合は名前としても使用
             $member->email = $request->email;
-            $member->group_id = $group->id;
+            $member->group_id = $coreGroup->id; // コアグループに所属させる
             $member->is_registered = false;
             $member->is_active = true;
 
@@ -45,7 +53,7 @@ class GroupMemberController extends Controller
                 $user = User::where('email', $request->email)->first();
                 if ($user) {
                     // ユーザーが既にこのグループのメンバーとして登録されているかチェック
-                    $existingMember = Member::where('group_id', $group->id)
+                    $existingMember = Member::where('group_id', $coreGroup->id)
                         ->where('user_id', $user->id)
                         ->first();
 
@@ -65,6 +73,11 @@ class GroupMemberController extends Controller
             }
 
             $member->save();
+
+            // コアグループとは別に、元のリクエストで指定された班グループ（$group）にもメンバーを関連付ける
+            if ($group->id !== $coreGroup->id && $group->type === \App\Enums\GroupType::BRANCH) {
+                $member->branchGroups()->attach($group->id);
+            }
 
             // 活動ログを記録
             $activityLog = new ActivityLog;

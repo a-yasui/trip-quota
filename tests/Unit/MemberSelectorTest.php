@@ -49,6 +49,6 @@ class MemberSelectorTest extends TestCase
 
         // Assert: Check if the members are selected
         $this->assertTrue($selectedMembers[11]);
-        $this->assertFalse($selectedMembers[9]);
+        $this->assertFalse(isset($selectedMembers[9]));
     }
 } 
