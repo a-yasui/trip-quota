@@ -18,47 +18,26 @@ class TravelPlanService
     /**
      * 旅行計画を作成する
      *
-     * @param string $plan_name 旅行計画名
-     * @param int $creator_id 作成者ID
-     * @param int $deletion_permission_holder_id 削除権限保持者ID
-     * @param \DateTimeInterface $departure_date 出発日
-     * @param string $timezone タイムゾーン
-     * @param \DateTimeInterface|null $return_date 帰宅日 (オプション)
-     * @param bool $is_active アクティブフラグ (デフォルト: true)
+     * @param CreateRequest $request 旅行計画作成リクエスト
      * @return GroupCreateResult 作成された旅行計画とコアグループ
      */
-    public function create(
-        string $plan_name,
-        int $creator_id,
-        int $deletion_permission_holder_id,
-        \DateTimeInterface $departure_date,
-        string $timezone,
-        \DateTimeInterface $return_date = null,
-        bool $is_active = true
-    ): GroupCreateResult {
-        return DB::transaction(function () use (
-            $plan_name,
-            $creator_id,
-            $deletion_permission_holder_id,
-            $departure_date,
-            $timezone,
-            $return_date,
-            $is_active
-        ) {
+    public function create(CreateRequest $request): GroupCreateResult
+    {
+        return DB::transaction(function () use ($request) {
             // 旅行計画を作成
             $plan = new TravelPlan();
-            $plan->title = $plan_name;
-            $plan->creator_id = $creator_id;
-            $plan->deletion_permission_holder_id = $deletion_permission_holder_id;
-            $plan->departure_date = $departure_date;
-            $plan->timezone = $timezone;
-            $plan->return_date = $return_date;
-            $plan->is_active = $is_active;
+            $plan->title = $request->plan_name;
+            $plan->creator_id = $request->creator->id;
+            $plan->deletion_permission_holder_id = $request->creator->id;
+            $plan->departure_date = $request->departure_date;
+            $plan->timezone = $request->timezone;
+            $plan->return_date = $request->return_date;
+            $plan->is_active = $request->is_active;
             $plan->save();
             
             // コアグループを作成
             $coreGroup = new Group();
-            $coreGroup->name = $plan_name . 'のメンバー';
+            $coreGroup->name = $request->plan_name . 'のメンバー';
             $coreGroup->type = GroupType::CORE;
             $coreGroup->travel_plan_id = $plan->id;
             $coreGroup->save();
