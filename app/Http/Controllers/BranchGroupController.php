@@ -13,9 +13,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
+use TripQuota\TravelPlan\TravelPlanService;
 
 class BranchGroupController extends Controller
 {
+    protected TravelPlanService $travelPlanService;
+
+    public function __construct(TravelPlanService $travelPlanService)
+    {
+        $this->travelPlanService = $travelPlanService;
+    }
+
     /**
      * 班グループ作成フォームを表示
      */
@@ -43,46 +51,21 @@ class BranchGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            // コアグループを取得
-            $coreGroup = $travelPlan->groups()->where('type', GroupType::CORE)->first();
-
-            if (! $coreGroup) {
-                return redirect()->route('travel-plans.show', $travelPlan)
-                    ->with('error', 'コアグループが見つかりません');
+            // TravelPlanServiceを使用して班グループを作成
+            $branchGroup = $this->travelPlanService->addBranchGroup($travelPlan, $request->name);
+            
+            // 追加の設定
+            if ($request->has('description')) {
+                $branchGroup->description = $request->description;
+                $branchGroup->save();
             }
 
-            // 班グループを作成
-            $branchGroup = new Group;
-            $branchGroup->name = $request->name;
-            $branchGroup->type = GroupType::BRANCH;
-            $branchGroup->travel_plan_id = $travelPlan->id;
-            $branchGroup->parent_group_id = $coreGroup->id;
-            $branchGroup->save();
-
-            // 選択されたメンバーを班グループに追加
-            $memberIds = $request->members;
-            foreach ($memberIds as $memberId) {
-                $member = Member::find($memberId);
-
-                // 同じユーザーが複数のメンバーとして登録されないようにチェック
-                if ($member && $member->user_id) {
-                    $existingMember = Member::where('group_id', $branchGroup->id)
-                        ->where('user_id', $member->user_id)
-                        ->first();
-
-                    if ($existingMember) {
-                        continue; // 既に登録されている場合はスキップ
-                    }
+            // メンバーを追加
+            if ($request->has('members')) {
+                foreach ($request->members as $memberId) {
+                    $member = Member::findOrFail($memberId);
+                    $branchGroup->members()->attach($member->id);
                 }
-
-                // 新しいメンバーを作成
-                $newMember = new Member;
-                $newMember->name = $member->name;
-                $newMember->email = $member->email;
-                $newMember->user_id = $member->user_id;
-                $newMember->group_id = $branchGroup->id;
-                $newMember->is_active = true;
-                $newMember->save();
             }
 
             // 活動ログを記録
@@ -92,20 +75,19 @@ class BranchGroupController extends Controller
             $activityLog->subject_id = $travelPlan->id;
             $activityLog->action = 'branch_group_created';
             $activityLog->description = Auth::user()->name.'さんが班グループ「'.$branchGroup->name.'」を作成しました';
-            $activityLog->ip_address = request()->ip();
             $activityLog->save();
 
             DB::commit();
 
-            return redirect()->route('travel-plans.show', $travelPlan)
-                ->with('success', '班グループを作成しました');
+            return redirect()->route('branch-groups.show', $branchGroup)
+                ->with('success', '班グループ「'.$branchGroup->name.'」を作成しました。');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
                 ->withInput()
-                ->with('error', '班グループの作成に失敗しました: '.$e->getMessage());
+                ->with('error', '班グループの作成に失敗しました。'.$e->getMessage());
         }
     }
 
@@ -238,18 +220,11 @@ class BranchGroupController extends Controller
         }
 
         try {
-            DB::beginTransaction();
-
             $travelPlan = $group->travelPlan;
             $groupName = $group->name;
 
-            // メンバーを削除
-            foreach ($group->members as $member) {
-                $member->delete();
-            }
-
-            // グループを削除
-            $group->delete();
+            // TravelPlanServiceを使用して班グループを削除
+            $this->travelPlanService->removeBranchGroup($group);
 
             // 活動ログを記録
             $activityLog = new ActivityLog;
@@ -258,19 +233,18 @@ class BranchGroupController extends Controller
             $activityLog->subject_id = $travelPlan->id;
             $activityLog->action = 'branch_group_deleted';
             $activityLog->description = Auth::user()->name.'さんが班グループ「'.$groupName.'」を削除しました';
-            $activityLog->ip_address = request()->ip();
             $activityLog->save();
 
             DB::commit();
 
             return redirect()->route('travel-plans.show', $travelPlan)
-                ->with('success', '班グループを削除しました');
+                ->with('success', '班グループ「'.$groupName.'」を削除しました。');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                ->with('error', '班グループの削除に失敗しました: '.$e->getMessage());
+                ->with('error', '班グループの削除に失敗しました。'.$e->getMessage());
         }
     }
 
