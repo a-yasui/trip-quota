@@ -18,29 +18,26 @@ class TravelPlanService
     /**
      * 旅行計画を作成する
      *
-     * @param string $plan_name 旅行計画名
+     * @param CreateRequest $request 旅行計画作成リクエスト
      * @return GroupCreateResult 作成された旅行計画とコアグループ
      */
-    public function create(string $plan_name): GroupCreateResult
+    public function create(CreateRequest $request): GroupCreateResult
     {
-        return DB::transaction(function () use ($plan_name) {
+        return DB::transaction(function () use ($request) {
             // 旅行計画を作成
             $plan = new TravelPlan();
-            $plan->title = $plan_name;
-            // テスト時に必須フィールドがないとエラーになるため、デフォルト値を設定
-            // 実際のアプリケーションでは、これらの値はコントローラーで設定される
-            // このため、これらのフィールドはアプリケーション層でさらに上書きされる可能性がある
-            if (app()->environment('testing')) {
-                $plan->creator_id = 1; // テスト用のデフォルト値
-                $plan->deletion_permission_holder_id = 1; // テスト用のデフォルト値
-                $plan->departure_date = now()->addDays(30); // テスト用のデフォルト値
-                $plan->timezone = 'Asia/Tokyo'; // テスト用のデフォルト値
-            }
+            $plan->title = $request->plan_name;
+            $plan->creator_id = $request->creator->id;
+            $plan->deletion_permission_holder_id = $request->creator->id;
+            $plan->departure_date = $request->departure_date;
+            $plan->timezone = $request->timezone;
+            $plan->return_date = $request->return_date;
+            $plan->is_active = $request->is_active;
             $plan->save();
             
             // コアグループを作成
             $coreGroup = new Group();
-            $coreGroup->name = $plan_name . 'のメンバー';
+            $coreGroup->name = $request->plan_name . 'のメンバー';
             $coreGroup->type = GroupType::CORE;
             $coreGroup->travel_plan_id = $plan->id;
             $coreGroup->save();

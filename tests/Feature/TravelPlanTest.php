@@ -78,6 +78,8 @@ class TravelPlanTest extends TestCase
         $response = $this->actingAs($user)
             ->post('/travel-plans', $travelPlanData);
 
+        file_put_contents('test.html', $response->getContent());
+
         $this->assertDatabaseHas('travel_plans', [
             'title' => '韓国ソウル旅行',
             'creator_id' => $user->id,

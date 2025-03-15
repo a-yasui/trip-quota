@@ -329,9 +329,24 @@ git status で現在の git のコンテキストを確認します。 もし指
 
 この事を踏まえて、ドメイン `TripQuota\TravelPlan\TravelPlanService` を下記のように実装する。
 
-- `TripQuota\TravelPlan\TravelPlanService::create(string $plan_name): GroupCreateResult`
+- `TripQuota\TravelPlan\TravelPlanService::create(CreateRequest $request): GroupCreateResult`
 
-    旅行計画を作成する。返り値の GroupCreateResult は `class GroupCreateResult {public function __construct(public readonly TravelPlan $plan, public readonly Group $core_group){}}` である
+    旅行計画を作成する。
+
+    引数の CreateRequest は次のようなデータである。
+    ```php
+    class CreateRequest {
+        public function __construct(
+        public readonly string $plan_name,
+        public readonly \App\Model\User $creator,
+        public readonly \DateTimeInterface $departure_date,
+        public readonly \App\Enum\Timezone $timezone,
+        public readonly \DateTimeInterface $return_date = null,
+        public readonly bool $is_active = true
+    ){}}
+    ```
+    
+    返り値の GroupCreateResult は `class GroupCreateResult {public function __construct(public readonly TravelPlan $plan, public readonly Group $core_group){}}` である
 
 - `TripQuota\TravelPlan\TravelPlanService::addBranchGroup(TravelPlan $plan, string $branch_name): BranchGroup`
 

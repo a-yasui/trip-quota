@@ -3,6 +3,7 @@
 namespace Tests\Unit\TripQuota\TravelPlan;
 
 use App\Enums\GroupType;
+use App\Enums\Timezone;
 use App\Models\ExpenseSettlement;
 use App\Models\Group;
 use App\Models\Member;
@@ -10,6 +11,7 @@ use App\Models\TravelPlan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use TripQuota\TravelPlan\CreateRequest;
 use TripQuota\TravelPlan\GroupCreateResult;
 use TripQuota\TravelPlan\TravelPlanService;
 
@@ -35,9 +37,24 @@ class TravelPlanServiceTest extends TestCase
         
         // テスト用の旅行計画名
         $planName = '韓国ソウル旅行';
+        
+        // 出発日と時間帯を設定
+        $departureDate = now()->addDays(30);
+        $timezone = Timezone::ASIA_TOKYO;
+        $returnDate = now()->addDays(35);
+
+        // CreateRequestオブジェクトを作成
+        $createRequest = new CreateRequest(
+            plan_name: $planName,
+            creator: $user,
+            departure_date: $departureDate,
+            timezone: $timezone,
+            return_date: $returnDate,
+            is_active: true
+        );
 
         // サービスを使用して旅行計画とコアグループを作成
-        $result = $this->travelPlanService->create($planName);
+        $result = $this->travelPlanService->create($createRequest);
 
         // 戻り値が GroupCreateResult クラスのインスタンスであることを確認
         $this->assertInstanceOf(GroupCreateResult::class, $result);
@@ -49,12 +66,13 @@ class TravelPlanServiceTest extends TestCase
         // 旅行計画名が正しく設定されていることを確認
         $this->assertEquals($planName, $result->plan->title);
         
-        // 必須フィールドを設定
-        $result->plan->creator_id = $user->id;
-        $result->plan->deletion_permission_holder_id = $user->id;
-        $result->plan->departure_date = now()->addDays(30);
-        $result->plan->timezone = 'Asia/Tokyo';
-        $result->plan->save();
+        // 各フィールドが正しく設定されていることを確認
+        $this->assertEquals($user->id, $result->plan->creator_id);
+        $this->assertEquals($user->id, $result->plan->deletion_permission_holder_id);
+        $this->assertEquals($departureDate->format('Y-m-d'), $result->plan->departure_date->format('Y-m-d'));
+        $this->assertEquals($timezone, $result->plan->timezone);
+        $this->assertEquals($returnDate->format('Y-m-d'), $result->plan->return_date->format('Y-m-d'));
+        $this->assertTrue($result->plan->is_active);
 
         // コアグループが旅行計画に紐づいていることを確認
         $this->assertEquals($result->plan->id, $result->core_group->travel_plan_id);
