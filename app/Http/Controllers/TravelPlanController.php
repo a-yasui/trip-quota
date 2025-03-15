@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use TripQuota\TravelPlan\TravelPlanService;
+use TripQuota\TravelPlan\CreateRequest;
 
 class TravelPlanController extends Controller
 {
@@ -64,40 +65,37 @@ class TravelPlanController extends Controller
     public function store(TravelPlanRequest $request)
     {
         try {
-            DB::beginTransaction();
+            return DB::transaction(function () use ($request) {
+                $user = Auth::user();
 
-            $user = Auth::user();
+                // CreateRequestオブジェクトを作成
+                $createRequest = new CreateRequest(
+                    plan_name: $request->title,
+                    creator: $user,
+                    departure_date: new \Carbon\Carbon($request->departure_date),
+                    timezone: \App\Enums\Timezone::tryFrom($request->timezone),
+                    return_date: $request->return_date ? new \Carbon\Carbon($request->return_date) : null,
+                    is_active: true
+                );
 
-            // TravelPlanServiceを使用して旅行計画とコアグループを作成
-            $result = $this->travelPlanService->create(
-                $request->title,
-                $user->id,
-                $user->id,
-                $request->departure_date,
-                $request->timezone,
-                $request->return_date,
-                true
-            );
-            $travelPlan = $result->plan;
-            $coreGroup = $result->core_group;
+                // TravelPlanServiceを使用して旅行計画とコアグループを作成
+                $result = $this->travelPlanService->create($createRequest);
+                $travelPlan = $result->plan;
+                $coreGroup = $result->core_group;
 
-            // 作成者をコアグループのメンバーとして追加
-            $member = new Member;
-            $member->name = $user->name;
-            $member->email = $user->email;
-            $member->user_id = $user->id;
-            $member->group_id = $coreGroup->id;
-            $member->is_active = true;
-            $member->save();
+                // 作成者をコアグループのメンバーとして追加
+                $member = new Member;
+                $member->name = $user->name;
+                $member->email = $user->email;
+                $member->user_id = $user->id;
+                $member->group_id = $coreGroup->id;
+                $member->is_active = true;
+                $member->save();
 
-            DB::commit();
-
-            return redirect()->route('travel-plans.show', $travelPlan)
-                ->with('success', '旅行計画「'.$travelPlan->title.'」を作成しました。');
-
+                return redirect()->route('travel-plans.show', $travelPlan)
+                    ->with('success', '旅行計画「'.$travelPlan->title.'」を作成しました。');
+            });
         } catch (\Exception $e) {
-            DB::rollBack();
-
             return redirect()->back()
                 ->withInput()
                 ->with('error', '旅行計画の作成に失敗しました。'.$e->getMessage());
@@ -202,7 +200,7 @@ class TravelPlanController extends Controller
 
     /**
      * 旅行計画を削除
-     * 
+     *
      * @param  TravelPlan $travelPlan
      * @return \Illuminate\Http\RedirectResponse
      */
