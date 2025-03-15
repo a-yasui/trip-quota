@@ -29,7 +29,6 @@ class MemberFactory extends Factory
             'group_id' => $group->id,
             'arrival_date' => $travelPlan->departure_date,
             'departure_date' => $travelPlan->return_date,
-            'is_registered' => true,
             'is_active' => true,
         ];
     }
@@ -42,8 +41,9 @@ class MemberFactory extends Factory
     public function registered()
     {
         return $this->state(function (array $attributes) {
+            $user = User::factory()->create();
             return [
-                'is_registered' => true,
+                'user_id' => $user->id,
             ];
         });
     }
@@ -57,7 +57,6 @@ class MemberFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'is_registered' => false,
                 'user_id' => null,
             ];
         });

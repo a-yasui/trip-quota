@@ -43,10 +43,9 @@ class ItineraryTest extends TestCase
         ]);
 
         // メンバーを作成
-        Member::factory()->create([
-            'user_id' => $this->user->id,
+        $member = Member::factory()->create([
             'group_id' => $this->coreGroup->id,
-            'is_registered' => true,
+            'user_id' => $this->user->id,
         ]);
     }
 

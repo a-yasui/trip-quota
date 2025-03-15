@@ -211,11 +211,21 @@ class Member extends Model
     }
 
     /**
+     * Get the registered status attribute.
+     *
+     * @return bool
+     */
+    public function getIsRegisteredAttribute()
+    {
+        return !is_null($this->user_id);
+    }
+
+    /**
      * Scope a query to only include registered members.
      */
     public function scopeRegistered($query)
     {
-        return $query->where('is_registered', true);
+        return $query->whereNotNull('user_id');
     }
 
     public function branchGroups()
