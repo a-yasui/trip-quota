@@ -26,7 +26,7 @@ return new class extends Migration
         });
 
         // Add index for case-insensitive account name lookups
-        DB::statement('CREATE INDEX accounts_name_index ON accounts (LOWER(name))');
+//        DB::statement('CREATE INDEX accounts_name_index ON accounts (LOWER(name))');
     }
 
     /**

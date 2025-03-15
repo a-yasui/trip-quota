@@ -58,6 +58,6 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
     && update-alternatives --set python /usr/bin/python3
 
 #コンテナ内に入った時のディレクトリを指定
-WORKDIR /var/www/html
+WORKDIR /var/www
 
 EXPOSE 80
