@@ -4,14 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Enums\GroupType;
 use App\Http\Requests\TravelPlanRequest;
+use App\Models\ActivityLog;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\TravelPlan;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use TripQuota\TravelPlan\TravelPlanService;
 
 class TravelPlanController extends Controller
 {
+    /**
+     * @var TravelPlanService
+     */
+    protected TravelPlanService $travelPlanService;
+
+    /**
+     * コンストラクタ
+     */
+    public function __construct(TravelPlanService $travelPlanService)
+    {
+        $this->travelPlanService = $travelPlanService;
+    }
+
     /**
      * Display a listing of the travel plans.
      *
@@ -52,9 +68,12 @@ class TravelPlanController extends Controller
 
             $user = Auth::user();
 
-            // 旅行計画の作成
-            $travelPlan = new TravelPlan;
-            $travelPlan->title = $request->title;
+            // TravelPlanServiceを使用して旅行計画とコアグループを作成
+            $result = $this->travelPlanService->create($request->title);
+            $travelPlan = $result->plan;
+            $coreGroup = $result->core_group;
+            
+            // 旅行計画の追加情報を設定
             $travelPlan->creator_id = $user->id;
             $travelPlan->deletion_permission_holder_id = $user->id;
             $travelPlan->departure_date = $request->departure_date;
@@ -62,14 +81,6 @@ class TravelPlanController extends Controller
             $travelPlan->timezone = $request->timezone;
             $travelPlan->is_active = true;
             $travelPlan->save();
-
-            // コアグループの作成
-            $coreGroup = new Group;
-            $coreGroup->name = $travelPlan->title;
-            $coreGroup->type = GroupType::CORE;
-            $coreGroup->travel_plan_id = $travelPlan->id;
-            $coreGroup->description = 'メインメンバーグループ';
-            $coreGroup->save();
 
             // 作成者をコアグループのメンバーとして追加
             $member = new Member;
@@ -187,6 +198,44 @@ class TravelPlanController extends Controller
             return redirect()->back()
                 ->withInput()
                 ->with('error', '旅行計画の更新に失敗しました。'.$e->getMessage());
+        }
+    }
+
+    /**
+     * 旅行計画を削除
+     * 
+     * @param  TravelPlan $travelPlan
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(TravelPlan $travelPlan)
+    {
+        // 権限チェック
+        $user = Auth::user();
+        if ($user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
+            abort(403, '旅行計画を削除する権限がありません。');
+        }
+
+        try {
+            $planName = $travelPlan->title;
+
+            // TravelPlanServiceを使用して旅行計画を削除
+            $this->travelPlanService->removeTravelPlan($travelPlan);
+
+            // 活動ログを記録
+            $activityLog = new ActivityLog;
+            $activityLog->user_id = Auth::id();
+            $activityLog->subject_type = 'travel_plan_deleted';
+            $activityLog->subject_id = null;
+            $activityLog->action = 'travel_plan_deleted';
+            $activityLog->description = Auth::user()->name.'さんが旅行計画「'.$planName.'」を削除しました';
+            $activityLog->save();
+
+            return redirect()->route('travel-plans.index')
+                ->with('success', '旅行計画「'.$planName.'」を削除しました。');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', '旅行計画の削除に失敗しました。'.$e->getMessage());
         }
     }
 }

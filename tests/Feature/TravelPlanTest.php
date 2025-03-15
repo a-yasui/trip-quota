@@ -8,6 +8,7 @@ use App\Models\TravelPlan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Enums\GroupType;
 
 class TravelPlanTest extends TestCase
 {
@@ -84,6 +85,7 @@ class TravelPlanTest extends TestCase
         ]);
 
         $travelPlan = TravelPlan::where('title', '韓国ソウル旅行')->first();
+        $this->assertNotNull($travelPlan, '旅行計画が作成されていません');
 
         $this->assertDatabaseHas('groups', [
             'travel_plan_id' => $travelPlan->id,
@@ -93,6 +95,7 @@ class TravelPlanTest extends TestCase
         $coreGroup = Group::where('travel_plan_id', $travelPlan->id)
             ->where('type', 'core')
             ->first();
+        $this->assertNotNull($coreGroup, 'コアグループが作成されていません');
 
         $this->assertDatabaseHas('members', [
             'group_id' => $coreGroup->id,
@@ -491,5 +494,90 @@ class TravelPlanTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertDontSee('編集'); // 編集ボタンが表示されないことを確認
+    }
+
+    /**
+     * Test that a travel plan can be deleted.
+     */
+    public function test_travel_plan_can_be_deleted(): void
+    {
+        $user = User::factory()->create();
+
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+            'title' => '韓国ソウル旅行',
+        ]);
+
+        $coreGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => GroupType::CORE,
+            'name' => $travelPlan->title,
+        ]);
+
+        $branchGroup = Group::factory()->create([
+            'travel_plan_id' => $travelPlan->id,
+            'type' => GroupType::BRANCH,
+            'name' => '観光班',
+            'parent_group_id' => $coreGroup->id,
+        ]);
+
+        $member = Member::factory()->create([
+            'group_id' => $coreGroup->id,
+            'user_id' => $user->id,
+        ]);
+
+        $branchGroup->members()->attach($member->id);
+
+        $response = $this->actingAs($user)
+            ->delete('/travel-plans/'.$travelPlan->id);
+
+        $response->assertRedirect(route('travel-plans.index'));
+        $response->assertSessionHas('success');
+
+        // 旅行計画が削除されていることを確認（ソフトデリート）
+        $this->assertSoftDeleted('travel_plans', [
+            'id' => $travelPlan->id,
+        ]);
+
+        // コアグループが削除されていることを確認（ソフトデリート）
+        $this->assertSoftDeleted('groups', [
+            'id' => $coreGroup->id,
+        ]);
+
+        // 班グループが削除されていることを確認（ソフトデリート）
+        $this->assertSoftDeleted('groups', [
+            'id' => $branchGroup->id,
+        ]);
+
+        // メンバーが非アクティブになっていることを確認
+        $this->assertDatabaseHas('members', [
+            'id' => $member->id,
+            'is_active' => false,
+        ]);
+    }
+
+    /**
+     * Test that a travel plan cannot be deleted by unauthorized user.
+     */
+    public function test_travel_plan_cannot_be_deleted_by_unauthorized_user(): void
+    {
+        $user = User::factory()->create();
+        $anotherUser = User::factory()->create();
+
+        $travelPlan = TravelPlan::factory()->create([
+            'creator_id' => $user->id,
+            'deletion_permission_holder_id' => $user->id,
+        ]);
+
+        $response = $this->actingAs($anotherUser)
+            ->delete('/travel-plans/'.$travelPlan->id);
+
+        $response->assertStatus(403); // 権限なしの場合は403エラー
+
+        // 旅行計画が削除されていないことを確認
+        $this->assertDatabaseHas('travel_plans', [
+            'id' => $travelPlan->id,
+        ]);
     }
 }

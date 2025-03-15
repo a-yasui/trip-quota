@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/travel-plans/{travelPlan}', [TravelPlanController::class, 'show'])->name('travel-plans.show');
     Route::get('/travel-plans/{travelPlan}/edit', [TravelPlanController::class, 'edit'])->name('travel-plans.edit');
     Route::put('/travel-plans/{travelPlan}', [TravelPlanController::class, 'update'])->name('travel-plans.update');
+    Route::delete('/travel-plans/{travelPlan}', [TravelPlanController::class, 'destroy'])->name('travel-plans.destroy');
 
     // グループルート
     Route::get('/groups', [App\Http\Controllers\GroupController::class, 'index'])->name('groups.index');
