@@ -10,6 +10,7 @@ use App\Models\ExpenseSettlement;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use TripQuota\Group\GroupService;
+use TripQuota\User\UserService;
 
 /**
  * 旅行計画に関するドメインサービス
@@ -43,17 +44,9 @@ class TravelPlanService
             $coreGroup->travel_plan_id = $plan->id;
             $coreGroup->save();
 
-            // 作成者をコアグループのメンバーとして追加
-            $member = new Member;
-            $member->name = $request->creator->name;
-            $member->email = $request->creator->email;
-            $member->user_id = $request->creator->id;
-            $member->group_id = $coreGroup->id;
-            $member->is_active = true;
-            $member->save();
-
-            $groupService = new GroupService();
-            $groupService->addCoreMember($plan, $member);
+            // UserService を利用して作成者をメンバーとして追加
+            $userService = new UserService();
+            $userService->createMember($plan, $request->creator->name, $request->creator->email);
 
             return new GroupCreateResult($plan, $coreGroup);
         });
