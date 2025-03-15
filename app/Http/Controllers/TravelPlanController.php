@@ -81,16 +81,6 @@ class TravelPlanController extends Controller
                 // TravelPlanServiceを使用して旅行計画とコアグループを作成
                 $result = $this->travelPlanService->create($createRequest);
                 $travelPlan = $result->plan;
-                $coreGroup = $result->core_group;
-
-                // 作成者をコアグループのメンバーとして追加
-                $member = new Member;
-                $member->name = $user->name;
-                $member->email = $user->email;
-                $member->user_id = $user->id;
-                $member->group_id = $coreGroup->id;
-                $member->is_active = true;
-                $member->save();
 
                 return redirect()->route('travel-plans.show', $travelPlan)
                     ->with('success', '旅行計画「'.$travelPlan->title.'」を作成しました。');

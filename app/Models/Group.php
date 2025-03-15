@@ -112,6 +112,10 @@ class Group extends Model
      */
     public function members()
     {
+        // 特殊:: コアグループはhasManyで、班グループはbelongsToManyで取得する
+        if ($this->type === \App\Enums\GroupType::CORE) {
+            return $this->hasMany(Member::class, 'group_id');
+        }
         return $this->belongsToMany(Member::class, 'group_member')
                     ->withTimestamps();
     }

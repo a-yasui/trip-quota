@@ -4,6 +4,7 @@ namespace TripQuota\TravelPlan;
 
 use App\Enums\GroupType;
 use App\Models\Group;
+use App\Models\Member;
 use App\Models\TravelPlan;
 use App\Models\ExpenseSettlement;
 use Illuminate\Support\Facades\DB;
@@ -34,18 +35,30 @@ class TravelPlanService
             $plan->return_date = $request->return_date;
             $plan->is_active = $request->is_active;
             $plan->save();
-            
+
             // コアグループを作成
             $coreGroup = new Group();
             $coreGroup->name = $request->plan_name . 'のメンバー';
             $coreGroup->type = GroupType::CORE;
             $coreGroup->travel_plan_id = $plan->id;
             $coreGroup->save();
-            
+
+            // 作成者をコアグループのメンバーとして追加
+            $member = new Member;
+            $member->name = $request->creator->name;
+            $member->email = $request->creator->email;
+            $member->user_id = $request->creator->id;
+            $member->group_id = $coreGroup->id;
+            $member->is_active = true;
+            $member->save();
+
+            $groupService = new GroupService();
+            $groupService->addCoreMember($plan, $member);
+
             return new GroupCreateResult($plan, $coreGroup);
         });
     }
-    
+
     /**
      * 旅行計画に対して班グループを作成する
      *
@@ -57,7 +70,7 @@ class TravelPlanService
     {
         // コアグループの存在確認
         $coreGroup = $plan->groups()->core()->firstOrFail();
-        
+
         // 班グループを作成
         $branchGroup = new Group();
         $branchGroup->name = $branch_name;
@@ -65,10 +78,10 @@ class TravelPlanService
         $branchGroup->travel_plan_id = $plan->id;
         $branchGroup->parent_group_id = $coreGroup->id;
         $branchGroup->save();
-        
+
         return $branchGroup;
     }
-    
+
     /**
      * 班グループを削除する
      *
@@ -81,40 +94,40 @@ class TravelPlanService
         if ($group->type !== GroupType::BRANCH) {
             throw new \InvalidArgumentException('指定されたグループはコアグループであるため削除できません。');
         }
-        
+
         // 精算情報の存在チェック
         $branchMembers = $group->members()->pluck('members.id')->toArray();
-        
+
         if (count($branchMembers) > 0) {
             $hasSettlements = ExpenseSettlement::where(function ($query) use ($branchMembers) {
                 $query->whereIn('payer_member_id', $branchMembers)
                       ->orWhereIn('receiver_member_id', $branchMembers);
             })->exists();
-            
+
             if ($hasSettlements) {
                 throw new \Exception('グループのメンバーに精算データがあるため削除できません。');
             }
         }
-        
+
         // 関連データの削除
         DB::transaction(function () use ($group) {
             // メンバー関連をデタッチ
             $group->members()->detach();
-            
+
             // 班グループ接続を削除
             $group->sourceBranchGroupConnections()->delete();
             $group->targetBranchGroupConnections()->delete();
-            
+
             // システム班グループキーを削除
             if ($group->systemBranchGroupKey) {
                 $group->systemBranchGroupKey->delete();
             }
-            
+
             // グループを削除
             $group->delete();
         });
     }
-    
+
     /**
      * 旅行計画を削除する
      *
@@ -125,7 +138,7 @@ class TravelPlanService
         DB::transaction(function () use ($plan) {
             // 関連するすべてのグループを取得
             $groups = $plan->groups;
-            
+
             foreach ($groups as $group) {
                 // コアグループのメンバーを非アクティブに
                 if ($group->type === GroupType::CORE) {
@@ -134,27 +147,27 @@ class TravelPlanService
                         $member->save();
                     }
                 }
-                
+
                 // 班グループのメンバー関連をデタッチ
                 if ($group->type === GroupType::BRANCH) {
                     $group->members()->detach();
-                    
+
                     // 班グループ接続を削除
                     $group->sourceBranchGroupConnections()->delete();
                     $group->targetBranchGroupConnections()->delete();
-                    
+
                     // システム班グループキーを削除
                     if ($group->systemBranchGroupKey) {
                         $group->systemBranchGroupKey->delete();
                     }
                 }
-                
+
                 // グループを削除
                 $group->delete();
             }
-            
+
             // 旅行計画を削除
             $plan->delete();
         });
     }
-} 
+}
