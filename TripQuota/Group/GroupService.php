@@ -45,7 +45,12 @@ class GroupService
         $member->group_id = $coreGroup->id;
         $member->save();
 
-        $coreGroup->members()->attach($member->id);
+        // 中間テーブルに保持させる
+        \DB::table('group_member')
+            ->insert([
+                'group_id' => $coreGroup->id,
+                'member_id' => $member->id,
+            ]);
 
         return $coreGroup;
     }

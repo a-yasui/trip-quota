@@ -136,6 +136,13 @@ class GroupMemberTest extends TestCase
             'travel_plan_id' => $travelPlan->id,
             'type' => 'core',
         ]);
+        
+        // 通常メンバーに加えて、もう1人のメンバーを追加（最後のメンバー削除防止のため）
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'name' => '他のメンバー',
+        ]);
+        
         $member = Member::factory()->create([
             'group_id' => $group->id,
             'name' => '削除対象メンバー',
@@ -145,8 +152,8 @@ class GroupMemberTest extends TestCase
             ->delete(route('groups.members.destroy', [$group, $member]));
 
         $response->assertRedirect();
-        $group->refresh();
-        $this->assertFalse($group->members()->where('members.id', $member->id)->exists());
+        $member->refresh();
+        $this->assertFalse($member->is_active);
     }
 
     /**

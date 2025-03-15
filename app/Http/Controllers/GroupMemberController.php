@@ -11,14 +11,17 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use TripQuota\Group\GroupService;
+use TripQuota\User\UserService;
 
 class GroupMemberController extends Controller
 {
     protected GroupService $groupService;
+    protected UserService $userService;
 
-    public function __construct(GroupService $groupService)
+    public function __construct(GroupService $groupService, UserService $userService)
     {
         $this->groupService = $groupService;
+        $this->userService = $userService;
     }
 
     /**
@@ -43,11 +46,6 @@ class GroupMemberController extends Controller
             // 旅行計画を取得
             $travelPlan = $group->travelPlan;
 
-            $member = new Member;
-            $member->name = $request->name ?? $request->email; // メールアドレスのみの場合は名前としても使用
-            $member->email = $request->email;
-            $member->is_active = true;
-
             // メールアドレスが入力され、そのアドレスが登録ユーザーのものである場合
             if ($request->email) {
                 $user = User::where('email', $request->email)->first();
@@ -65,24 +63,15 @@ class GroupMemberController extends Controller
                                 ->with('error', 'このユーザーは既にメンバーとして登録されています');
                         }
                     }
-
-                    $member->user_id = $user->id;
-                    // 名前が指定されていない場合はユーザー名を使用
-                    if (! $request->name) {
-                        $member->name = $user->name;
-                    }
                 }
             }
 
-            // 一時的に保存（group_idを設定せずに）
-            $member->group_id = 0; // 仮の値
-            $member->save();
-
-            // GroupServiceを使ってコアグループにメンバーを追加
-            $coreGroup = $this->groupService->addCoreMember($travelPlan, $member);
+            // UserService を使用してメンバー作成
+            $memberName = $request->name ?? $request->email;
+            $member = $this->userService->createMember($travelPlan, $memberName, $request->email);
 
             // コアグループとは別に、元のリクエストで指定された班グループ（$group）にもメンバーを関連付ける
-            if ($group->id !== $coreGroup->id && $group->type === \App\Enums\GroupType::BRANCH) {
+            if ($group->type === \App\Enums\GroupType::BRANCH) {
                 $this->groupService->addBranchMember($group, $member);
             }
 
@@ -136,8 +125,8 @@ class GroupMemberController extends Controller
                     ->with('error', '自分自身をメンバーから削除することはできません。');
             }
 
-            // GroupServiceを使ってコアグループからメンバーを削除
-            $this->groupService->removeCoreMember($travelPlan, $member);
+            // UserService を使ってメンバーを削除
+            $this->userService->removeMember($travelPlan, $member);
 
             // 活動ログを記録
             $activityLog = new ActivityLog;
