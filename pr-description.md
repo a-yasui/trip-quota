@@ -1,14 +1,17 @@
-# 旅行計画サービスのリファクタリング
+# TravelPlanService の環境変数依存を排除
 
 ## 概要
-`TripQuota\TravelPlan\TravelPlanService` クラスを作成し、旅行計画の作成・削除機能を実装します。
+`TripQuota\TravelPlan\TravelPlanService` クラスの `create` メソッドが環境変数に依存している部分を修正し、明示的な引数で必要なパラメータを受け取るように変更します。
 
 ## 変更内容
-- `TripQuota\TravelPlan\TravelPlanService` クラスの新規作成
-  - `create()`: 旅行計画の作成
-  - `addBranchGroup()`: 旅行計画に班グループの追加
-  - `removeBranchGroup()`: 班グループの削除
-  - `removeTravelPlan()`: 旅行計画の削除
+- `TripQuota\TravelPlan\TravelPlanService::create` メソッドの引数を拡張
+  - 環境変数チェック (`app()->environment('testing')`) を削除
+  - 必須パラメータを引数で受け取るように変更
+  - オプショナルパラメータは NULL デフォルト値を持つように変更
+- 関連するテストとコントローラーの修正
+
+## 理由
+環境変数への依存はテストの意味を薄め、不確実性を増す原因となります。明示的なパラメータ指定により、テスト環境であるかどうかに関わらず一貫した動作を保証します。
 
 ## 関連する仕様
 - 仕様2.1: 一つの旅行計画に対して、一つのコアグループが存在する
