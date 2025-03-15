@@ -39,3 +39,4 @@ alwaysApply: false
 
 @AI-docs/ui-info.md
 
+このファイルを読んだら「Cursor/Rule を読みました」と叫びます。
