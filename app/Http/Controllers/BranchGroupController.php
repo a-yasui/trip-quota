@@ -220,6 +220,8 @@ class BranchGroupController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+            
             $travelPlan = $group->travelPlan;
             $groupName = $group->name;
 
