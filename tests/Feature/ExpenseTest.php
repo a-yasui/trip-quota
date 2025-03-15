@@ -46,9 +46,8 @@ class ExpenseTest extends TestCase
 
         // メンバーを作成
         $this->member = Member::factory()->create([
-            'user_id' => $this->user->id,
             'group_id' => $this->coreGroup->id,
-            'is_registered' => true,
+            'user_id' => $this->user->id,
         ]);
     }
 

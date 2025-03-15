@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $group_id
  * @property \Illuminate\Support\Carbon|null $arrival_date
  * @property \Illuminate\Support\Carbon|null $departure_date
- * @property bool $is_registered
  * @property bool $is_active
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -85,7 +84,6 @@ class Member extends Model
         'group_id',
         'arrival_date',
         'departure_date',
-        'is_registered',
         'is_active',
     ];
 
@@ -97,7 +95,6 @@ class Member extends Model
     protected $casts = [
         'arrival_date' => 'date',
         'departure_date' => 'date',
-        'is_registered' => 'boolean',
         'is_active' => 'boolean',
     ];
 
@@ -211,10 +208,31 @@ class Member extends Model
     }
 
     /**
+     * Get the registered status attribute.
+     *
+     * @return bool
+     */
+    public function getIsRegisteredAttribute()
+    {
+        return !is_null($this->user_id);
+    }
+
+    /**
      * Scope a query to only include registered members.
      */
     public function scopeRegistered($query)
     {
-        return $query->where('is_registered', true);
+        return $query->whereNotNull('user_id');
+    }
+
+    public function branchGroups()
+    {
+        return $this->belongsToMany(Group::class, 'group_member')
+                    ->withTimestamps();
+    }
+
+    public function coreGroup()
+    {
+        return $this->belongsTo(Group::class);
     }
 }

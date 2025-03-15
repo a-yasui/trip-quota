@@ -59,7 +59,7 @@ class GroupMemberTest extends TestCase
         $this->assertDatabaseHas('members', [
             'name' => 'テストメンバー',
             'group_id' => $group->id,
-            'is_registered' => 0,
+            'user_id' => null,
         ]);
     }
 
@@ -87,7 +87,7 @@ class GroupMemberTest extends TestCase
         $this->assertDatabaseHas('members', [
             'email' => 'test@example.com',
             'group_id' => $group->id,
-            'is_registered' => 0,
+            'user_id' => null,
         ]);
     }
 
@@ -119,7 +119,6 @@ class GroupMemberTest extends TestCase
             'email' => $otherUser->email,
             'user_id' => $otherUser->id,
             'group_id' => $group->id,
-            'is_registered' => 1,
         ]);
     }
 
@@ -146,9 +145,8 @@ class GroupMemberTest extends TestCase
             ->delete(route('groups.members.destroy', [$group, $member]));
 
         $response->assertRedirect();
-        $this->assertSoftDeleted('members', [
-            'id' => $member->id,
-        ]);
+        $group->refresh();
+        $this->assertFalse($group->members()->where('members.id', $member->id)->exists());
     }
 
     /**
@@ -170,7 +168,6 @@ class GroupMemberTest extends TestCase
             'name' => $user->name,
             'email' => $user->email,
             'user_id' => $user->id,
-            'is_registered' => true,
         ]);
 
         $response = $this->actingAs($user)

@@ -16,6 +16,9 @@
 
    # コミットメッセージのスタイル確認
    git --no-pager log
+
+   # 変更点を見る
+   git --no-pager show
    ```
 
 2. 変更の分析

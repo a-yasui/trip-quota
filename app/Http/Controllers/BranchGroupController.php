@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class BranchGroupController extends Controller
 {
@@ -80,7 +81,6 @@ class BranchGroupController extends Controller
                 $newMember->email = $member->email;
                 $newMember->user_id = $member->user_id;
                 $newMember->group_id = $branchGroup->id;
-                $newMember->is_registered = $member->is_registered;
                 $newMember->is_active = true;
                 $newMember->save();
             }
@@ -332,17 +332,12 @@ class BranchGroupController extends Controller
             $newGroup->save();
 
             // 元の班グループのメンバーを複製
-            $members = $group->members()->active()->get();
-            foreach ($members as $member) {
-                $newMember = new Member;
-                $newMember->name = $member->name;
-                $newMember->email = $member->email;
-                $newMember->user_id = $member->user_id;
-                $newMember->group_id = $newGroup->id;
-                $newMember->is_registered = $member->is_registered;
-                $newMember->is_active = true;
-                $newMember->save();
-            }
+            $memberIds = $group->members()->pluck('members.id');
+
+            $newGroup->branchMembers()->attach($memberIds);
+
+            // デバッグ出力を追加
+            Log::info('新しいグループが作成されました', ['group_id' => $newGroup->id, 'name' => $newGroup->name]);
 
             // 活動ログを記録
             $activityLog = new ActivityLog;

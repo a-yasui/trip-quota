@@ -10,9 +10,17 @@ use App\Models\TravelPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use TripQuota\Group\GroupService;
 
 class GroupMemberController extends Controller
 {
+    protected GroupService $groupService;
+
+    public function __construct(GroupService $groupService)
+    {
+        $this->groupService = $groupService;
+    }
+
     /**
      * メンバーを追加するフォームを表示
      */
@@ -26,18 +34,18 @@ class GroupMemberController extends Controller
      */
     public function store(GroupMemberStoreRequest $request, Group $group)
     {
-
         try {
             // トランザクションが既に開始されていない場合のみ開始
             if (DB::transactionLevel() === 0) {
                 DB::beginTransaction();
             }
 
+            // 旅行計画を取得
+            $travelPlan = $group->travelPlan;
+
             $member = new Member;
             $member->name = $request->name ?? $request->email; // メールアドレスのみの場合は名前としても使用
             $member->email = $request->email;
-            $member->group_id = $group->id;
-            $member->is_registered = false;
             $member->is_active = true;
 
             // メールアドレスが入力され、そのアドレスが登録ユーザーのものである場合
@@ -45,18 +53,20 @@ class GroupMemberController extends Controller
                 $user = User::where('email', $request->email)->first();
                 if ($user) {
                     // ユーザーが既にこのグループのメンバーとして登録されているかチェック
-                    $existingMember = Member::where('group_id', $group->id)
-                        ->where('user_id', $user->id)
-                        ->first();
+                    $coreGroup = $travelPlan->groups()->where('type', \App\Enums\GroupType::CORE)->first();
+                    if ($coreGroup) {
+                        $existingMember = Member::where('group_id', $coreGroup->id)
+                            ->where('user_id', $user->id)
+                            ->first();
 
-                    if ($existingMember) {
-                        return redirect()->route('groups.members.create', $group)
-                            ->withInput()
-                            ->with('error', 'このユーザーは既にメンバーとして登録されています');
+                        if ($existingMember) {
+                            return redirect()->route('groups.members.create', $group)
+                                ->withInput()
+                                ->with('error', 'このユーザーは既にメンバーとして登録されています');
+                        }
                     }
 
                     $member->user_id = $user->id;
-                    $member->is_registered = true;
                     // 名前が指定されていない場合はユーザー名を使用
                     if (! $request->name) {
                         $member->name = $user->name;
@@ -64,7 +74,17 @@ class GroupMemberController extends Controller
                 }
             }
 
+            // 一時的に保存（group_idを設定せずに）
+            $member->group_id = 0; // 仮の値
             $member->save();
+
+            // GroupServiceを使ってコアグループにメンバーを追加
+            $coreGroup = $this->groupService->addCoreMember($travelPlan, $member);
+
+            // コアグループとは別に、元のリクエストで指定された班グループ（$group）にもメンバーを関連付ける
+            if ($group->id !== $coreGroup->id && $group->type === \App\Enums\GroupType::BRANCH) {
+                $this->groupService->addBranchMember($group, $member);
+            }
 
             // 活動ログを記録
             $activityLog = new ActivityLog;
@@ -116,7 +136,8 @@ class GroupMemberController extends Controller
                     ->with('error', '自分自身をメンバーから削除することはできません。');
             }
 
-            $member->delete();
+            // GroupServiceを使ってコアグループからメンバーを削除
+            $this->groupService->removeCoreMember($travelPlan, $member);
 
             // 活動ログを記録
             $activityLog = new ActivityLog;

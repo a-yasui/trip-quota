@@ -77,7 +77,6 @@ class TravelPlanController extends Controller
             $member->email = $user->email;
             $member->user_id = $user->id;
             $member->group_id = $coreGroup->id;
-            $member->is_registered = true;
             $member->is_active = true;
             $member->save();
 

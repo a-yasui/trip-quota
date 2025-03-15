@@ -97,7 +97,6 @@ class TravelPlanTest extends TestCase
         $this->assertDatabaseHas('members', [
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
-            'is_registered' => true,
         ]);
 
         $response->assertRedirect(route('travel-plans.show', $travelPlan));
@@ -172,9 +171,6 @@ class TravelPlanTest extends TestCase
         $member = Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'is_registered' => true,
         ]);
 
         $response = $this->actingAs($user)
@@ -379,7 +375,6 @@ class TravelPlanTest extends TestCase
         Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
-            'is_registered' => true,
         ]);
 
         $response = $this->actingAs($user)
@@ -418,7 +413,6 @@ class TravelPlanTest extends TestCase
         Member::factory()->create([
             'group_id' => $coreGroup->id,
             'user_id' => $user->id,
-            'is_registered' => true,
         ]);
 
         $response = $this->actingAs($user)

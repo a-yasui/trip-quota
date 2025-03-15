@@ -59,6 +59,26 @@ Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Ser
 - DB トランザクションは `DB::transaction(function(){ /* 追加,変更,削除の処理 */ } )` で実装をする。
 - `DB::beginTransaction(); ... DB::commmit();` は使用しない。
 
+### トランザクションを使う箇所の例
+
+```php
+class MemberController extends Controller {
+    public function store (Request $request) {
+        try {
+            $$member  = \DB::transaction(function()use($request){
+                $member = new Member();
+                $member->name = $request->name ?? '';
+                $member->save();
+                return $m
+            });
+        } catch (\Throwable $e){
+            return response()->back()->withError($e->getMessage());
+        }
+        return response()->back()->with('success', "メンバー「".e($member->name)."」さんを追加しました");
+    }
+}
+```
+
 # 開発者用コマンド
 
 - developer:create-account --email=<email> --password=<password

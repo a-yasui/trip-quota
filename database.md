@@ -123,7 +123,6 @@ erDiagram
         group_id bigint FK
         arrival_date date
         departure_date date
-        is_registered boolean
         is_active boolean
         created_at timestamp
         updated_at timestamp
