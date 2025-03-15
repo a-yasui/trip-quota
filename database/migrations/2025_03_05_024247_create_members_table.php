@@ -19,7 +19,6 @@ return new class extends Migration
             $table->foreignId('group_id')->constrained()->cascadeOnDelete();
             $table->date('arrival_date')->nullable();
             $table->date('departure_date')->nullable();
-            $table->boolean('is_registered')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();

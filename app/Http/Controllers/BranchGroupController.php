@@ -81,7 +81,6 @@ class BranchGroupController extends Controller
                 $newMember->email = $member->email;
                 $newMember->user_id = $member->user_id;
                 $newMember->group_id = $branchGroup->id;
-                $newMember->is_registered = $member->is_registered;
                 $newMember->is_active = true;
                 $newMember->save();
             }

@@ -145,9 +145,8 @@ class GroupMemberTest extends TestCase
             ->delete(route('groups.members.destroy', [$group, $member]));
 
         $response->assertRedirect();
-        
-        // 注: GroupServiceを使用するようになったため、実際のメンバー削除はGroupServiceが行う
-        // テストでは、リダイレクトが正しく行われることだけを確認する
+        $group->refresh();
+        $this->assertFalse($group->members()->where('members.id', $member->id)->exists());
     }
 
     /**

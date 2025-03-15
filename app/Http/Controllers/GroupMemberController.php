@@ -46,7 +46,6 @@ class GroupMemberController extends Controller
             $member = new Member;
             $member->name = $request->name ?? $request->email; // メールアドレスのみの場合は名前としても使用
             $member->email = $request->email;
-            $member->is_registered = false;
             $member->is_active = true;
 
             // メールアドレスが入力され、そのアドレスが登録ユーザーのものである場合
@@ -68,7 +67,6 @@ class GroupMemberController extends Controller
                     }
 
                     $member->user_id = $user->id;
-                    $member->is_registered = true;
                     // 名前が指定されていない場合はユーザー名を使用
                     if (! $request->name) {
                         $member->name = $user->name;

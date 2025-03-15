@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $group_id
  * @property \Illuminate\Support\Carbon|null $arrival_date
  * @property \Illuminate\Support\Carbon|null $departure_date
- * @property bool $is_registered
  * @property bool $is_active
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -85,7 +84,6 @@ class Member extends Model
         'group_id',
         'arrival_date',
         'departure_date',
-        'is_registered',
         'is_active',
     ];
 
@@ -97,7 +95,6 @@ class Member extends Model
     protected $casts = [
         'arrival_date' => 'date',
         'departure_date' => 'date',
-        'is_registered' => 'boolean',
         'is_active' => 'boolean',
     ];
 
