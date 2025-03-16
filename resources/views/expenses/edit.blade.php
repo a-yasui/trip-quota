@@ -11,7 +11,7 @@
                 <div class="p-6 text-gray-900">
                     <div class="mb-6 flex justify-between items-center">
                         <h3 class="text-lg font-medium text-gray-900">{{ __('経費情報を編集') }}</h3>
-                        <a href="{{ route('expenses.show', $expense) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-200 focus:bg-gray-200 active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <a href="{{ route('expenses.show', $expense) }}" class="btn-secondary">
                             {{ __('詳細に戻る') }}
                         </a>
                     </div>

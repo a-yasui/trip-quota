@@ -20,10 +20,10 @@
                         
                         @if(count($expenses) > 0)
                             <div class="flex space-x-2">
-                                <a href="{{ route('travel-plans.show', $expenses->first()->travelPlan) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-200 focus:bg-gray-200 active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <a href="{{ route('travel-plans.show', $expenses->first()->travelPlan) }}" class="btn-secondary">
                                     {{ __('旅行計画に戻る') }}
                                 </a>
-                                <a href="{{ route('travel-plans.expenses.create', $expenses->first()->travelPlan) }}" class="inline-flex items-center px-4 py-2 bg-lime-500 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-lime-400 focus:bg-lime-400 active:bg-lime-600 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <a href="{{ route('travel-plans.expenses.create', $expenses->first()->travelPlan) }}" class="btn-primary">
                                     {{ __('経費を追加') }}
                                 </a>
                             </div>

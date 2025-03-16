@@ -67,10 +67,10 @@
                         </div>
 
                         <div class="flex items-center justify-between mt-8">
-                            <a href="{{ route('travel-plans.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-400 focus:outline-none focus:border-gray-500 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <a href="{{ route('travel-plans.index') }}" class="btn-cancel">
                                 キャンセル
                             </a>
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-lime-500 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-lime-400 active:bg-lime-600 focus:outline-none focus:border-lime-600 focus:ring ring-lime-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <button type="submit" class="btn-submit">
                                 旅行計画を作成
                             </button>
                         </div>
