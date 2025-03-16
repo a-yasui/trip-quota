@@ -18,10 +18,10 @@
                     <div class="mb-6 flex justify-between items-center">
                         <h3 class="text-lg font-medium text-gray-900">{{ __('経費詳細') }}</h3>
                         <div class="flex space-x-2">
-                            <a href="{{ route('travel-plans.show', $expense->travelPlan) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-200 focus:bg-gray-200 active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <a href="{{ route('travel-plans.show', $expense->travelPlan) }}" class="btn-secondary">
                                 {{ __('旅行計画に戻る') }}
                             </a>
-                            <a href="{{ route('expenses.edit', $expense) }}" class="inline-flex items-center px-4 py-2 bg-lime-500 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-lime-400 focus:bg-lime-400 active:bg-lime-600 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <a href="{{ route('expenses.edit', $expense) }}" class="btn-primary">
                                 {{ __('編集') }}
                             </a>
                         </div>
@@ -129,7 +129,7 @@
                         <form action="{{ route('expenses.destroy', $expense) }}" method="POST" class="inline" onsubmit="return confirm('{{ __('この経費を削除してもよろしいですか？') }}');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <button type="submit" class="btn-delete">
                                 {{ __('削除') }}
                             </button>
                         </form>
