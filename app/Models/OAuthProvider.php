@@ -17,7 +17,7 @@ class OAuthProvider extends Model
         'provider_id',
         'access_token',
         'refresh_token',
-        'expires_at'
+        'expires_at',
     ];
 
     protected function casts(): array
@@ -41,8 +41,8 @@ class OAuthProvider extends Model
     public static function findByProvider(string $provider, string $providerId): ?self
     {
         return self::where('provider', $provider)
-                   ->where('provider_id', $providerId)
-                   ->first();
+            ->where('provider_id', $providerId)
+            ->first();
     }
 
     /**

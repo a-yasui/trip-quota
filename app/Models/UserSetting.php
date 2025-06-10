@@ -15,7 +15,7 @@ class UserSetting extends Model
         'timezone',
         'email_notifications',
         'push_notifications',
-        'currency'
+        'currency',
     ];
 
     protected function casts(): array

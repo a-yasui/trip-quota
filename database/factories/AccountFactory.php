@@ -12,8 +12,8 @@ class AccountFactory extends Factory
 
     public function definition(): array
     {
-        $accountName = 'user' . fake()->unique()->randomNumber(4);
-        
+        $accountName = 'user'.fake()->unique()->randomNumber(4);
+
         return [
             'user_id' => User::factory(),
             'account_name' => $accountName,

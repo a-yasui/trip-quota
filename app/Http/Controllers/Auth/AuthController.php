@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -32,14 +31,14 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         // ユーザーが存在しない場合
-        if (!$user) {
+        if (! $user) {
             throw ValidationException::withMessages([
                 'email' => ['メールアドレスまたはパスワードが正しくありません。'],
             ]);
         }
 
         // OAuth登録ユーザーでパスワードが設定されていない場合
-        if (!$user->hasPassword()) {
+        if (! $user->hasPassword()) {
             throw ValidationException::withMessages([
                 'email' => ['このメールアドレスはOAuth認証で登録されています。OAuth認証でログインしてください。'],
             ]);
@@ -48,7 +47,7 @@ class AuthController extends Controller
         // 認証試行
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $request->session()->regenerate();
-            
+
             return redirect()->intended('/dashboard');
         }
 

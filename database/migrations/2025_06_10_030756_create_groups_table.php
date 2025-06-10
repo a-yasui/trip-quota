@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('branch_key')->nullable()->comment('班グループの区別用名前（system_branch_group_keys参照）');
             $table->text('description')->nullable();
             $table->timestamps();
-            
+
             $table->index(['travel_plan_id', 'type']);
         });
     }

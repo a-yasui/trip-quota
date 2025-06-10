@@ -18,7 +18,7 @@ class User extends Authenticatable
     protected $fillable = [
         'email',
         'password',
-        'email_verified_at'
+        'email_verified_at',
     ];
 
     /**
@@ -97,7 +97,7 @@ class User extends Authenticatable
      */
     public function hasPassword(): bool
     {
-        return !is_null($this->password);
+        return ! is_null($this->password);
     }
 
     /**

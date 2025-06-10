@@ -3,8 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Models\Account;
-use App\Models\OAuthProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;

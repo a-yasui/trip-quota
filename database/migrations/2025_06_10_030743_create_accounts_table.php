@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('thumbnail_url')->nullable();
             $table->text('bio')->nullable();
             $table->timestamps();
-            
+
             $table->index('account_name')->comment('account_nameの大文字小文字を区別しないためのユニーク制約');
         });
     }

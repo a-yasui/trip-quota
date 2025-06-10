@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('rate', 10, 6)->comment('為替レート');
             $table->date('effective_date')->comment('有効日');
             $table->timestamps();
-            
+
             $table->unique(['from_currency', 'to_currency', 'effective_date']);
         });
     }

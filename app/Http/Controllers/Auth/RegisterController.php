@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Account;
+use App\Models\User;
 use App\Models\UserSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,10 +36,10 @@ class RegisterController extends Controller
                 'min:4',
                 'max:20',
                 function ($attribute, $value, $fail) {
-                    if (!Account::validateAccountName($value)) {
+                    if (! Account::validateAccountName($value)) {
                         $fail('アカウント名は英字で始まり、英数字、アンダースコア、ハイフンのみ使用できます。');
                     }
-                    if (!Account::isAccountNameAvailable($value)) {
+                    if (! Account::isAccountNameAvailable($value)) {
                         $fail('このアカウント名は既に使用されています。');
                     }
                 },

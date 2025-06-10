@@ -13,7 +13,7 @@ class OAuthProviderFactory extends Factory
     public function definition(): array
     {
         $providers = ['google', 'github'];
-        
+
         return [
             'user_id' => User::factory(),
             'provider' => fake()->randomElement($providers),

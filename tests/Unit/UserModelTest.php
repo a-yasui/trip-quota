@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use App\Models\User;
 use App\Models\Account;
 use App\Models\OAuthProvider;
+use App\Models\User;
 use App\Models\UserSetting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -48,12 +48,12 @@ class UserModelTest extends TestCase
     public function test_user_can_have_multiple_accounts()
     {
         $user = User::factory()->create();
-        
+
         Account::factory()->create([
             'user_id' => $user->id,
             'account_name' => 'account1',
         ]);
-        
+
         Account::factory()->create([
             'user_id' => $user->id,
             'account_name' => 'account2',
@@ -65,7 +65,7 @@ class UserModelTest extends TestCase
     public function test_user_can_have_oauth_providers()
     {
         $user = User::factory()->create();
-        
+
         OAuthProvider::factory()->create([
             'user_id' => $user->id,
             'provider' => 'google',
@@ -78,7 +78,7 @@ class UserModelTest extends TestCase
     public function test_user_has_user_settings_relationship()
     {
         $user = User::factory()->create();
-        
+
         UserSetting::factory()->create([
             'user_id' => $user->id,
         ]);

@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Account;
 use App\Models\OAuthProvider;
+use App\Models\User;
 use App\Models\UserSetting;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Facades\Socialite;
@@ -20,7 +19,7 @@ class SocialiteController extends Controller
     public function redirect(string $provider)
     {
         $this->validateProvider($provider);
-        
+
         return Socialite::driver($provider)->redirect();
     }
 
@@ -41,17 +40,18 @@ class SocialiteController extends Controller
             DB::transaction(function () use ($provider, $socialiteUser) {
                 // 既存のOAuth連携をチェック
                 $oauthProvider = OAuthProvider::findByProvider($provider, $socialiteUser->getId());
-                
+
                 if ($oauthProvider) {
                     // 既存のOAuth連携が見つかった場合、ログイン
                     $this->updateOAuthProvider($oauthProvider, $socialiteUser);
                     Auth::login($oauthProvider->user);
+
                     return;
                 }
 
                 // メールアドレスで既存ユーザーをチェック
                 $existingUser = User::where('email', $socialiteUser->getEmail())->first();
-                
+
                 if ($existingUser) {
                     // 既存ユーザーにOAuth連携を追加
                     $this->createOAuthProvider($existingUser, $provider, $socialiteUser);
@@ -76,8 +76,8 @@ class SocialiteController extends Controller
     private function validateProvider(string $provider): void
     {
         $allowedProviders = ['google', 'github'];
-        
-        if (!in_array($provider, $allowedProviders)) {
+
+        if (! in_array($provider, $allowedProviders)) {
             abort(404);
         }
     }
@@ -154,21 +154,21 @@ class SocialiteController extends Controller
     {
         // 英数字以外を除去して、先頭を英字にする
         $accountName = preg_replace('/[^a-zA-Z0-9]/', '', $baseName);
-        if (empty($accountName) || !preg_match('/^[a-zA-Z]/', $accountName)) {
-            $accountName = 'user' . $accountName;
+        if (empty($accountName) || ! preg_match('/^[a-zA-Z]/', $accountName)) {
+            $accountName = 'user'.$accountName;
         }
-        
+
         // 最低4文字にする
         if (strlen($accountName) < 4) {
-            $accountName = $accountName . rand(1000, 9999);
+            $accountName = $accountName.rand(1000, 9999);
         }
 
         // 重複チェックして、重複する場合は数字を追加
         $originalName = $accountName;
         $counter = 1;
-        
-        while (!Account::isAccountNameAvailable($accountName)) {
-            $accountName = $originalName . $counter;
+
+        while (! Account::isAccountNameAvailable($accountName)) {
+            $accountName = $originalName.$counter;
             $counter++;
         }
 

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->timestamp('expires_at');
             $table->timestamp('responded_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['invitation_token']);
             $table->index(['invitee_email', 'status']);
         });

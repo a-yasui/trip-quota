@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Models\User;
 use App\Models\Account;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,7 +14,7 @@ class AccountModelTest extends TestCase
     public function test_account_can_be_created_with_valid_data()
     {
         $user = User::factory()->create();
-        
+
         $account = Account::factory()->create([
             'user_id' => $user->id,
             'account_name' => 'testuser',

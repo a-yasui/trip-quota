@@ -14,7 +14,7 @@ class Account extends Model
         'account_name',
         'display_name',
         'thumbnail_url',
-        'bio'
+        'bio',
     ];
 
     /**
@@ -55,11 +55,11 @@ class Account extends Model
     public static function isAccountNameAvailable(string $accountName, ?int $excludeId = null): bool
     {
         $query = self::whereRaw('LOWER(account_name) = ?', [strtolower($accountName)]);
-        
+
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
-        
-        return !$query->exists();
+
+        return ! $query->exists();
     }
 }

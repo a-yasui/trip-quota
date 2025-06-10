@@ -22,7 +22,7 @@ return new class extends Migration
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->string('timezone', 50)->default('Asia/Tokyo');
-            
+
             // 移動手段関連
             $table->enum('transportation_type', ['walking', 'bike', 'car', 'ferry', 'bus', 'airplane'])->nullable();
             $table->string('airline')->nullable()->comment('飛行機の場合');
@@ -31,10 +31,10 @@ return new class extends Migration
             $table->datetime('arrival_time')->nullable()->comment('到着時刻（現地時間）');
             $table->string('departure_location')->nullable();
             $table->string('arrival_location')->nullable();
-            
+
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['travel_plan_id', 'date']);
             $table->index(['group_id', 'date']);
         });

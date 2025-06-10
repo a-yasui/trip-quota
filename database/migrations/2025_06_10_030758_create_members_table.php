@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('email')->nullable()->comment('招待用メールアドレス');
             $table->boolean('is_confirmed')->default(false)->comment('参加確認済み');
             $table->timestamps();
-            
+
             $table->index(['travel_plan_id', 'user_id']);
             $table->index(['travel_plan_id', 'email']);
         });

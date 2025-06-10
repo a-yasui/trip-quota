@@ -26,7 +26,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->string('confirmation_number')->nullable();
             $table->timestamps();
-            
+
             $table->index(['travel_plan_id', 'check_in_date']);
         });
     }

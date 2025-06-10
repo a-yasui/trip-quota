@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('is_settled')->default(false)->comment('精算完了');
             $table->timestamp('settled_at')->nullable()->comment('精算完了日時');
             $table->timestamps();
-            
+
             $table->index(['travel_plan_id', 'is_settled']);
         });
     }

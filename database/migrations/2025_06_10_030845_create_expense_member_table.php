@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2)->nullable()->comment('金額調整がある場合の個別金額');
             $table->boolean('is_confirmed')->default(false)->comment('メンバーが確認済みか');
             $table->timestamps();
-            
+
             $table->unique(['expense_id', 'member_id']);
         });
     }

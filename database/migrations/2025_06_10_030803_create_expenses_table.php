@@ -23,7 +23,7 @@ return new class extends Migration
             $table->date('expense_date')->comment('支払い日');
             $table->boolean('is_split_confirmed')->default(false)->comment('割り勘計算確定済み');
             $table->timestamps();
-            
+
             $table->index(['travel_plan_id', 'expense_date']);
             $table->index(['group_id', 'expense_date']);
         });

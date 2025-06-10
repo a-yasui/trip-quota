@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Models\User;
 use App\Models\OAuthProvider;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,7 +14,7 @@ class OAuthProviderModelTest extends TestCase
     public function test_oauth_provider_can_be_created_with_valid_data()
     {
         $user = User::factory()->create();
-        
+
         $provider = OAuthProvider::factory()->create([
             'user_id' => $user->id,
             'provider' => 'google',
@@ -41,7 +41,7 @@ class OAuthProviderModelTest extends TestCase
     public function test_find_by_provider()
     {
         $user = User::factory()->create();
-        
+
         $provider = OAuthProvider::factory()->create([
             'user_id' => $user->id,
             'provider' => 'google',
@@ -59,7 +59,7 @@ class OAuthProviderModelTest extends TestCase
     public function test_is_token_valid_with_future_expiry()
     {
         $user = User::factory()->create();
-        
+
         $provider = OAuthProvider::factory()->create([
             'user_id' => $user->id,
             'expires_at' => now()->addHour(),
@@ -71,7 +71,7 @@ class OAuthProviderModelTest extends TestCase
     public function test_is_token_valid_with_past_expiry()
     {
         $user = User::factory()->create();
-        
+
         $provider = OAuthProvider::factory()->create([
             'user_id' => $user->id,
             'expires_at' => now()->subHour(),
@@ -83,7 +83,7 @@ class OAuthProviderModelTest extends TestCase
     public function test_is_token_valid_with_null_expiry()
     {
         $user = User::factory()->create();
-        
+
         $provider = OAuthProvider::factory()->create([
             'user_id' => $user->id,
             'expires_at' => null,
@@ -95,7 +95,7 @@ class OAuthProviderModelTest extends TestCase
     public function test_unique_provider_constraint()
     {
         $user = User::factory()->create();
-        
+
         OAuthProvider::factory()->create([
             'user_id' => $user->id,
             'provider' => 'google',
