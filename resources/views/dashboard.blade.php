@@ -1,102 +1,100 @@
-@extends('layouts.app')
-
-@section('title', 'ダッシュボード')
-
-@section('header', 'ダッシュボード')
-
-@section('content')
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- 旅行計画カード -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">旅行計画</h3>
-                    <a href="{{ route('travel-plans.create') }}" class="inline-flex items-center text-sm font-medium text-lime-600 hover:text-lime-500">
-                        <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        新規作成
-                    </a>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ダッシュボード - {{ config('app.name', 'TripQuota') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold text-gray-900">{{ config('app.name', 'TripQuota') }}</h1>
                 </div>
-                <p class="text-gray-600 mb-4">現在の旅行計画や過去の旅行履歴を確認できます。</p>
-                <a href="{{ route('travel-plans.index') }}" class="inline-flex items-center px-4 py-2 bg-lime-500 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-lime-400 focus:bg-lime-400 active:bg-lime-600 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    旅行計画を見る
-                </a>
-            </div>
-        </div>
-
-        <!-- グループカード -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">グループ</h3>
-                </div>
-                <p class="text-gray-600 mb-4">参加中のグループや招待を確認できます。</p>
-                <a href="{{ route('groups.index') }}" class="inline-flex items-center px-4 py-2 bg-lime-500 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-lime-400 focus:bg-lime-400 active:bg-lime-600 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    グループを見る
-                </a>
-            </div>
-        </div>
-
-        <!-- 経費精算カード -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">経費精算</h3>
-                </div>
-                <p class="text-gray-600 mb-4">旅行中の支出や割り勘の状況を確認できます。</p>
-                <a href="{{ route('expenses.index') }}" class="inline-flex items-center px-4 py-2 bg-lime-500 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-lime-400 focus:bg-lime-400 active:bg-lime-600 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    経費を見る
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- 現在の旅行計画 -->
-    <div class="mt-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">現在の旅行計画</h3>
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
-            <div class="p-6">
-                <div class="space-y-4">
-                    <p class="text-gray-600">まだ旅行計画はありません。新しい旅行計画を作成しましょう！</p>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-700">{{ Auth::user()->email }}</span>
+                    <form method="POST" action="{{ route('logout') }}" class="inline">
+                        @csrf
+                        <button type="submit" class="text-sm text-gray-500 hover:text-gray-700">
+                            ログアウト
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <!-- 最近の経費 -->
-    <div class="mt-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">最近の経費</h3>
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
-            <div class="p-6">
-                <div class="space-y-4">
-                    <p class="text-gray-600">まだ経費の記録はありません。旅行中に経費を記録しましょう！</p>
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- 成功メッセージ -->
+        @if (session('success'))
+            <div class="mb-4 bg-green-50 border border-green-200 rounded-md p-4">
+                <div class="flex">
+                    <div class="ml-3">
+                        <p class="text-sm text-green-700">
+                            {{ session('success') }}
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        @endif
 
-    <!-- 最近の通知 -->
-    <div class="mt-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">最近の通知</h3>
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
-            <div class="p-6">
-                <div class="space-y-4">
-                    <p class="text-gray-600">新しい通知はありません。</p>
+        <div class="px-4 py-6 sm:px-0">
+            <div class="border-4 border-dashed border-gray-200 rounded-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">ダッシュボード</h2>
+                <p class="text-gray-600 mb-6">{{ Auth::user()->email }} としてログインしています。</p>
+                
+                <!-- アカウント情報 -->
+                <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">アカウント情報</h3>
+                        @if(Auth::user()->accounts->count() > 0)
+                            <div class="space-y-2">
+                                @foreach(Auth::user()->accounts as $account)
+                                    <div class="flex items-center space-x-3">
+                                        @if($account->thumbnail_url)
+                                            <img src="{{ $account->thumbnail_url }}" alt="{{ $account->display_name }}" class="w-8 h-8 rounded-full">
+                                        @else
+                                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                                <span class="text-sm font-medium text-gray-700">{{ substr($account->account_name, 0, 1) }}</span>
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">{{ $account->display_name }}</p>
+                                            <p class="text-sm text-gray-500">@{{ $account->account_name }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-sm text-gray-500">アカウントが設定されていません。</p>
+                        @endif
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- 今後の予定 -->
-    <div class="mt-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">今後の予定</h3>
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
-            <div class="p-6">
-                <div class="space-y-4">
-                    <p class="text-gray-600">今後の予定はありません。旅行計画を作成して予定を追加しましょう！</p>
+                <!-- OAuth連携情報 -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">OAuth連携</h3>
+                        @if(Auth::user()->oauthProviders->count() > 0)
+                            <div class="space-y-2">
+                                @foreach(Auth::user()->oauthProviders as $provider)
+                                    <div class="flex items-center space-x-3">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {{ ucfirst($provider->provider) }}
+                                        </span>
+                                        <span class="text-sm text-gray-600">連携済み</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-sm text-gray-500">OAuth連携がありません。</p>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-@endsection
+</body>
+</html>

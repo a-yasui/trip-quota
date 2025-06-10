@@ -2,22 +2,23 @@
 
 namespace Database\Factories;
 
+use App\Models\UserSetting;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\UserSetting>
- */
 class UserSettingFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = UserSetting::class;
+
     public function definition(): array
     {
         return [
-            //
+            'user_id' => User::factory(),
+            'language' => 'ja',
+            'timezone' => 'Asia/Tokyo',
+            'email_notifications' => fake()->boolean(),
+            'push_notifications' => fake()->boolean(),
+            'currency' => fake()->randomElement(['JPY', 'USD', 'EUR']),
         ];
     }
 }

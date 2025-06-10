@@ -4,76 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * ユーザーのアカウント情報を管理するテーブル。一人のユーザーが複数のアカウントを持ち、旅行計画ごとに異なるアカウントで参加できる。
- *
- *
- * @property int $id
- * @property int $user_id
- * @property string $name
- * @property string|null $display_name
- * @property string|null $thumbnail_path
- * @property bool $is_active
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\MemberAccountAssociation> $memberAssociations
- * @property-read int|null $member_associations_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\MemberAccountAssociation> $previousMemberAssociations
- * @property-read int|null $previous_member_associations_count
- * @property-read \App\Models\User $user
- *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account active()
- * @method static \Database\Factories\AccountFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereDisplayName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereIsActive($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereThumbnailPath($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Account withoutTrashed()
- *
- * @mixin \Eloquent
- */
 class Account extends Model
 {
-    /** @use HasFactory<\Database\Factories\AccountFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
-        'name',
+        'account_name',
         'display_name',
-        'thumbnail_path',
-        'is_active',
+        'thumbnail_url',
+        'bio'
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
-
-    /**
-     * Get the user that owns the account.
+     * アカウントの所有者
      */
     public function user()
     {
@@ -81,34 +26,40 @@ class Account extends Model
     }
 
     /**
-     * Get the member associations for the account.
+     * このアカウントが関連付けられているメンバー
      */
-    public function memberAssociations()
+    public function members()
     {
-        return $this->hasMany(MemberAccountAssociation::class);
+        return $this->hasMany(Member::class);
     }
 
     /**
-     * Get the previous member associations for the account.
+     * アカウント名のバリデーション（英数字、アンダースコア、ハイフンのみ、3文字以上）
      */
-    public function previousMemberAssociations()
+    public static function validateAccountName(string $accountName): bool
     {
-        return $this->hasMany(MemberAccountAssociation::class, 'previous_account_id');
+        return preg_match('/^[a-zA-Z][\w\-_]{3,}$/', $accountName) === 1;
     }
 
     /**
-     * Scope a query to only include active accounts.
+     * アカウント名の大文字小文字を区別しない検索
      */
-    public function scopeActive($query)
+    public static function findByAccountNameIgnoreCase(string $accountName): ?self
     {
-        return $query->where('is_active', true);
+        return self::whereRaw('LOWER(account_name) = ?', [strtolower($accountName)])->first();
     }
 
     /**
-     * Scope a query to find an account by name (case-insensitive).
+     * アカウント名が利用可能かチェック（大文字小文字区別なし）
      */
-    public function scopeWhereName($query, $name)
+    public static function isAccountNameAvailable(string $accountName, ?int $excludeId = null): bool
     {
-        return $query->whereRaw('LOWER(name) = ?', [strtolower($name)]);
+        $query = self::whereRaw('LOWER(account_name) = ?', [strtolower($accountName)]);
+        
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+        
+        return !$query->exists();
     }
 }
