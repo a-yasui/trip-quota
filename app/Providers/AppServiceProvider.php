@@ -11,7 +11,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // TravelPlan domain services
+        $this->app->bind(
+            \TripQuota\TravelPlan\TravelPlanRepositoryInterface::class,
+            \TripQuota\TravelPlan\TravelPlanRepository::class
+        );
     }
 
     /**

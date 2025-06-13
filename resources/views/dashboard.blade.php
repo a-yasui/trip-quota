@@ -45,6 +45,27 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">ダッシュボード</h2>
                 <p class="text-gray-600 mb-6">{{ Auth::user()->email }} としてログインしています。</p>
                 
+                <!-- クイックアクション -->
+                <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">クイックアクション</h3>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <a href="{{ route('travel-plans.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                旅行プラン一覧
+                            </a>
+                            <a href="{{ route('travel-plans.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                新しい旅行プラン
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- アカウント情報 -->
                 <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
                     <div class="px-4 py-5 sm:p-6">

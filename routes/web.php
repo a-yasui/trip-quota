@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\TravelPlanController;
 use Illuminate\Support\Facades\Route;
 
 // ウェルカムページ
@@ -34,4 +35,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // 旅行プラン管理
+    Route::resource('travel-plans', TravelPlanController::class)->parameters([
+        'travel-plans' => 'uuid',
+    ]);
 });
