@@ -1,36 +1,13 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>受信した招待 - TripQuota</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- ヘッダー -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">受信した招待</h1>
-            <p class="mt-2 text-sm text-gray-600">あなた宛に送信された旅行プランの招待一覧です。</p>
-        </div>
+@extends('layouts.master')
 
-        <!-- 成功メッセージ -->
-        @if(session('success'))
-            <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
+@section('title', '受信した招待 - TripQuota')
 
-        <!-- エラーメッセージ -->
-        @if($errors->any())
-            <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+@section('content')
+    @component('components.container', ['class' => 'max-w-5xl'])
+        @component('components.page-header', ['title' => '受信した招待', 'subtitle' => 'あなた宛に送信された旅行プランの招待一覧です。'])
+        @endcomponent
+
+        @include('components.alerts')
 
         <!-- 招待一覧 -->
         @if($pendingInvitations->count() > 0)
@@ -135,6 +112,5 @@
                 ← ダッシュボードに戻る
             </a>
         </div>
-    </div>
-</body>
-</html>
+    @endcomponent
+@endsection

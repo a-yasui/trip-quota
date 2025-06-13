@@ -1,29 +1,13 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>班グループ作成 - {{ $travelPlan->plan_name }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- ヘッダー -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">班グループ作成</h1>
-            <p class="mt-2 text-sm text-gray-600">{{ $travelPlan->plan_name }}の新しい班グループを作成します。</p>
-        </div>
+@extends('layouts.master')
 
-        <!-- エラーメッセージ -->
-        @if($errors->any())
-            <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+@section('title', '班グループ作成 - ' . $travelPlan->plan_name)
+
+@section('content')
+    @component('components.container', ['class' => 'max-w-3xl'])
+        @component('components.page-header', ['title' => '班グループ作成', 'subtitle' => $travelPlan->plan_name . 'の新しい班グループを作成します。'])
+        @endcomponent
+
+        @include('components.alerts')
 
         <!-- フォーム -->
         <div class="bg-white shadow-sm rounded-lg">
@@ -97,6 +81,5 @@
                 </div>
             </form>
         </div>
-    </div>
-</body>
-</html>
+    @endcomponent
+@endsection

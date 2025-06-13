@@ -1,35 +1,21 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $member->name }} - {{ $travelPlan->plan_name }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- ヘッダー -->
-        <div class="mb-8">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">{{ $member->name }}</h1>
-                    <p class="mt-2 text-sm text-gray-600">{{ $travelPlan->plan_name }}</p>
-                </div>
+@extends('layouts.master')
+
+@section('title', $member->name . ' - ' . $travelPlan->plan_name)
+
+@section('content')
+    @component('components.container', ['class' => 'max-w-4xl'])
+        @component('components.page-header', ['title' => $member->name, 'subtitle' => $travelPlan->plan_name])
+            @slot('action')
                 @if($member->user_id !== $travelPlan->owner_user_id)
                     <a href="{{ route('travel-plans.members.edit', [$travelPlan->uuid, $member->id]) }}" 
                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                         編集
                     </a>
                 @endif
-            </div>
-        </div>
+            @endslot
+        @endcomponent
 
-        <!-- 成功メッセージ -->
-        @if(session('success'))
-            <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
+        @include('components.alerts')
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- メンバー詳細 -->
@@ -296,6 +282,5 @@
                 旅行プラン詳細
             </a>
         </div>
-    </div>
-</body>
-</html>
+    @endcomponent
+@endsection

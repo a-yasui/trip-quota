@@ -1,29 +1,13 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>メンバー招待 - {{ $travelPlan->plan_name }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- ヘッダー -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">メンバー招待</h1>
-            <p class="mt-2 text-sm text-gray-600">{{ $travelPlan->plan_name }}にメンバーを招待します。</p>
-        </div>
+@extends('layouts.master')
 
-        <!-- エラーメッセージ -->
-        @if($errors->any())
-            <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+@section('title', 'メンバー招待 - ' . $travelPlan->plan_name)
+
+@section('content')
+    @component('components.container', ['class' => 'max-w-3xl'])
+        @component('components.page-header', ['title' => 'メンバー招待', 'subtitle' => $travelPlan->plan_name . 'にメンバーを招待します。'])
+        @endcomponent
+
+        @include('components.alerts')
 
         <!-- フォーム -->
         <div class="bg-white shadow-sm rounded-lg">
@@ -152,36 +136,37 @@
                 </div>
             </form>
         </div>
-    </div>
+    @endcomponent
+@endsection
 
-    <script>
-        // 招待方法の切り替え
-        document.addEventListener('DOMContentLoaded', function() {
-            const emailRadio = document.getElementById('invitation_type_email');
-            const accountRadio = document.getElementById('invitation_type_account');
-            const emailSection = document.getElementById('email_section');
-            const accountSection = document.getElementById('account_section');
+@push('scripts')
+<script>
+    // 招待方法の切り替え
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailRadio = document.getElementById('invitation_type_email');
+        const accountRadio = document.getElementById('invitation_type_account');
+        const emailSection = document.getElementById('email_section');
+        const accountSection = document.getElementById('account_section');
 
-            function toggleSections() {
-                if (emailRadio.checked) {
-                    emailSection.style.display = 'block';
-                    accountSection.style.display = 'none';
-                    document.getElementById('email').required = true;
-                    document.getElementById('account_name').required = false;
-                } else {
-                    emailSection.style.display = 'none';
-                    accountSection.style.display = 'block';
-                    document.getElementById('email').required = false;
-                    document.getElementById('account_name').required = true;
-                }
+        function toggleSections() {
+            if (emailRadio.checked) {
+                emailSection.style.display = 'block';
+                accountSection.style.display = 'none';
+                document.getElementById('email').required = true;
+                document.getElementById('account_name').required = false;
+            } else {
+                emailSection.style.display = 'none';
+                accountSection.style.display = 'block';
+                document.getElementById('email').required = false;
+                document.getElementById('account_name').required = true;
             }
+        }
 
-            emailRadio.addEventListener('change', toggleSections);
-            accountRadio.addEventListener('change', toggleSections);
+        emailRadio.addEventListener('change', toggleSections);
+        accountRadio.addEventListener('change', toggleSections);
 
-            // 初期状態設定
-            toggleSections();
-        });
-    </script>
-</body>
-</html>
+        // 初期状態設定
+        toggleSections();
+    });
+</script>
+@endpush

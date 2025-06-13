@@ -1,44 +1,19 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>メンバー管理 - {{ $travelPlan->plan_name }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- ヘッダー -->
-        <div class="mb-8">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">メンバー管理</h1>
-                    <p class="mt-2 text-sm text-gray-600">{{ $travelPlan->plan_name }}</p>
-                </div>
+@extends('layouts.master')
+
+@section('title', 'メンバー管理 - ' . $travelPlan->plan_name)
+
+@section('content')
+    @component('components.container')
+        @component('components.page-header', ['title' => 'メンバー管理', 'subtitle' => $travelPlan->plan_name])
+            @slot('action')
                 <a href="{{ route('travel-plans.members.create', $travelPlan->uuid) }}" 
                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                     メンバーを招待
                 </a>
-            </div>
-        </div>
+            @endslot
+        @endcomponent
 
-        <!-- 成功メッセージ -->
-        @if(session('success'))
-            <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <!-- エラーメッセージ -->
-        @if($errors->any())
-            <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        @include('components.alerts')
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- 確認済みメンバー -->
@@ -176,6 +151,5 @@
                 グループ管理
             </a>
         </div>
-    </div>
-</body>
-</html>
+    @endcomponent
+@endsection

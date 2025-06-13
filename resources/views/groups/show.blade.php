@@ -1,46 +1,34 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $group->name }} - {{ $travelPlan->plan_name }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- ヘッダー -->
-        <div class="mb-8">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
-                        @if($group->group_type === 'CORE')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 mr-3">
-                                全体
-                            </span>
-                        @else
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 mr-3">
-                                班
-                            </span>
-                        @endif
-                        {{ $group->name }}
-                    </h1>
-                    <p class="mt-2 text-sm text-gray-600">{{ $travelPlan->plan_name }}</p>
-                </div>
+@extends('layouts.master')
+
+@section('title', $group->name . ' - ' . $travelPlan->plan_name)
+
+@section('content')
+    @component('components.container', ['class' => 'max-w-5xl'])
+        @component('components.page-header')
+            @slot('title')
+                @if($group->group_type === 'CORE')
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 mr-3">
+                        全体
+                    </span>
+                @else
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 mr-3">
+                        班
+                    </span>
+                @endif
+                {{ $group->name }}
+            @endslot
+            @slot('subtitle'){{ $travelPlan->plan_name }}@endslot
+            @slot('action')
                 @if($group->group_type === 'BRANCH')
                     <a href="{{ route('travel-plans.groups.edit', [$travelPlan->uuid, $group->id]) }}" 
                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                         編集
                     </a>
                 @endif
-            </div>
-        </div>
+            @endslot
+        @endcomponent
 
-        <!-- 成功メッセージ -->
-        @if(session('success'))
-            <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
+        @include('components.alerts')
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- グループ詳細 -->
@@ -211,6 +199,5 @@
                 旅行プラン詳細
             </a>
         </div>
-    </div>
-</body>
-</html>
+    @endcomponent
+@endsection
