@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\TravelPlanController;
 use Illuminate\Support\Facades\Route;
@@ -73,6 +74,22 @@ Route::middleware('auth')->group(function () {
     // メンバー招待（別ルート）
     Route::get('travel-plans/{uuid}/members/invite', [MemberController::class, 'create'])->name('travel-plans.members.create');
     Route::post('travel-plans/{uuid}/members/invite', [MemberController::class, 'store'])->name('travel-plans.members.store');
+
+    // 旅程管理（旅行プラン配下）
+    Route::resource('travel-plans.itineraries', ItineraryController::class)->parameters([
+        'travel-plans' => 'uuid',
+    ])->names([
+        'index' => 'travel-plans.itineraries.index',
+        'create' => 'travel-plans.itineraries.create',
+        'store' => 'travel-plans.itineraries.store',
+        'show' => 'travel-plans.itineraries.show',
+        'edit' => 'travel-plans.itineraries.edit',
+        'update' => 'travel-plans.itineraries.update',
+        'destroy' => 'travel-plans.itineraries.destroy',
+    ]);
+
+    // 旅程タイムライン表示
+    Route::get('travel-plans/{uuid}/itineraries/timeline', [ItineraryController::class, 'timeline'])->name('travel-plans.itineraries.timeline');
 
     // 招待管理
     Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');

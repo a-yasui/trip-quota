@@ -47,9 +47,14 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require-dev": {
-        "fakerphp/faker": "^1.24",
-        "laravel/pint": "^1.22",
+        "barryvdh/laravel-ide-helper": "^3.5",
+        "fakerphp/faker": "^1.23",
+        "laravel/pail": "^1.2.2",
+        "laravel/pint": "^1.13",
+        "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
-        "phpunit/phpunit": "^12.2"
+        "nunomaduro/collision": "^8.6",
+        "phpunit/phpunit": "^11.5.3",
+        "thedoctor0/laravel-factory-generator": "^1.4"
     }
 }
