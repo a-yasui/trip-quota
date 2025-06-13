@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>受信した招待 - TripQuota</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- ヘッダー -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">受信した招待</h1>
+            <p class="mt-2 text-sm text-gray-600">あなた宛に送信された旅行プランの招待一覧です。</p>
+        </div>
+
+        <!-- 成功メッセージ -->
+        @if(session('success'))
+            <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <!-- エラーメッセージ -->
+        @if($errors->any())
+            <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <ul class="list-disc list-inside">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <!-- 招待一覧 -->
+        @if($pendingInvitations->count() > 0)
+            <div class="bg-white shadow-sm rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-900">待機中の招待 ({{ $pendingInvitations->count() }})</h2>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    @foreach($pendingInvitations as $invitation)
+                        <div class="px-6 py-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h3 class="text-lg font-medium text-gray-900">
+                                                {{ $invitation->travelPlan->plan_name }}
+                                            </h3>
+                                            <div class="mt-1 text-sm text-gray-500">
+                                                <p>招待者: {{ $invitation->invitedBy->name }}</p>
+                                                <p>送信日: {{ $invitation->created_at->format('Y年m月d日 H:i') }}</p>
+                                                <p>有効期限: {{ $invitation->expires_at->format('Y年m月d日 H:i') }}</p>
+                                            </div>
+                                            @if($invitation->travelPlan->description)
+                                                <p class="mt-2 text-sm text-gray-700">{{ Str::limit($invitation->travelPlan->description, 100) }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <a href="{{ route('invitations.show', $invitation->invitation_token) }}" 
+                                       class="bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 border border-gray-300 rounded-md text-sm font-medium">
+                                        詳細を見る
+                                    </a>
+                                    <form method="POST" action="{{ route('invitations.accept', $invitation->invitation_token) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" 
+                                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                                            参加する
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ route('invitations.decline', $invitation->invitation_token) }}" 
+                                          onsubmit="return confirm('本当に拒否しますか？')" class="inline">
+                                        @csrf
+                                        <button type="submit" 
+                                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                                            拒否する
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- 旅行プラン詳細 -->
+                            <div class="mt-4 pl-14">
+                                <div class="flex items-center text-sm text-gray-500 space-x-6">
+                                    <div class="flex items-center">
+                                        <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span>
+                                            {{ $invitation->travelPlan->departure_date->format('Y年m月d日') }}
+                                            @if($invitation->travelPlan->return_date)
+                                                〜 {{ $invitation->travelPlan->return_date->format('Y年m月d日') }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                        <span>{{ $invitation->travelPlan->members->count() }}人参加予定</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span>{{ $invitation->travelPlan->timezone }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @else
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">招待がありません</h3>
+                <p class="mt-1 text-sm text-gray-500">現在、受信している招待はありません。</p>
+            </div>
+        @endif
+
+        <!-- ナビゲーション -->
+        <div class="mt-8 flex justify-center">
+            <a href="{{ route('dashboard') }}" class="text-blue-600 hover:text-blue-800">
+                ← ダッシュボードに戻る
+            </a>
+        </div>
+    </div>
+</body>
+</html>

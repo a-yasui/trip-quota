@@ -1,0 +1,229 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use TripQuota\Invitation\InvitationService;
+use TripQuota\Member\MemberService;
+use TripQuota\TravelPlan\TravelPlanService;
+
+class MemberController extends Controller
+{
+    public function __construct(
+        private MemberService $memberService,
+        private TravelPlanService $travelPlanService,
+        private InvitationService $invitationService
+    ) {}
+
+    /**
+     * 旅行プランのメンバー一覧表示
+     */
+    public function index(string $travelPlanUuid)
+    {
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
+            $confirmedMembers = $this->memberService->getConfirmedMembers($travelPlan, Auth::user());
+            $unconfirmedMembers = $this->memberService->getUnconfirmedMembers($travelPlan, Auth::user());
+            $pendingInvitations = $this->invitationService->getPendingInvitationsForTravelPlan($travelPlan, Auth::user());
+
+            return view('members.index', compact('travelPlan', 'members', 'confirmedMembers', 'unconfirmedMembers', 'pendingInvitations'));
+        } catch (\Exception $e) {
+            abort(403);
+        }
+    }
+
+    /**
+     * メンバー招待フォーム表示
+     */
+    public function create(string $travelPlanUuid)
+    {
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            return view('members.create', compact('travelPlan'));
+        } catch (\Exception $e) {
+            abort(403);
+        }
+    }
+
+    /**
+     * メンバー招待処理
+     */
+    public function store(Request $request, string $travelPlanUuid)
+    {
+        $validated = $request->validate([
+            'invitation_type' => 'required|in:email,account',
+            'email' => 'required_if:invitation_type,email|email|max:255',
+            'account_name' => 'required_if:invitation_type,account|string|max:255',
+            'name' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            if ($validated['invitation_type'] === 'email') {
+                $this->memberService->inviteMemberByEmail(
+                    $travelPlan,
+                    Auth::user(),
+                    $validated['email'],
+                    $validated['name']
+                );
+                $message = $validated['email'].'に招待を送信しました。';
+            } else {
+                $this->memberService->inviteMemberByAccountName(
+                    $travelPlan,
+                    Auth::user(),
+                    $validated['account_name']
+                );
+                $message = '@'.$validated['account_name'].'に招待を送信しました。';
+            }
+
+            return redirect()
+                ->route('travel-plans.members.index', $travelPlan->uuid)
+                ->with('success', $message);
+        } catch (ValidationException $e) {
+            return back()
+                ->withInput()
+                ->withErrors($e->errors());
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * メンバー詳細表示
+     */
+    public function show(string $travelPlanUuid, int $memberId)
+    {
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
+            $member = $members->find($memberId);
+
+            if (! $member) {
+                abort(404);
+            }
+
+            return view('members.show', compact('travelPlan', 'member'));
+        } catch (\Exception $e) {
+            abort(403);
+        }
+    }
+
+    /**
+     * メンバー編集フォーム表示
+     */
+    public function edit(string $travelPlanUuid, int $memberId)
+    {
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
+            $member = $members->find($memberId);
+
+            if (! $member) {
+                abort(404);
+            }
+
+            return view('members.edit', compact('travelPlan', 'member'));
+        } catch (\Exception $e) {
+            abort(403);
+        }
+    }
+
+    /**
+     * メンバー更新処理
+     */
+    public function update(Request $request, string $travelPlanUuid, int $memberId)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
+            $member = $members->find($memberId);
+
+            if (! $member) {
+                abort(404);
+            }
+
+            $updatedMember = $this->memberService->updateMember($member, Auth::user(), $validated);
+
+            return redirect()
+                ->route('travel-plans.members.show', [$travelPlan->uuid, $updatedMember->id])
+                ->with('success', 'メンバー情報を更新しました。');
+        } catch (ValidationException $e) {
+            return back()
+                ->withInput()
+                ->withErrors($e->errors());
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * メンバー削除処理
+     */
+    public function destroy(string $travelPlanUuid, int $memberId)
+    {
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
+            $member = $members->find($memberId);
+
+            if (! $member) {
+                abort(404);
+            }
+
+            $this->memberService->removeMember($member, Auth::user());
+
+            return redirect()
+                ->route('travel-plans.members.index', $travelPlan->uuid)
+                ->with('success', 'メンバーを削除しました。');
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+}

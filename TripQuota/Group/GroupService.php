@@ -1,0 +1,119 @@
+<?php
+
+namespace TripQuota\Group;
+
+use App\Models\Group;
+use App\Models\TravelPlan;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use TripQuota\Member\MemberRepositoryInterface;
+
+class GroupService
+{
+    public function __construct(
+        private GroupRepositoryInterface $groupRepository,
+        private MemberRepositoryInterface $memberRepository
+    ) {}
+
+    public function createBranchGroup(TravelPlan $travelPlan, User $user, array $data): Group
+    {
+        $this->ensureUserCanManageGroups($travelPlan, $user);
+
+        return DB::transaction(function () use ($travelPlan, $data) {
+            $branchKey = $this->groupRepository->generateUniqueBranchKey();
+
+            return $this->groupRepository->create([
+                'travel_plan_id' => $travelPlan->id,
+                'type' => 'BRANCH',
+                'name' => $data['name'],
+                'branch_key' => $branchKey,
+                'description' => $data['description'] ?? null,
+            ]);
+        });
+    }
+
+    public function updateGroup(Group $group, User $user, array $data): Group
+    {
+        $this->ensureUserCanManageGroups($group->travelPlan, $user);
+        $this->ensureGroupCanBeEdited($group);
+
+        return $this->groupRepository->update($group, [
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+        ]);
+    }
+
+    public function deleteGroup(Group $group, User $user): bool
+    {
+        $this->ensureUserCanManageGroups($group->travelPlan, $user);
+        $this->ensureGroupCanBeDeleted($group);
+
+        return DB::transaction(function () use ($group) {
+            // グループに関連するデータの削除
+            // TODO: 宿泊施設、行程、費用などの関連データの処理
+
+            return $this->groupRepository->delete($group);
+        });
+    }
+
+    public function getGroupsForTravelPlan(TravelPlan $travelPlan, User $user): \Illuminate\Database\Eloquent\Collection
+    {
+        $this->ensureUserCanViewGroups($travelPlan, $user);
+
+        return $this->groupRepository->findByTravelPlan($travelPlan);
+    }
+
+    public function getCoreGroup(TravelPlan $travelPlan, User $user): ?Group
+    {
+        $this->ensureUserCanViewGroups($travelPlan, $user);
+
+        return $this->groupRepository->findCoreGroup($travelPlan);
+    }
+
+    public function getBranchGroups(TravelPlan $travelPlan, User $user): \Illuminate\Database\Eloquent\Collection
+    {
+        $this->ensureUserCanViewGroups($travelPlan, $user);
+
+        return $this->groupRepository->findBranchGroups($travelPlan);
+    }
+
+    public function findGroupByBranchKey(string $branchKey): ?Group
+    {
+        return $this->groupRepository->findByBranchKey($branchKey);
+    }
+
+    private function ensureUserCanViewGroups(TravelPlan $travelPlan, User $user): void
+    {
+        $member = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
+
+        if (! $member) {
+            throw new \Exception('この旅行プランのグループを表示する権限がありません。');
+        }
+    }
+
+    private function ensureUserCanManageGroups(TravelPlan $travelPlan, User $user): void
+    {
+        $member = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
+
+        if (! $member || ! $member->is_confirmed) {
+            throw new \Exception('グループを管理する権限がありません。');
+        }
+    }
+
+    private function ensureGroupCanBeEdited(Group $group): void
+    {
+        if ($group->type === 'CORE') {
+            throw new \Exception('コアグループは編集できません。');
+        }
+    }
+
+    private function ensureGroupCanBeDeleted(Group $group): void
+    {
+        if ($group->type === 'CORE') {
+            throw new \Exception('コアグループは削除できません。');
+        }
+
+        // メンバーが存在する場合は削除不可
+        // TODO: グループメンバーのチェック実装
+    }
+}
