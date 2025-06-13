@@ -5,6 +5,56 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $travel_plan_id
+ * @property int|null $user_id
+ * @property int|null $account_id
+ * @property string $name
+ * @property string|null $email
+ * @property bool $is_confirmed
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Accommodation> $accommodations
+ * @property-read int|null $accommodations_count
+ * @property-read \App\Models\Account|null $account
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Accommodation> $createdAccommodations
+ * @property-read int|null $created_accommodations_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Itinerary> $createdItineraries
+ * @property-read int|null $created_itineraries_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Expense> $expenses
+ * @property-read int|null $expenses_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Itinerary> $itineraries
+ * @property-read int|null $itineraries_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Expense> $paidExpenses
+ * @property-read int|null $paid_expenses_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ExpenseSettlement> $payeeSettlements
+ * @property-read int|null $payee_settlements_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ExpenseSettlement> $payerSettlements
+ * @property-read int|null $payer_settlements_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\GroupInvitation> $sentInvitations
+ * @property-read int|null $sent_invitations_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TravelDocument> $travelDocuments
+ * @property-read int|null $travel_documents_count
+ * @property-read \App\Models\TravelPlan $travelPlan
+ * @property-read \App\Models\User|null $user
+ *
+ * @method static \Database\Factories\MemberFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereAccountId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereIsConfirmed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereTravelPlanId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereUserId($value)
+ *
+ * @mixin \Eloquent
+ */
 class Member extends Model
 {
     use HasFactory;

@@ -75,6 +75,9 @@ Route::middleware('auth')->group(function () {
     Route::get('travel-plans/{uuid}/members/invite', [MemberController::class, 'create'])->name('travel-plans.members.create');
     Route::post('travel-plans/{uuid}/members/invite', [MemberController::class, 'store'])->name('travel-plans.members.store');
 
+    // 旅程タイムライン表示（resourceルートより先に定義）
+    Route::get('travel-plans/{uuid}/itineraries/timeline', [ItineraryController::class, 'timeline'])->name('travel-plans.itineraries.timeline');
+
     // 旅程管理（旅行プラン配下）
     Route::resource('travel-plans.itineraries', ItineraryController::class)->parameters([
         'travel-plans' => 'uuid',
@@ -87,9 +90,6 @@ Route::middleware('auth')->group(function () {
         'update' => 'travel-plans.itineraries.update',
         'destroy' => 'travel-plans.itineraries.destroy',
     ]);
-
-    // 旅程タイムライン表示
-    Route::get('travel-plans/{uuid}/itineraries/timeline', [ItineraryController::class, 'timeline'])->name('travel-plans.itineraries.timeline');
 
     // 招待管理
     Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');

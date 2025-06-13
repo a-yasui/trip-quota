@@ -62,6 +62,7 @@ class ItineraryRepository implements ItineraryRepositoryInterface
     public function update(Itinerary $itinerary, array $data): Itinerary
     {
         $itinerary->update($data);
+
         return $itinerary->fresh(['travelPlan', 'group', 'createdBy', 'members']);
     }
 
@@ -69,7 +70,7 @@ class ItineraryRepository implements ItineraryRepositoryInterface
     {
         // まずピボットテーブルの関連を削除
         $itinerary->members()->detach();
-        
+
         return $itinerary->delete();
     }
 

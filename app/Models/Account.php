@@ -5,6 +5,34 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $account_name
+ * @property string|null $display_name
+ * @property string|null $thumbnail_url
+ * @property string|null $bio
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Member> $members
+ * @property-read int|null $members_count
+ * @property-read \App\Models\User $user
+ *
+ * @method static \Database\Factories\AccountFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereAccountName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereBio($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereDisplayName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereThumbnailUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Account whereUserId($value)
+ *
+ * @mixin \Eloquent
+ */
 class Account extends Model
 {
     use HasFactory;

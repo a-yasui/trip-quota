@@ -16,7 +16,7 @@ class GroupFactory extends Factory
         return [
             'travel_plan_id' => TravelPlan::factory(),
             'type' => fake()->randomElement(['CORE', 'BRANCH']),
-            'name' => fake()->words(2, true) . 'グループ',
+            'name' => fake()->words(2, true).'グループ',
             'branch_key' => function (array $attributes) {
                 return $attributes['type'] === 'BRANCH' ? Str::random(8) : null;
             },
@@ -37,7 +37,7 @@ class GroupFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => 'BRANCH',
-            'name' => fake()->randomElement(['A班', 'B班', 'C班', '1班', '2班', '3班']) . 'グループ',
+            'name' => fake()->randomElement(['A班', 'B班', 'C班', '1班', '2班', '3班']).'グループ',
             'branch_key' => Str::random(8),
         ]);
     }

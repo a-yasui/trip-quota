@@ -65,7 +65,7 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <h2 class="text-xl font-semibold text-blue-900">
-                                        {{ $dateObj->format('m月d日') }}（{{ $dayOfWeek }}）
+                                        {{ $dateObj->format('n月d日') }}（{{ $dayOfWeek }}）
                                     </h2>
                                     <p class="text-sm text-blue-700 mt-1">{{ $dayItineraries->count() }}件の旅程</p>
                                 </div>
@@ -138,8 +138,8 @@
                                                     
                                                     <div class="mt-1 flex items-center flex-wrap gap-3 text-sm text-gray-500">
                                                         @if($itinerary->group)
-                                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $itinerary->group->group_type === 'CORE' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
-                                                                @if($itinerary->group->group_type === 'CORE')
+                                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $itinerary->group->type === 'CORE' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                                                @if($itinerary->group->type === 'CORE')
                                                                     [全体] {{ $itinerary->group->name }}
                                                                 @else
                                                                     [班] {{ $itinerary->group->name }}
@@ -220,7 +220,7 @@
                 </svg>
                 <h3 class="mt-2 text-sm font-medium text-gray-900">指定期間に旅程がありません</h3>
                 <p class="mt-1 text-sm text-gray-500">
-                    {{ $startDate->format('Y年m月d日') }} から {{ $endDate->format('Y年m月d日') }} の期間に旅程がありません。
+                    {{ $startDate->format('Y年n月d日') }} から {{ $endDate->format('Y年n月d日') }} の期間に旅程がありません。
                 </p>
                 <div class="mt-6">
                     <a href="{{ route('travel-plans.itineraries.create', $travelPlan->uuid) }}" 

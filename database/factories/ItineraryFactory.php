@@ -17,7 +17,7 @@ class ItineraryFactory extends Factory
         $date = fake()->dateTimeBetween('now', '+1 year');
         $startTime = fake()->optional()->time();
         $endTime = $startTime ? fake()->time() : null;
-        
+
         return [
             'travel_plan_id' => TravelPlan::factory(),
             'group_id' => null,

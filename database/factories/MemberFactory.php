@@ -15,7 +15,7 @@ class MemberFactory extends Factory
     public function definition(): array
     {
         $user = User::factory();
-        
+
         return [
             'travel_plan_id' => TravelPlan::factory(),
             'user_id' => $user,
@@ -54,7 +54,7 @@ class MemberFactory extends Factory
     {
         return $this->state(function (array $attributes) use ($user) {
             $account = Account::factory()->for($user)->create();
-            
+
             return [
                 'user_id' => $user->id,
                 'account_id' => $account->id,

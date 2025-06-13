@@ -4,7 +4,6 @@ namespace TripQuota\Itinerary;
 
 use App\Models\Group;
 use App\Models\Itinerary;
-use App\Models\Member;
 use App\Models\TravelPlan;
 use App\Models\User;
 use Carbon\Carbon;
@@ -21,7 +20,7 @@ class ItineraryService
     public function getItinerariesByTravelPlan(TravelPlan $travelPlan, User $user): Collection
     {
         $this->ensureUserCanViewItineraries($travelPlan, $user);
-        
+
         return $this->itineraryRepository->findByTravelPlan($travelPlan);
     }
 
@@ -29,21 +28,21 @@ class ItineraryService
     {
         $this->ensureUserCanViewItineraries($travelPlan, $user);
         $this->ensureGroupBelongsToTravelPlan($group, $travelPlan);
-        
+
         return $this->itineraryRepository->findByTravelPlanAndGroup($travelPlan, $group);
     }
 
     public function getItinerariesByDate(TravelPlan $travelPlan, Carbon $date, User $user): Collection
     {
         $this->ensureUserCanViewItineraries($travelPlan, $user);
-        
+
         return $this->itineraryRepository->findByTravelPlanAndDate($travelPlan, $date);
     }
 
     public function getItinerariesByDateRange(TravelPlan $travelPlan, Carbon $startDate, Carbon $endDate, User $user): Collection
     {
         $this->ensureUserCanViewItineraries($travelPlan, $user);
-        
+
         return $this->itineraryRepository->findByTravelPlanDateRange($travelPlan, $startDate, $endDate);
     }
 
@@ -51,13 +50,14 @@ class ItineraryService
     {
         $this->ensureUserCanManageItineraries($travelPlan, $user);
         $this->validateItineraryData($data);
-        
+        $this->validateDateWithinTravelPeriod($data, $travelPlan);
+
         return DB::transaction(function () use ($travelPlan, $user, $data) {
             // 作成者のメンバー情報を取得
             $member = $travelPlan->members()->where('user_id', $user->id)->first();
-            if (!$member) {
+            if (! $member) {
                 throw ValidationException::withMessages([
-                    'user' => ['このユーザーは旅行プランのメンバーではありません。']
+                    'user' => ['このユーザーは旅行プランのメンバーではありません。'],
                 ]);
             }
 
@@ -98,7 +98,7 @@ class ItineraryService
     {
         $this->ensureUserCanEditItinerary($itinerary, $user);
         $this->validateItineraryData($data, $itinerary->id);
-        
+
         return DB::transaction(function () use ($itinerary, $data) {
             // グループの検証
             if (isset($data['group_id'])) {
@@ -126,7 +126,7 @@ class ItineraryService
     public function deleteItinerary(Itinerary $itinerary, User $user): bool
     {
         $this->ensureUserCanDeleteItinerary($itinerary, $user);
-        
+
         return $this->itineraryRepository->delete($itinerary);
     }
 
@@ -134,10 +134,10 @@ class ItineraryService
     {
         // メンバーIDの妥当性チェック
         $validMemberIds = $travelPlan->members()->whereIn('id', $memberIds)->pluck('id')->toArray();
-        
+
         if (count($validMemberIds) !== count($memberIds)) {
             throw ValidationException::withMessages([
-                'member_ids' => ['無効なメンバーIDが含まれています。']
+                'member_ids' => ['無効なメンバーIDが含まれています。'],
             ]);
         }
 
@@ -146,10 +146,14 @@ class ItineraryService
 
     private function ensureUserCanViewItineraries(TravelPlan $travelPlan, User $user): void
     {
-        $member = $travelPlan->members()->where('user_id', $user->id)->first();
-        if (!$member) {
+        $member = $travelPlan->members()
+            ->where('user_id', $user->id)
+            ->where('is_confirmed', true)
+            ->first();
+            
+        if (! $member) {
             throw ValidationException::withMessages([
-                'authorization' => ['この旅行プランの旅程を閲覧する権限がありません。']
+                'authorization' => ['この旅行プランの旅程を閲覧する権限がありません。'],
             ]);
         }
     }
@@ -160,10 +164,10 @@ class ItineraryService
             ->where('user_id', $user->id)
             ->where('is_confirmed', true)
             ->first();
-            
-        if (!$member) {
+
+        if (! $member) {
             throw ValidationException::withMessages([
-                'authorization' => ['旅程を管理する権限がありません。確認済みメンバーである必要があります。']
+                'authorization' => ['旅程を管理する権限がありません。確認済みメンバーである必要があります。'],
             ]);
         }
     }
@@ -172,10 +176,10 @@ class ItineraryService
     {
         // 作成者、または旅行プランの所有者・作成者のみ編集可能
         $member = $itinerary->travelPlan->members()->where('user_id', $user->id)->first();
-        
-        if (!$member) {
+
+        if (! $member) {
             throw ValidationException::withMessages([
-                'authorization' => ['この旅程を編集する権限がありません。']
+                'authorization' => ['この旅程を編集する権限がありません。'],
             ]);
         }
 
@@ -183,9 +187,9 @@ class ItineraryService
         $isOwner = $itinerary->travelPlan->owner_user_id === $user->id;
         $isPlanCreator = $itinerary->travelPlan->creator_user_id === $user->id;
 
-        if (!($isCreator || $isOwner || $isPlanCreator)) {
+        if (! ($isCreator || $isOwner || $isPlanCreator)) {
             throw ValidationException::withMessages([
-                'authorization' => ['この旅程を編集できるのは作成者または旅行プラン管理者のみです。']
+                'authorization' => ['この旅程を編集できるのは作成者または旅行プラン管理者のみです。'],
             ]);
         }
     }
@@ -200,7 +204,7 @@ class ItineraryService
     {
         if ($group->travel_plan_id !== $travelPlan->id) {
             throw ValidationException::withMessages([
-                'group_id' => ['指定されたグループはこの旅行プランに属していません。']
+                'group_id' => ['指定されたグループはこの旅行プランに属していません。'],
             ]);
         }
     }
@@ -208,9 +212,9 @@ class ItineraryService
     private function ensureUserBelongsToGroup(User $user, Group $group): void
     {
         $member = $group->members()->where('user_id', $user->id)->first();
-        if (!$member) {
+        if (! $member) {
             throw ValidationException::withMessages([
-                'group_id' => ['指定されたグループのメンバーではありません。']
+                'group_id' => ['指定されたグループのメンバーではありません。'],
             ]);
         }
     }
@@ -220,13 +224,13 @@ class ItineraryService
         // 必須フィールドのチェック
         if (empty($data['title'])) {
             throw ValidationException::withMessages([
-                'title' => ['タイトルは必須です。']
+                'title' => ['タイトルは必須です。'],
             ]);
         }
 
         if (empty($data['date'])) {
             throw ValidationException::withMessages([
-                'date' => ['日付は必須です。']
+                'date' => ['日付は必須です。'],
             ]);
         }
 
@@ -235,7 +239,7 @@ class ItineraryService
             $date = Carbon::parse($data['date']);
         } catch (\Exception $e) {
             throw ValidationException::withMessages([
-                'date' => ['有効な日付を入力してください。']
+                'date' => ['有効な日付を入力してください。'],
             ]);
         }
 
@@ -243,7 +247,7 @@ class ItineraryService
         if (isset($data['transportation_type']) && $data['transportation_type'] === 'airplane') {
             if (empty($data['flight_number'])) {
                 throw ValidationException::withMessages([
-                    'flight_number' => ['飛行機の場合、便名は必須です。']
+                    'flight_number' => ['飛行機の場合、便名は必須です。'],
                 ]);
             }
         }
@@ -254,12 +258,35 @@ class ItineraryService
         if ($startTime && $endTime) {
             $start = Carbon::parse($startTime);
             $end = Carbon::parse($endTime);
-            
+
             if ($end->lte($start)) {
                 throw ValidationException::withMessages([
-                    'end_time' => ['終了時刻は開始時刻より後である必要があります。']
+                    'end_time' => ['終了時刻は開始時刻より後である必要があります。'],
                 ]);
             }
+        }
+    }
+
+    private function validateDateWithinTravelPeriod(array $data, TravelPlan $travelPlan): void
+    {
+        if (empty($data['date'])) {
+            return;
+        }
+
+        $date = Carbon::parse($data['date']);
+        $departureDate = $travelPlan->departure_date;
+        $returnDate = $travelPlan->return_date;
+
+        if ($date->lt($departureDate)) {
+            throw ValidationException::withMessages([
+                'date' => ['旅程の日付は旅行開始日以降である必要があります。'],
+            ]);
+        }
+
+        if ($returnDate && $date->gt($returnDate)) {
+            throw ValidationException::withMessages([
+                'date' => ['旅程の日付は旅行終了日以前である必要があります。'],
+            ]);
         }
     }
 }

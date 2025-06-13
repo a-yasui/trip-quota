@@ -16,7 +16,9 @@ class ItineraryControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
 
     protected function setUp(): void
@@ -37,11 +39,9 @@ class ItineraryControllerTest extends TestCase
 
     public function test_index_displays_itineraries_for_authenticated_member()
     {
-        $itinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $itinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'title' => 'Test Itinerary',
             'date' => Carbon::parse('2024-01-16'),
-            'created_by' => $this->user->id,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -56,21 +56,16 @@ class ItineraryControllerTest extends TestCase
     public function test_index_filters_by_group()
     {
         $group = Group::factory()->create(['travel_plan_id' => $this->travelPlan->id]);
-        $groupItinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
-            'group_id' => $group->id,
+        $groupItinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->forGroup($group)->createdBy($this->member)->create([
             'title' => 'Group Itinerary',
-            'created_by' => $this->user->id,
         ]);
-        $generalItinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $generalItinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'group_id' => null,
             'title' => 'General Itinerary',
-            'created_by' => $this->user->id,
         ]);
 
         $response = $this->actingAs($this->user)
-            ->get(route('travel-plans.itineraries.index', $this->travelPlan->uuid) . '?group_id=' . $group->id);
+            ->get(route('travel-plans.itineraries.index', $this->travelPlan->uuid).'?group_id='.$group->id);
 
         $response->assertStatus(200);
         $response->assertSee('Group Itinerary');
@@ -80,21 +75,17 @@ class ItineraryControllerTest extends TestCase
     public function test_index_filters_by_date()
     {
         $targetDate = Carbon::parse('2024-01-16');
-        $targetItinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $targetItinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'date' => $targetDate,
             'title' => 'Target Date Itinerary',
-            'created_by' => $this->user->id,
         ]);
-        $otherItinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $otherItinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'date' => Carbon::parse('2024-01-17'),
             'title' => 'Other Date Itinerary',
-            'created_by' => $this->user->id,
         ]);
 
         $response = $this->actingAs($this->user)
-            ->get(route('travel-plans.itineraries.index', $this->travelPlan->uuid) . '?date=2024-01-16');
+            ->get(route('travel-plans.itineraries.index', $this->travelPlan->uuid).'?date=2024-01-16');
 
         $response->assertStatus(200);
         $response->assertSee('Target Date Itinerary');
@@ -125,7 +116,7 @@ class ItineraryControllerTest extends TestCase
         $group = Group::factory()->create(['travel_plan_id' => $this->travelPlan->id]);
 
         $response = $this->actingAs($this->user)
-            ->get(route('travel-plans.itineraries.create', $this->travelPlan->uuid) . '?date=2024-01-16&group_id=' . $group->id);
+            ->get(route('travel-plans.itineraries.create', $this->travelPlan->uuid).'?date=2024-01-16&group_id='.$group->id);
 
         $response->assertStatus(200);
         $response->assertSee('value="2024-01-16"', false);
@@ -230,7 +221,7 @@ class ItineraryControllerTest extends TestCase
             ->post(route('travel-plans.itineraries.store', $this->travelPlan->uuid), $validData);
 
         $response->assertStatus(302);
-        
+
         $itinerary = Itinerary::where('title', 'Test Itinerary')->first();
         $this->assertCount(2, $itinerary->members);
         $this->assertTrue($itinerary->members->contains($member1));
@@ -239,14 +230,12 @@ class ItineraryControllerTest extends TestCase
 
     public function test_show_displays_itinerary_details()
     {
-        $itinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $itinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'title' => 'Test Itinerary',
             'description' => 'Test description',
             'transportation_type' => 'airplane',
             'airline' => 'JAL',
             'flight_number' => 'JL123',
-            'created_by' => $this->user->id,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -263,12 +252,10 @@ class ItineraryControllerTest extends TestCase
 
     public function test_edit_displays_form_with_existing_data()
     {
-        $itinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $itinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'title' => 'Test Itinerary',
             'transportation_type' => 'airplane',
             'airline' => 'JAL',
-            'created_by' => $this->user->id,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -283,10 +270,8 @@ class ItineraryControllerTest extends TestCase
 
     public function test_update_modifies_itinerary_with_valid_data()
     {
-        $itinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $itinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'title' => 'Original Title',
-            'created_by' => $this->user->id,
         ]);
 
         $updateData = [
@@ -310,10 +295,7 @@ class ItineraryControllerTest extends TestCase
 
     public function test_destroy_deletes_itinerary()
     {
-        $itinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
-            'created_by' => $this->user->id,
-        ]);
+        $itinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create();
 
         $response = $this->actingAs($this->user)
             ->delete(route('travel-plans.itineraries.destroy', [$this->travelPlan->uuid, $itinerary->id]));
@@ -326,21 +308,17 @@ class ItineraryControllerTest extends TestCase
     {
         $date1 = Carbon::parse('2024-01-16');
         $date2 = Carbon::parse('2024-01-17');
-        
-        $itinerary1 = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+
+        $itinerary1 = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'title' => 'Day 1 Activity',
             'date' => $date1,
             'start_time' => Carbon::parse('10:00'),
-            'created_by' => $this->user->id,
         ]);
-        
-        $itinerary2 = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+
+        $itinerary2 = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'title' => 'Day 2 Activity',
             'date' => $date2,
             'start_time' => Carbon::parse('14:00'),
-            'created_by' => $this->user->id,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -362,9 +340,9 @@ class ItineraryControllerTest extends TestCase
         $endDate = Carbon::parse('2024-01-18');
 
         $response = $this->actingAs($this->user)
-            ->get(route('travel-plans.itineraries.timeline', $this->travelPlan->uuid) . 
-                '?start_date=' . $startDate->format('Y-m-d') . 
-                '&end_date=' . $endDate->format('Y-m-d'));
+            ->get(route('travel-plans.itineraries.timeline', $this->travelPlan->uuid).
+                '?start_date='.$startDate->format('Y-m-d').
+                '&end_date='.$endDate->format('Y-m-d'));
 
         $response->assertStatus(200);
         $response->assertSee('value="2024-01-16"', false);
@@ -404,10 +382,13 @@ class ItineraryControllerTest extends TestCase
             'is_confirmed' => true,
         ]);
 
-        $itinerary = Itinerary::factory()->create([
+        $otherMember = Member::factory()->create([
             'travel_plan_id' => $this->travelPlan->id,
-            'created_by' => $otherUser->id,
+            'user_id' => $otherUser->id,
+            'is_confirmed' => true,
         ]);
+
+        $itinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($otherMember)->create();
 
         $response = $this->actingAs($this->user)
             ->put(route('travel-plans.itineraries.update', [$this->travelPlan->uuid, $itinerary->id]), [

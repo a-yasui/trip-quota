@@ -8,8 +8,8 @@ use App\Models\Member;
 use App\Models\TravelPlan;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 use TripQuota\Itinerary\ItineraryRepositoryInterface;
@@ -20,18 +20,19 @@ class ItineraryServiceTest extends TestCase
     use RefreshDatabase;
 
     private ItineraryService $service;
+
     private ItineraryRepositoryInterface $repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // モック用のリポジトリを作成
         $this->repository = $this->createMock(ItineraryRepositoryInterface::class);
         $this->service = new ItineraryService($this->repository);
     }
 
-    public function test_getItinerariesByTravelPlan_returns_itineraries_for_confirmed_member()
+    public function test_get_itineraries_by_travel_plan_returns_itineraries_for_confirmed_member()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
@@ -51,7 +52,7 @@ class ItineraryServiceTest extends TestCase
         $this->assertEquals($expectedItineraries, $result);
     }
 
-    public function test_getItinerariesByTravelPlan_throws_exception_for_non_member()
+    public function test_get_itineraries_by_travel_plan_throws_exception_for_non_member()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
@@ -62,11 +63,14 @@ class ItineraryServiceTest extends TestCase
         $this->service->getItinerariesByTravelPlan($travelPlan, $user);
     }
 
-    public function test_getItinerariesByTravelPlan_throws_exception_for_unconfirmed_member()
+    public function test_get_itineraries_by_travel_plan_throws_exception_for_unconfirmed_member()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
-        Member::factory()->forUser($user)->forTravelPlan($travelPlan)->unconfirmed()->create();
+        
+        // 未確認メンバーを作成
+        $member = Member::factory()->forUser($user)->forTravelPlan($travelPlan)->create();
+        $member->update(['is_confirmed' => false]);
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('この旅行プランの旅程を閲覧する権限がありません。');
@@ -74,7 +78,7 @@ class ItineraryServiceTest extends TestCase
         $this->service->getItinerariesByTravelPlan($travelPlan, $user);
     }
 
-    public function test_getItinerariesByGroup_returns_group_itineraries()
+    public function test_get_itineraries_by_group_returns_group_itineraries()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
@@ -95,7 +99,7 @@ class ItineraryServiceTest extends TestCase
         $this->assertEquals($expectedItineraries, $result);
     }
 
-    public function test_getItinerariesByDate_returns_date_specific_itineraries()
+    public function test_get_itineraries_by_date_returns_date_specific_itineraries()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
@@ -116,7 +120,7 @@ class ItineraryServiceTest extends TestCase
         $this->assertEquals($expectedItineraries, $result);
     }
 
-    public function test_getItinerariesByDateRange_returns_range_itineraries()
+    public function test_get_itineraries_by_date_range_returns_range_itineraries()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
@@ -138,7 +142,7 @@ class ItineraryServiceTest extends TestCase
         $this->assertEquals($expectedItineraries, $result);
     }
 
-    public function test_createItinerary_validates_required_fields()
+    public function test_create_itinerary_validates_required_fields()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
@@ -149,7 +153,7 @@ class ItineraryServiceTest extends TestCase
         $this->service->createItinerary($travelPlan, $user, []);
     }
 
-    public function test_createItinerary_validates_end_time_after_start_time()
+    public function test_create_itinerary_validates_end_time_after_start_time()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
@@ -167,7 +171,7 @@ class ItineraryServiceTest extends TestCase
         $this->service->createItinerary($travelPlan, $user, $invalidData);
     }
 
-    public function test_createItinerary_validates_airplane_fields()
+    public function test_create_itinerary_validates_airplane_fields()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
@@ -185,7 +189,7 @@ class ItineraryServiceTest extends TestCase
         $this->service->createItinerary($travelPlan, $user, $invalidData);
     }
 
-    public function test_createItinerary_validates_date_within_travel_period()
+    public function test_create_itinerary_validates_date_within_travel_period()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create([
@@ -204,13 +208,13 @@ class ItineraryServiceTest extends TestCase
         $this->service->createItinerary($travelPlan, $user, $invalidData);
     }
 
-    public function test_createItinerary_validates_group_belongs_to_travel_plan()
+    public function test_create_itinerary_validates_group_belongs_to_travel_plan()
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
         $otherTravelPlan = TravelPlan::factory()->create();
         $group = Group::factory()->for($otherTravelPlan)->create();
-        
+
         Member::factory()->forUser($user)->forTravelPlan($travelPlan)->create();
 
         $invalidData = [
@@ -224,13 +228,13 @@ class ItineraryServiceTest extends TestCase
         $this->service->createItinerary($travelPlan, $user, $invalidData);
     }
 
-    public function test_updateItinerary_validates_user_permissions()
+    public function test_update_itinerary_validates_user_permissions()
     {
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
         $otherMember = Member::factory()->forUser($otherUser)->forTravelPlan($travelPlan)->create();
-        
+
         $itinerary = Itinerary::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'created_by_member_id' => $otherMember->id,
@@ -239,18 +243,18 @@ class ItineraryServiceTest extends TestCase
         Member::factory()->forUser($user)->forTravelPlan($travelPlan)->create();
 
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('この旅程を編集する権限がありません。');
+        $this->expectExceptionMessage('この旅程を編集できるのは作成者または旅行プラン管理者のみです。');
 
         $this->service->updateItinerary($itinerary, $user, ['title' => 'Updated']);
     }
 
-    public function test_deleteItinerary_validates_user_permissions()
+    public function test_delete_itinerary_validates_user_permissions()
     {
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
         $otherMember = Member::factory()->forUser($otherUser)->forTravelPlan($travelPlan)->create();
-        
+
         $itinerary = Itinerary::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'created_by_member_id' => $otherMember->id,
@@ -259,7 +263,7 @@ class ItineraryServiceTest extends TestCase
         Member::factory()->forUser($user)->forTravelPlan($travelPlan)->create();
 
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('この旅程を削除する権限がありません。');
+        $this->expectExceptionMessage('この旅程を編集できるのは作成者または旅行プラン管理者のみです。');
 
         $this->service->deleteItinerary($itinerary, $user);
     }

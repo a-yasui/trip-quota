@@ -48,7 +48,7 @@
                             @endif
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">日付</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->date->format('Y年m月d日（D）') }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->date->format('Y年n月d日（D）') }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">時間</dt>
@@ -67,8 +67,8 @@
                                 <dt class="text-sm font-medium text-gray-500">対象グループ</dt>
                                 <dd class="mt-1 text-sm text-gray-900">
                                     @if($itinerary->group)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $itinerary->group->group_type === 'CORE' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
-                                            @if($itinerary->group->group_type === 'CORE')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $itinerary->group->type === 'CORE' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                            @if($itinerary->group->type === 'CORE')
                                                 [全体] {{ $itinerary->group->name }}
                                             @else
                                                 [班] {{ $itinerary->group->name }}

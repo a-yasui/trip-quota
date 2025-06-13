@@ -13,17 +13,15 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 final class ActivityLogFactory extends Factory
 {
     /**
-    * The name of the factory's corresponding model.
-    *
-    * @var string
-    */
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected $model = ActivityLog::class;
 
     /**
-    * Define the model's default state.
-    *
-    * @return array
-    */
+     * Define the model's default state.
+     */
     public function definition(): array
     {
         return [

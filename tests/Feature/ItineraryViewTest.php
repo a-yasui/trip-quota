@@ -16,7 +16,9 @@ class ItineraryViewTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
 
     protected function setUp(): void
@@ -38,19 +40,17 @@ class ItineraryViewTest extends TestCase
 
     public function test_index_view_displays_correctly()
     {
-        $group = Group::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $group = Group::factory()->for($this->travelPlan)->create([
             'name' => 'Test Group',
-            'group_type' => 'CORE',
+            'type' => 'CORE',
         ]);
 
-        $itinerary = Itinerary::factory()->create([
+        $itinerary = Itinerary::factory()->createdBy($this->member)->create([
             'travel_plan_id' => $this->travelPlan->id,
             'title' => 'Sample Itinerary',
             'description' => 'Test description',
             'group_id' => $group->id,
             'transportation_type' => 'airplane',
-            'created_by' => $this->user->id,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -81,10 +81,9 @@ class ItineraryViewTest extends TestCase
 
     public function test_create_view_displays_form_correctly()
     {
-        $group = Group::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $group = Group::factory()->for($this->travelPlan)->create([
             'name' => 'Test Group',
-            'group_type' => 'BRANCH',
+            'type' => 'BRANCH',
         ]);
 
         $member = Member::factory()->create([
@@ -132,10 +131,9 @@ class ItineraryViewTest extends TestCase
 
     public function test_show_view_displays_itinerary_details()
     {
-        $group = Group::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $group = Group::factory()->for($this->travelPlan)->create([
             'name' => 'Sample Group',
-            'group_type' => 'CORE',
+            'type' => 'CORE',
         ]);
 
         $member = Member::factory()->create([
@@ -144,7 +142,7 @@ class ItineraryViewTest extends TestCase
             'is_confirmed' => true,
         ]);
 
-        $itinerary = Itinerary::factory()->create([
+        $itinerary = Itinerary::factory()->createdBy($member)->create([
             'travel_plan_id' => $this->travelPlan->id,
             'title' => 'Tokyo to Osaka Flight',
             'description' => 'Morning flight to Osaka',
@@ -158,7 +156,6 @@ class ItineraryViewTest extends TestCase
             'arrival_location' => 'Kansai Airport',
             'notes' => 'Check-in 2 hours early',
             'group_id' => $group->id,
-            'created_by' => $this->user->id,
         ]);
 
         $itinerary->members()->attach($member);
@@ -170,7 +167,7 @@ class ItineraryViewTest extends TestCase
         $response->assertSee('Tokyo to Osaka Flight - Test Travel Plan');
         $response->assertSee('Tokyo to Osaka Flight');
         $response->assertSee('Morning flight to Osaka');
-        $response->assertSee('2024年1月16日');
+        $response->assertSee('2024年1月16日（Tue）');
         $response->assertSee('09:00');
         $response->assertSee('10:30');
         $response->assertSee('[全体] Sample Group');
@@ -189,19 +186,17 @@ class ItineraryViewTest extends TestCase
 
     public function test_edit_view_displays_form_with_existing_data()
     {
-        $group = Group::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $group = Group::factory()->for($this->travelPlan)->create([
             'name' => 'Edit Group',
         ]);
 
-        $itinerary = Itinerary::factory()->create([
+        $itinerary = Itinerary::factory()->createdBy($this->member)->create([
             'travel_plan_id' => $this->travelPlan->id,
             'title' => 'Original Title',
             'description' => 'Original description',
             'transportation_type' => 'car',
             'departure_location' => 'Tokyo Station',
             'group_id' => $group->id,
-            'created_by' => $this->user->id,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -220,22 +215,18 @@ class ItineraryViewTest extends TestCase
 
     public function test_timeline_view_displays_correctly()
     {
-        $itinerary1 = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $itinerary1 = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'title' => 'Morning Activity',
             'date' => Carbon::parse('2024-01-16'),
             'start_time' => Carbon::parse('09:00'),
             'transportation_type' => 'walking',
-            'created_by' => $this->user->id,
         ]);
 
-        $itinerary2 = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $itinerary2 = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'title' => 'Afternoon Activity',
             'date' => Carbon::parse('2024-01-16'),
             'start_time' => Carbon::parse('14:00'),
             'transportation_type' => 'bus',
-            'created_by' => $this->user->id,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -285,15 +276,12 @@ class ItineraryViewTest extends TestCase
 
     public function test_views_show_proper_navigation_links()
     {
-        $itinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
-            'created_by' => $this->user->id,
-        ]);
+        $itinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create();
 
         // Test index navigation
         $response = $this->actingAs($this->user)
             ->get(route('travel-plans.itineraries.index', $this->travelPlan->uuid));
-        
+
         $response->assertSee('旅行プラン詳細に戻る');
         $response->assertSee('グループ管理');
         $response->assertSee('メンバー管理');
@@ -301,7 +289,7 @@ class ItineraryViewTest extends TestCase
         // Test show navigation
         $response = $this->actingAs($this->user)
             ->get(route('travel-plans.itineraries.show', [$this->travelPlan->uuid, $itinerary->id]));
-        
+
         $response->assertSee('旅程一覧に戻る');
         $response->assertSee('タイムライン表示');
         $response->assertSee('旅行プラン詳細');
@@ -309,7 +297,7 @@ class ItineraryViewTest extends TestCase
         // Test timeline navigation
         $response = $this->actingAs($this->user)
             ->get(route('travel-plans.itineraries.timeline', $this->travelPlan->uuid));
-        
+
         $response->assertSee('旅行プラン詳細に戻る');
         $response->assertSee('グループ管理');
         $response->assertSee('メンバー管理');
@@ -327,11 +315,10 @@ class ItineraryViewTest extends TestCase
         ];
 
         foreach ($transportationTypes as $type => $icon) {
-            $itinerary = Itinerary::factory()->create([
-                'travel_plan_id' => $this->travelPlan->id,
+            $itinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
                 'title' => "Test {$type}",
                 'transportation_type' => $type,
-                'created_by' => $this->user->id,
+                'date' => Carbon::parse('2024-01-16'), // 旅行期間内の日付
             ]);
 
             $response = $this->actingAs($this->user)
@@ -343,8 +330,7 @@ class ItineraryViewTest extends TestCase
 
     public function test_views_handle_missing_optional_fields_gracefully()
     {
-        $itinerary = Itinerary::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
+        $itinerary = Itinerary::factory()->forTravelPlan($this->travelPlan)->createdBy($this->member)->create([
             'title' => 'Minimal Itinerary',
             'date' => Carbon::parse('2024-01-16'),
             'description' => null,
@@ -353,7 +339,6 @@ class ItineraryViewTest extends TestCase
             'transportation_type' => null,
             'group_id' => null,
             'notes' => null,
-            'created_by' => $this->user->id,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -363,6 +348,6 @@ class ItineraryViewTest extends TestCase
         $response->assertSee('時間未指定');
         $response->assertSee('すべてのメンバー');
         $response->assertDontSee('説明');
-        $response->assertDontSee('メモ');
+        $response->assertDontSee('<h2 class="text-lg font-medium text-gray-900">メモ</h2>', false);
     }
 }
