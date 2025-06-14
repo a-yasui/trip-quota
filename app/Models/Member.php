@@ -136,4 +136,9 @@ class Member extends Model
     {
         return $this->belongsToMany(TravelDocument::class, 'document_member');
     }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'group_member');
+    }
 }

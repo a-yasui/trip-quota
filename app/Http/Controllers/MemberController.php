@@ -52,6 +52,9 @@ class MemberController extends Controller
                 abort(404);
             }
 
+            // 招待権限の確認（確認済みメンバーであることを確認）
+            $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
+
             return view('members.create', compact('travelPlan'));
         } catch (\Exception $e) {
             abort(403);
@@ -111,7 +114,7 @@ class MemberController extends Controller
     /**
      * メンバー詳細表示
      */
-    public function show(string $travelPlanUuid, int $memberId)
+    public function show(string $travelPlanUuid, string $memberId)
     {
         try {
             $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
@@ -121,7 +124,7 @@ class MemberController extends Controller
             }
 
             $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
-            $member = $members->find($memberId);
+            $member = $members->find((int) $memberId);
 
             if (! $member) {
                 abort(404);
@@ -136,7 +139,7 @@ class MemberController extends Controller
     /**
      * メンバー編集フォーム表示
      */
-    public function edit(string $travelPlanUuid, int $memberId)
+    public function edit(string $travelPlanUuid, string $memberId)
     {
         try {
             $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
@@ -146,7 +149,7 @@ class MemberController extends Controller
             }
 
             $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
-            $member = $members->find($memberId);
+            $member = $members->find((int) $memberId);
 
             if (! $member) {
                 abort(404);
@@ -161,7 +164,7 @@ class MemberController extends Controller
     /**
      * メンバー更新処理
      */
-    public function update(Request $request, string $travelPlanUuid, int $memberId)
+    public function update(Request $request, string $travelPlanUuid, string $memberId)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -175,7 +178,7 @@ class MemberController extends Controller
             }
 
             $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
-            $member = $members->find($memberId);
+            $member = $members->find((int) $memberId);
 
             if (! $member) {
                 abort(404);
@@ -200,7 +203,7 @@ class MemberController extends Controller
     /**
      * メンバー削除処理
      */
-    public function destroy(string $travelPlanUuid, int $memberId)
+    public function destroy(string $travelPlanUuid, string $memberId)
     {
         try {
             $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
@@ -210,7 +213,7 @@ class MemberController extends Controller
             }
 
             $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
-            $member = $members->find($memberId);
+            $member = $members->find((int) $memberId);
 
             if (! $member) {
                 abort(404);
