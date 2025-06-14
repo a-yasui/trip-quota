@@ -1,197 +1,277 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('旅程詳細') }} - {{ $travelPlan->title }}
-            </h2>
-            <div>
-                <a href="{{ route('travel-plans.itineraries.edit', [$travelPlan, $itinerary]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition mr-2">
-                    {{ __('編集') }}
-                </a>
-                <form class="inline-block" action="{{ route('travel-plans.itineraries.destroy', [$travelPlan, $itinerary]) }}" method="POST" onsubmit="return confirm('{{ __('この旅程を削除してもよろしいですか？') }}');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-300 disabled:opacity-25 transition">
-                        {{ __('削除') }}
-                    </button>
-                </form>
-            </div>
-        </div>
-    </x-slot>
+@extends('layouts.master')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    @if (session('success'))
-                        <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                            <span class="block sm:inline">{{ session('success') }}</span>
-                        </div>
-                    @endif
+@section('title', $itinerary->title . ' - ' . $travelPlan->plan_name)
 
-                    @if (session('error'))
-                        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                            <span class="block sm:inline">{{ session('error') }}</span>
-                        </div>
-                    @endif
+@section('content')
+    @component('components.container', ['class' => 'max-w-5xl'])
+        @component('components.page-header', ['title' => $itinerary->title, 'subtitle' => $travelPlan->plan_name])
+            @slot('action')
+                <div class="flex space-x-3">
+                    <a href="{{ route('travel-plans.itineraries.edit', [$travelPlan->uuid, $itinerary->id]) }}" 
+                       class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        編集
+                    </a>
+                    <form method="POST" action="{{ route('travel-plans.itineraries.destroy', [$travelPlan->uuid, $itinerary->id]) }}" 
+                          onsubmit="return confirm('本当に削除しますか？')" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" 
+                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            削除
+                        </button>
+                    </form>
+                </div>
+            @endslot
+        @endcomponent
 
-                    <div class="mb-6">
-                        <a href="{{ route('travel-plans.itineraries.index', $travelPlan) }}" class="text-blue-600 hover:text-blue-800">
-                            &larr; {{ __('旅程一覧に戻る') }}
-                        </a>
+        @include('components.alerts')
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- メイン情報 -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- 基本情報 -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-medium text-gray-900">基本情報</h2>
                     </div>
-
-                    <div class="bg-gray-50 p-6 rounded-lg shadow-sm mb-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- 交通手段 -->
-                            <div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('交通手段') }}</h3>
-                                <div class="text-gray-700">
-                                    @switch($itinerary->transportation_type->value)
-                                        @case('flight')
-                                            <span class="inline-flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11.43a1 1 0 00-.725-.962l-5-1.429a1 1 0 01.725-1.962l5 1.429a1 1 0 00.725-.038l5-1.429a1 1 0 011.169 1.409l-7 14z" />
-                                                </svg>
-                                                {{ __('飛行機') }}
-                                            </span>
-                                            @break
-                                        @case('train')
-                                            <span class="inline-flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                                </svg>
-                                                {{ __('電車') }}
-                                            </span>
-                                            @break
-                                        @case('bus')
-                                            <span class="inline-flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                                                    <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H11a2.5 2.5 0 014.9 0H17a1 1 0 001-1V5a1 1 0 00-1-1H3zm0 2h13v8H3V6z" />
-                                                </svg>
-                                                {{ __('バス') }}
-                                            </span>
-                                            @break
-                                        @case('ferry')
-                                            <span class="inline-flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                                                    <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H11a2.5 2.5 0 014.9 0H17a1 1 0 001-1V5a1 1 0 00-1-1H3zm0 2h13v8H3V6z" />
-                                                </svg>
-                                                {{ __('フェリー') }}
-                                            </span>
-                                            @break
-                                        @case('car')
-                                            <span class="inline-flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                                                    <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H11a2.5 2.5 0 014.9 0H17a1 1 0 001-1V5a1 1 0 00-1-1H3zm0 2h13v8H3V6z" />
-                                                </svg>
-                                                {{ __('車') }}
-                                            </span>
-                                            @break
-                                        @case('walk')
-                                            <span class="inline-flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                                </svg>
-                                                {{ __('徒歩') }}
-                                            </span>
-                                            @break
-                                        @case('bike')
-                                            <span class="inline-flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                                </svg>
-                                                {{ __('バイク') }}
-                                            </span>
-                                            @break
-                                        @default
-                                            <span class="inline-flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                                </svg>
-                                                {{ __('その他') }}
-                                            </span>
-                                    @endswitch
-                                </div>
+                    <div class="px-6 py-4">
+                        <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div class="sm:col-span-2">
+                                <dt class="text-sm font-medium text-gray-500">タイトル</dt>
+                                <dd class="mt-1 text-lg font-medium text-gray-900">{{ $itinerary->title }}</dd>
                             </div>
-
-                            <!-- 出発地・到着地 -->
-                            <div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('出発地・到着地') }}</h3>
-                                <div class="flex items-center text-gray-700">
-                                    <div class="font-medium">{{ $itinerary->departure_location }}</div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                    </svg>
-                                    <div class="font-medium">{{ $itinerary->arrival_location }}</div>
+                            @if($itinerary->description)
+                                <div class="sm:col-span-2">
+                                    <dt class="text-sm font-medium text-gray-500">説明</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ $itinerary->description }}</dd>
                                 </div>
-                            </div>
-
-                            <!-- 出発時刻・到着時刻 -->
+                            @endif
                             <div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('出発時刻・到着時刻') }}</h3>
-                                <div class="text-gray-700">
-                                    <div class="mb-1">
-                                        <span class="font-medium">{{ __('出発') }}:</span> {{ $itinerary->departure_time->format('Y年m月d日 H:i') }}
-                                    </div>
+                                <dt class="text-sm font-medium text-gray-500">日付</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->date->format('Y年n月d日（D）') }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">時間</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    @if($itinerary->start_time)
+                                        {{ $itinerary->start_time->format('H:i') }}
+                                        @if($itinerary->end_time)
+                                            〜 {{ $itinerary->end_time->format('H:i') }}
+                                        @endif
+                                    @else
+                                        時間未指定
+                                    @endif
+                                </dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">対象グループ</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    @if($itinerary->group)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $itinerary->group->type === 'CORE' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                            @if($itinerary->group->type === 'CORE')
+                                                [全体] {{ $itinerary->group->name }}
+                                            @else
+                                                [班] {{ $itinerary->group->name }}
+                                            @endif
+                                        </span>
+                                    @else
+                                        すべてのメンバー
+                                    @endif
+                                </dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">作成者</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->createdBy->name }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- 交通手段情報 -->
+                @if($itinerary->transportation_type || $itinerary->departure_location || $itinerary->arrival_location)
+                    <div class="bg-white shadow-sm rounded-lg">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-medium text-gray-900">交通手段・移動情報</h2>
+                        </div>
+                        <div class="px-6 py-4">
+                            <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                @if($itinerary->transportation_type)
                                     <div>
-                                        <span class="font-medium">{{ __('到着') }}:</span> {{ $itinerary->arrival_time->format('Y年m月d日 H:i') }}
+                                        <dt class="text-sm font-medium text-gray-500">交通手段</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">
+                                            @switch($itinerary->transportation_type)
+                                                @case('walking')
+                                                    🚶 徒歩
+                                                    @break
+                                                @case('bike')
+                                                    🚲 自転車
+                                                    @break
+                                                @case('car')
+                                                    🚗 車
+                                                    @break
+                                                @case('bus')
+                                                    🚌 バス
+                                                    @break
+                                                @case('ferry')
+                                                    ⛴️ フェリー
+                                                    @break
+                                                @case('airplane')
+                                                    ✈️ 飛行機
+                                                    @break
+                                                @default
+                                                    {{ $itinerary->transportation_type }}
+                                            @endswitch
+                                        </dd>
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- 会社名・便名 -->
-                            @if($itinerary->company_name || $itinerary->reference_number)
-                                <div>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('会社名・便名') }}</h3>
-                                    <div class="text-gray-700">
-                                        @if($itinerary->company_name)
-                                            <div class="mb-1">
-                                                <span class="font-medium">{{ __('会社名') }}:</span> {{ $itinerary->company_name }}
-                                            </div>
-                                        @endif
-                                        @if($itinerary->reference_number)
-                                            <div>
-                                                <span class="font-medium">{{ __('便名・番号') }}:</span> {{ $itinerary->reference_number }}
-                                            </div>
-                                        @endif
+                                @endif
+                                @if($itinerary->airline)
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">航空会社</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->airline }}</dd>
                                     </div>
-                                </div>
-                            @endif
-
-                            <!-- メモ -->
-                            @if($itinerary->notes)
-                                <div class="md:col-span-2">
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('メモ') }}</h3>
-                                    <div class="text-gray-700 whitespace-pre-line">{{ $itinerary->notes }}</div>
-                                </div>
-                            @endif
+                                @endif
+                                @if($itinerary->flight_number)
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">便名</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 font-mono">{{ $itinerary->flight_number }}</dd>
+                                    </div>
+                                @endif
+                                @if($itinerary->departure_location)
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">出発地</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->departure_location }}</dd>
+                                    </div>
+                                @endif
+                                @if($itinerary->arrival_location)
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">到着地</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->arrival_location }}</dd>
+                                    </div>
+                                @endif
+                                @if($itinerary->departure_time)
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">出発時刻</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->departure_time->format('Y年m月d日 H:i') }}</dd>
+                                    </div>
+                                @endif
+                                @if($itinerary->arrival_time)
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">到着時刻</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->arrival_time->format('Y年m月d日 H:i') }}</dd>
+                                    </div>
+                                @endif
+                            </dl>
                         </div>
                     </div>
+                @endif
 
-                    <!-- 参加メンバー -->
-                    <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('参加メンバー') }}</h3>
+                <!-- 参加者 -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-medium text-gray-900">参加者 ({{ $itinerary->members->count() }}人)</h2>
+                    </div>
+                    <div class="px-6 py-4">
                         @if($itinerary->members->count() > 0)
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                 @foreach($itinerary->members as $member)
-                                    <div class="bg-white p-4 rounded-md shadow-sm">
-                                        <div class="font-medium text-gray-900">{{ $member->name }}</div>
-                                        @if($member->email)
-                                            <div class="text-sm text-gray-500">{{ $member->email }}</div>
-                                        @endif
+                                    <div class="flex items-center p-3 border border-gray-200 rounded-lg">
+                                        <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                            <span class="text-sm font-medium text-gray-700">
+                                                {{ substr($member->name, 0, 1) }}
+                                            </span>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">{{ $member->name }}</p>
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>
                         @else
-                            <p class="text-gray-500">{{ __('参加メンバーはいません。') }}</p>
+                            <p class="text-gray-500 text-center py-4">参加者が設定されていません</p>
                         @endif
                     </div>
                 </div>
+
+                <!-- メモ -->
+                @if($itinerary->notes)
+                    <div class="bg-white shadow-sm rounded-lg">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-medium text-gray-900">メモ</h2>
+                        </div>
+                        <div class="px-6 py-4">
+                            <p class="text-gray-700 whitespace-pre-wrap">{{ $itinerary->notes }}</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <!-- サイドバー -->
+            <div class="space-y-6">
+                <!-- アクション -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">アクション</h3>
+                    </div>
+                    <div class="px-6 py-4 space-y-3">
+                        <a href="{{ route('travel-plans.itineraries.edit', [$travelPlan->uuid, $itinerary->id]) }}" 
+                           class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center block">
+                            旅程を編集
+                        </a>
+                        <a href="{{ route('travel-plans.itineraries.create', $travelPlan->uuid) }}?date={{ $itinerary->date->format('Y-m-d') }}&group_id={{ $itinerary->group_id }}" 
+                           class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center block">
+                            同じ条件で新規作成
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 詳細情報 -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">詳細情報</h3>
+                    </div>
+                    <div class="px-6 py-4">
+                        <dl class="space-y-3">
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-gray-500">作成日</dt>
+                                <dd class="text-sm font-medium text-gray-900">{{ $itinerary->created_at->format('Y/m/d H:i') }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-gray-500">最終更新</dt>
+                                <dd class="text-sm font-medium text-gray-900">{{ $itinerary->updated_at->format('Y/m/d H:i') }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-gray-500">タイムゾーン</dt>
+                                <dd class="text-sm font-medium text-gray-900">{{ $itinerary->timezone }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- 関連旅程 -->
+                @if($relatedItineraries ?? false)
+                    <div class="bg-white shadow-sm rounded-lg">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">同日の旅程</h3>
+                        </div>
+                        <div class="px-6 py-4">
+                            <!-- 関連旅程のリスト表示 -->
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
-    </div>
-</x-app-layout>
+
+        <!-- ナビゲーション -->
+        <div class="mt-8 flex justify-center space-x-6">
+            <a href="{{ route('travel-plans.itineraries.index', $travelPlan->uuid) }}" class="text-blue-600 hover:text-blue-800">
+                ← 旅程一覧に戻る
+            </a>
+            <a href="{{ route('travel-plans.itineraries.timeline', $travelPlan->uuid) }}" class="text-blue-600 hover:text-blue-800">
+                タイムライン表示
+            </a>
+            <a href="{{ route('travel-plans.show', $travelPlan->uuid) }}" class="text-blue-600 hover:text-blue-800">
+                旅行プラン詳細
+            </a>
+        </div>
+    @endcomponent
+@endsection

@@ -1,66 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
-use App\Enums\Currency;
-use App\Models\Member;
-use App\Models\TravelPlan;
+use App\Models\Expense;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Expense>
+ * @extends Factory<\App\Models\Expense>
  */
-class ExpenseFactory extends Factory
+final class ExpenseFactory extends Factory
 {
     /**
-     * Define the model's default state.
+     * The name of the factory's corresponding model.
      *
-     * @return array<string, mixed>
+     * @var string
+     */
+    protected $model = Expense::class;
+
+    /**
+     * Define the model's default state.
      */
     public function definition(): array
     {
-        $categories = ['food', 'transportation', 'accommodation', 'entertainment', 'shopping', 'other'];
-
         return [
-            'travel_plan_id' => TravelPlan::factory(),
-            'payer_member_id' => Member::factory(),
-            'description' => $this->faker->sentence(3),
-            'amount' => $this->faker->numberBetween(1000, 50000),
-            'currency' => $this->faker->randomElement(Currency::cases()),
-            'expense_date' => $this->faker->dateTimeBetween('-1 month', '+1 month'),
-            'category' => $this->faker->randomElement($categories),
-            'notes' => $this->faker->optional(0.7)->paragraph(1),
-            'is_settled' => $this->faker->boolean(20), // 20%の確率で精算済み
+            'travel_plan_id' => \App\Models\TravelPlan::factory(),
+            'group_id' => \App\Models\Group::factory(),
+            'paid_by_member_id' => \App\Models\Member::factory(),
+            'title' => fake()->title,
+            'description' => fake()->optional()->text,
+            'amount' => fake()->word,
+            'currency' => fake()->currencyCode,
+            'expense_date' => fake()->date(),
+            'is_split_confirmed' => fake()->randomNumber(1),
         ];
-    }
-
-    /**
-     * 精算済みの経費を作成
-     */
-    public function settled(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_settled' => true,
-        ]);
-    }
-
-    /**
-     * 未精算の経費を作成
-     */
-    public function unsettled(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_settled' => false,
-        ]);
-    }
-
-    /**
-     * 特定のカテゴリの経費を作成
-     */
-    public function category(string $category): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'category' => $category,
-        ]);
     }
 }

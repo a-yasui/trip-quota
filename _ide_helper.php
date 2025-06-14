@@ -5,7 +5,7 @@
 
 /**
  * A helper file for Laravel, to provide autocomplete information to your IDE
- * Generated for Laravel 12.1.0.
+ * Generated for Laravel 11.45.1.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -1296,12 +1296,11 @@ namespace Illuminate\Support\Facades {
         /**
          * Register a binding with the container.
          *
-         * @param \Closure|string $abstract
+         * @param string $abstract
          * @param \Closure|string|null $concrete
          * @param bool $shared
          * @return void 
          * @throws \TypeError
-         * @throws ReflectionException
          * @static 
          */
         public static function bind($abstract, $concrete = null, $shared = false)
@@ -1359,7 +1358,7 @@ namespace Illuminate\Support\Facades {
          * Add a contextual binding to the container.
          *
          * @param string $concrete
-         * @param \Closure|string $abstract
+         * @param string $abstract
          * @param \Closure|string $implementation
          * @return void 
          * @static 
@@ -1374,7 +1373,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Register a binding if it hasn't already been registered.
          *
-         * @param \Closure|string $abstract
+         * @param string $abstract
          * @param \Closure|string|null $concrete
          * @param bool $shared
          * @return void 
@@ -1390,7 +1389,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Register a shared binding in the container.
          *
-         * @param \Closure|string $abstract
+         * @param string $abstract
          * @param \Closure|string|null $concrete
          * @return void 
          * @static 
@@ -1405,7 +1404,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Register a shared binding if it hasn't already been registered.
          *
-         * @param \Closure|string $abstract
+         * @param string $abstract
          * @param \Closure|string|null $concrete
          * @return void 
          * @static 
@@ -1420,7 +1419,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Register a scoped binding in the container.
          *
-         * @param \Closure|string $abstract
+         * @param string $abstract
          * @param \Closure|string|null $concrete
          * @return void 
          * @static 
@@ -1435,7 +1434,7 @@ namespace Illuminate\Support\Facades {
         /**
          * Register a scoped binding if it hasn't already been registered.
          *
-         * @param \Closure|string $abstract
+         * @param string $abstract
          * @param \Closure|string|null $concrete
          * @return void 
          * @static 
@@ -3320,6 +3319,20 @@ namespace Illuminate\Support\Facades {
         {
             /** @var \Illuminate\View\Compilers\BladeCompiler $instance */
             $instance->precompiler($precompiler);
+        }
+
+        /**
+         * Execute the given callback using a custom echo format.
+         *
+         * @param string $format
+         * @param callable $callback
+         * @return string 
+         * @static 
+         */
+        public static function usingEchoFormat($format, $callback)
+        {
+            /** @var \Illuminate\View\Compilers\BladeCompiler $instance */
+            return $instance->usingEchoFormat($format, $callback);
         }
 
         /**
@@ -5960,21 +5973,6 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Run the callback function with the given context values and restore the original context state when complete.
-         *
-         * @param callable $callback
-         * @param array<string, mixed> $data
-         * @param array<string, mixed> $hidden
-         * @return mixed 
-         * @static 
-         */
-        public static function scope($callback, $data = [], $hidden = [])
-        {
-            /** @var \Illuminate\Log\Context\Repository $instance */
-            return $instance->scope($callback, $data, $hidden);
-        }
-
-        /**
          * Determine if the repository is empty.
          *
          * @return bool 
@@ -6533,16 +6531,16 @@ namespace Illuminate\Support\Facades {
      *
      * @see https://carbon.nesbot.com/docs/
      * @see https://github.com/briannesbitt/Carbon/blob/master/src/Carbon/Factory.php
-     * @method static \Illuminate\Support\Carbon create($year = 0, $month = 1, $day = 1, $hour = 0, $minute = 0, $second = 0, $timezone = null)
-     * @method static \Illuminate\Support\Carbon createFromDate($year = null, $month = null, $day = null, $timezone = null)
-     * @method static \Illuminate\Support\Carbon|false createFromFormat($format, $time, $timezone = null)
-     * @method static \Illuminate\Support\Carbon createFromTime($hour = 0, $minute = 0, $second = 0, $timezone = null)
-     * @method static \Illuminate\Support\Carbon createFromTimeString($time, $timezone = null)
-     * @method static \Illuminate\Support\Carbon createFromTimestamp($timestamp, $timezone = null)
-     * @method static \Illuminate\Support\Carbon createFromTimestampMs($timestamp, $timezone = null)
+     * @method static \Illuminate\Support\Carbon create($year = 0, $month = 1, $day = 1, $hour = 0, $minute = 0, $second = 0, $tz = null)
+     * @method static \Illuminate\Support\Carbon createFromDate($year = null, $month = null, $day = null, $tz = null)
+     * @method static \Illuminate\Support\Carbon|false createFromFormat($format, $time, $tz = null)
+     * @method static \Illuminate\Support\Carbon createFromTime($hour = 0, $minute = 0, $second = 0, $tz = null)
+     * @method static \Illuminate\Support\Carbon createFromTimeString($time, $tz = null)
+     * @method static \Illuminate\Support\Carbon createFromTimestamp($timestamp, $tz = null)
+     * @method static \Illuminate\Support\Carbon createFromTimestampMs($timestamp, $tz = null)
      * @method static \Illuminate\Support\Carbon createFromTimestampUTC($timestamp)
-     * @method static \Illuminate\Support\Carbon createMidnightDate($year = null, $month = null, $day = null, $timezone = null)
-     * @method static \Illuminate\Support\Carbon|false createSafe($year = null, $month = null, $day = null, $hour = null, $minute = null, $second = null, $timezone = null)
+     * @method static \Illuminate\Support\Carbon createMidnightDate($year = null, $month = null, $day = null, $tz = null)
+     * @method static \Illuminate\Support\Carbon|false createSafe($year = null, $month = null, $day = null, $hour = null, $minute = null, $second = null, $tz = null)
      * @method static void disableHumanDiffOption($humanDiffOption)
      * @method static void enableHumanDiffOption($humanDiffOption)
      * @method static mixed executeWithLocale($locale, $func)
@@ -6555,7 +6553,7 @@ namespace Illuminate\Support\Facades {
      * @method static string getLocale()
      * @method static int getMidDayAt()
      * @method static \Illuminate\Support\Carbon|null getTestNow()
-     * @method static \Symfony\Contracts\Translation\TranslatorInterface getTranslator()
+     * @method static \Symfony\Component\Translation\TranslatorInterface getTranslator()
      * @method static int getWeekEndsAt()
      * @method static int getWeekStartsAt()
      * @method static array getWeekendDays()
@@ -6578,8 +6576,8 @@ namespace Illuminate\Support\Facades {
      * @method static \Illuminate\Support\Carbon maxValue()
      * @method static \Illuminate\Support\Carbon minValue()
      * @method static void mixin($mixin)
-     * @method static \Illuminate\Support\Carbon now($timezone = null)
-     * @method static \Illuminate\Support\Carbon parse($time = null, $timezone = null)
+     * @method static \Illuminate\Support\Carbon now($tz = null)
+     * @method static \Illuminate\Support\Carbon parse($time = null, $tz = null)
      * @method static string pluralUnit(string $unit)
      * @method static void resetMonthsOverflow()
      * @method static void resetToStringFormat()
@@ -6590,7 +6588,7 @@ namespace Illuminate\Support\Facades {
      * @method static void setMidDayAt($hour)
      * @method static void setTestNow($testNow = null)
      * @method static void setToStringFormat($format)
-     * @method static void setTranslator(\Symfony\Contracts\Translation\TranslatorInterface $translator)
+     * @method static void setTranslator(\Symfony\Component\Translation\TranslatorInterface $translator)
      * @method static void setUtf8($utf8)
      * @method static void setWeekEndsAt($day)
      * @method static void setWeekStartsAt($day)
@@ -6598,12 +6596,12 @@ namespace Illuminate\Support\Facades {
      * @method static bool shouldOverflowMonths()
      * @method static bool shouldOverflowYears()
      * @method static string singularUnit(string $unit)
-     * @method static \Illuminate\Support\Carbon today($timezone = null)
-     * @method static \Illuminate\Support\Carbon tomorrow($timezone = null)
+     * @method static \Illuminate\Support\Carbon today($tz = null)
+     * @method static \Illuminate\Support\Carbon tomorrow($tz = null)
      * @method static void useMonthsOverflow($monthsOverflow = true)
      * @method static void useStrictMode($strictModeEnabled = true)
      * @method static void useYearsOverflow($yearsOverflow = true)
-     * @method static \Illuminate\Support\Carbon yesterday($timezone = null)
+     * @method static \Illuminate\Support\Carbon yesterday($tz = null)
      * @see \Illuminate\Support\DateFactory
      */
     class Date {
@@ -7983,17 +7981,32 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
+         * Set the table prefix and return the grammar.
+         *
+         * @template TGrammar of \Illuminate\Database\Grammar
+         * @param TGrammar $grammar
+         * @return TGrammar 
+         * @static 
+         */
+        public static function withTablePrefix($grammar)
+        {
+            //Method inherited from \Illuminate\Database\Connection 
+            /** @var \Illuminate\Database\SQLiteConnection $instance */
+            return $instance->withTablePrefix($grammar);
+        }
+
+        /**
          * Execute the given callback without table prefix.
          *
          * @param \Closure $callback
-         * @return mixed 
+         * @return void 
          * @static 
          */
         public static function withoutTablePrefix($callback)
         {
             //Method inherited from \Illuminate\Database\Connection 
             /** @var \Illuminate\Database\SQLiteConnection $instance */
-            return $instance->withoutTablePrefix($callback);
+            $instance->withoutTablePrefix($callback);
         }
 
         /**
@@ -10080,18 +10093,6 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Begin recording request / response pairs.
-         *
-         * @return \Illuminate\Http\Client\Factory 
-         * @static 
-         */
-        public static function record()
-        {
-            /** @var \Illuminate\Http\Client\Factory $instance */
-            return $instance->record();
-        }
-
-        /**
          * Record a request response pair.
          *
          * @param \Illuminate\Http\Client\Request $request
@@ -11918,6 +11919,7 @@ namespace Illuminate\Support\Facades {
      * @method static void deleteToken(\Illuminate\Contracts\Auth\CanResetPassword $user)
      * @method static bool tokenExists(\Illuminate\Contracts\Auth\CanResetPassword $user, string $token)
      * @method static \Illuminate\Auth\Passwords\TokenRepositoryInterface getRepository()
+     * @method static \Illuminate\Support\Timebox getTimebox()
      * @see \Illuminate\Auth\Passwords\PasswordBrokerManager
      * @see \Illuminate\Auth\Passwords\PasswordBroker
      */
@@ -12859,89 +12861,6 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Release a reserved job back onto the queue after (n) seconds.
-         *
-         * @param string $queue
-         * @param \Illuminate\Queue\Jobs\DatabaseJobRecord $job
-         * @param int $delay
-         * @return mixed 
-         * @static 
-         */
-        public static function release($queue, $job, $delay)
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            return $instance->release($queue, $job, $delay);
-        }
-
-        /**
-         * Delete a reserved job from the queue.
-         *
-         * @param string $queue
-         * @param string $id
-         * @return void 
-         * @throws \Throwable
-         * @static 
-         */
-        public static function deleteReserved($queue, $id)
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            $instance->deleteReserved($queue, $id);
-        }
-
-        /**
-         * Delete a reserved job from the reserved queue and release it.
-         *
-         * @param string $queue
-         * @param \Illuminate\Queue\Jobs\DatabaseJob $job
-         * @param int $delay
-         * @return void 
-         * @static 
-         */
-        public static function deleteAndRelease($queue, $job, $delay)
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            $instance->deleteAndRelease($queue, $job, $delay);
-        }
-
-        /**
-         * Delete all of the jobs from the queue.
-         *
-         * @param string $queue
-         * @return int 
-         * @static 
-         */
-        public static function clear($queue)
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            return $instance->clear($queue);
-        }
-
-        /**
-         * Get the queue or return the default.
-         *
-         * @param string|null $queue
-         * @return string 
-         * @static 
-         */
-        public static function getQueue($queue)
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            return $instance->getQueue($queue);
-        }
-
-        /**
-         * Get the underlying database instance.
-         *
-         * @return \Illuminate\Database\Connection 
-         * @static 
-         */
-        public static function getDatabase()
-        {
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
-            return $instance->getDatabase();
-        }
-
-        /**
          * Get the maximum number of attempts for an object-based queue handler.
          *
          * @param mixed $job
@@ -12951,7 +12870,7 @@ namespace Illuminate\Support\Facades {
         public static function getJobTries($job)
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
+            /** @var \Illuminate\Queue\SyncQueue $instance */
             return $instance->getJobTries($job);
         }
 
@@ -12965,7 +12884,7 @@ namespace Illuminate\Support\Facades {
         public static function getJobBackoff($job)
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
+            /** @var \Illuminate\Queue\SyncQueue $instance */
             return $instance->getJobBackoff($job);
         }
 
@@ -12979,7 +12898,7 @@ namespace Illuminate\Support\Facades {
         public static function getJobExpiration($job)
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
+            /** @var \Illuminate\Queue\SyncQueue $instance */
             return $instance->getJobExpiration($job);
         }
 
@@ -12993,7 +12912,7 @@ namespace Illuminate\Support\Facades {
         public static function createPayloadUsing($callback)
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            \Illuminate\Queue\DatabaseQueue::createPayloadUsing($callback);
+            \Illuminate\Queue\SyncQueue::createPayloadUsing($callback);
         }
 
         /**
@@ -13005,7 +12924,7 @@ namespace Illuminate\Support\Facades {
         public static function getContainer()
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
+            /** @var \Illuminate\Queue\SyncQueue $instance */
             return $instance->getContainer();
         }
 
@@ -13019,7 +12938,7 @@ namespace Illuminate\Support\Facades {
         public static function setContainer($container)
         {
             //Method inherited from \Illuminate\Queue\Queue 
-            /** @var \Illuminate\Queue\DatabaseQueue $instance */
+            /** @var \Illuminate\Queue\SyncQueue $instance */
             $instance->setContainer($container);
         }
 
@@ -16114,7 +16033,7 @@ namespace Illuminate\Support\Facades {
          *
          * @param \Closure $callback
          * @param array $headers
-         * @param \Illuminate\Http\StreamedEvent|string|null $endStreamWith
+         * @param string $endStreamWith
          * @return \Symfony\Component\HttpFoundation\StreamedResponse 
          * @static 
          */
@@ -16140,7 +16059,7 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Create a new streamed JSON response instance.
+         * Create a new streamed response instance.
          *
          * @param array $data
          * @param int $status
@@ -17721,29 +17640,29 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Get the tables that belong to the connection.
+         * Determine if the given table exists.
          *
-         * @param string|string[]|null $schema
-         * @return array 
+         * @param string $table
+         * @return bool 
          * @static 
          */
-        public static function getTables($schema = null)
+        public static function hasTable($table)
         {
             /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            return $instance->getTables($schema);
+            return $instance->hasTable($table);
         }
 
         /**
-         * Get the views that belong to the connection.
+         * Get the tables for the database.
          *
-         * @param string|string[]|null $schema
+         * @param bool $withSize
          * @return array 
          * @static 
          */
-        public static function getViews($schema = null)
+        public static function getTables($withSize = true)
         {
             /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            return $instance->getViews($schema);
+            return $instance->getTables($withSize);
         }
 
         /**
@@ -17784,42 +17703,54 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Get the value for the given pragma name or set the given value.
+         * Set the busy timeout.
          *
-         * @param string $key
-         * @param mixed $value
-         * @return mixed 
+         * @param int $milliseconds
+         * @return bool 
          * @static 
          */
-        public static function pragma($key, $value = null)
+        public static function setBusyTimeout($milliseconds)
         {
             /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            return $instance->pragma($key, $value);
+            return $instance->setBusyTimeout($milliseconds);
+        }
+
+        /**
+         * Set the journal mode.
+         *
+         * @param string $mode
+         * @return bool 
+         * @static 
+         */
+        public static function setJournalMode($mode)
+        {
+            /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
+            return $instance->setJournalMode($mode);
+        }
+
+        /**
+         * Set the synchronous mode.
+         *
+         * @param int $mode
+         * @return bool 
+         * @static 
+         */
+        public static function setSynchronous($mode)
+        {
+            /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
+            return $instance->setSynchronous($mode);
         }
 
         /**
          * Empty the database file.
          *
-         * @param string|null $path
          * @return void 
          * @static 
          */
-        public static function refreshDatabaseFile($path = null)
+        public static function refreshDatabaseFile()
         {
             /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            $instance->refreshDatabaseFile($path);
-        }
-
-        /**
-         * Get the names of current schemas for the connection.
-         *
-         * @return string[]|null 
-         * @static 
-         */
-        public static function getCurrentSchemaListing()
-        {
-            /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            return $instance->getCurrentSchemaListing();
+            $instance->refreshDatabaseFile();
         }
 
         /**
@@ -17833,17 +17764,6 @@ namespace Illuminate\Support\Facades {
         {
             //Method inherited from \Illuminate\Database\Schema\Builder 
             \Illuminate\Database\Schema\SQLiteBuilder::defaultStringLength($length);
-        }
-
-        /**
-         * Set the default time precision for migrations.
-         *
-         * @static 
-         */
-        public static function defaultTimePrecision($precision)
-        {
-            //Method inherited from \Illuminate\Database\Schema\Builder 
-            return \Illuminate\Database\Schema\SQLiteBuilder::defaultTimePrecision($precision);
         }
 
         /**
@@ -17885,33 +17805,6 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Get the schemas that belong to the connection.
-         *
-         * @return array 
-         * @static 
-         */
-        public static function getSchemas()
-        {
-            //Method inherited from \Illuminate\Database\Schema\Builder 
-            /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            return $instance->getSchemas();
-        }
-
-        /**
-         * Determine if the given table exists.
-         *
-         * @param string $table
-         * @return bool 
-         * @static 
-         */
-        public static function hasTable($table)
-        {
-            //Method inherited from \Illuminate\Database\Schema\Builder 
-            /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            return $instance->hasTable($table);
-        }
-
-        /**
          * Determine if the given view exists.
          *
          * @param string $view
@@ -17926,32 +17819,42 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Get the names of the tables that belong to the connection.
+         * Get the names of the tables that belong to the database.
          *
-         * @param string|string[]|null $schema
-         * @param bool $schemaQualified
          * @return array 
          * @static 
          */
-        public static function getTableListing($schema = null, $schemaQualified = true)
+        public static function getTableListing()
         {
             //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            return $instance->getTableListing($schema, $schemaQualified);
+            return $instance->getTableListing();
         }
 
         /**
-         * Get the user-defined types that belong to the connection.
+         * Get the views that belong to the database.
          *
-         * @param string|string[]|null $schema
          * @return array 
          * @static 
          */
-        public static function getTypes($schema = null)
+        public static function getViews()
         {
             //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            return $instance->getTypes($schema);
+            return $instance->getViews();
+        }
+
+        /**
+         * Get the user-defined types that belong to the database.
+         *
+         * @return array 
+         * @static 
+         */
+        public static function getTypes()
+        {
+            //Method inherited from \Illuminate\Database\Schema\Builder 
+            /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
+            return $instance->getTypes();
         }
 
         /**
@@ -18247,34 +18150,6 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Get the default schema name for the connection.
-         *
-         * @return string|null 
-         * @static 
-         */
-        public static function getCurrentSchemaName()
-        {
-            //Method inherited from \Illuminate\Database\Schema\Builder 
-            /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            return $instance->getCurrentSchemaName();
-        }
-
-        /**
-         * Parse the given database object reference and extract the schema and table.
-         *
-         * @param string $reference
-         * @param string|bool|null $withDefaultSchema
-         * @return array 
-         * @static 
-         */
-        public static function parseSchemaAndTable($reference, $withDefaultSchema = null)
-        {
-            //Method inherited from \Illuminate\Database\Schema\Builder 
-            /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
-            return $instance->parseSchemaAndTable($reference, $withDefaultSchema);
-        }
-
-        /**
          * Get the database connection instance.
          *
          * @return \Illuminate\Database\Connection 
@@ -18285,6 +18160,20 @@ namespace Illuminate\Support\Facades {
             //Method inherited from \Illuminate\Database\Schema\Builder 
             /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
             return $instance->getConnection();
+        }
+
+        /**
+         * Set the database connection instance.
+         *
+         * @param \Illuminate\Database\Connection $connection
+         * @return \Illuminate\Database\Schema\SQLiteBuilder 
+         * @static 
+         */
+        public static function setConnection($connection)
+        {
+            //Method inherited from \Illuminate\Database\Schema\Builder 
+            /** @var \Illuminate\Database\Schema\SQLiteBuilder $instance */
+            return $instance->setConnection($connection);
         }
 
         /**
@@ -19487,7 +19376,7 @@ namespace Illuminate\Support\Facades {
         }
 
         /**
-         * Indicate that signed URLs should serve the corresponding files.
+         * Indiate that signed URLs should serve the corresponding files.
          *
          * @param bool $serve
          * @param \Closure|null $urlGeneratorResolver
@@ -20463,7 +20352,7 @@ namespace Illuminate\Support\Facades {
          *
          * @param \Illuminate\Http\Request $request
          * @param bool $absolute
-         * @param \Closure|array $ignoreQuery
+         * @param array $ignoreQuery
          * @return bool 
          * @static 
          */
@@ -20477,7 +20366,7 @@ namespace Illuminate\Support\Facades {
          * Determine if the given request has a valid signature for a relative URL.
          *
          * @param \Illuminate\Http\Request $request
-         * @param \Closure|array $ignoreQuery
+         * @param array $ignoreQuery
          * @return bool 
          * @static 
          */
@@ -20492,7 +20381,7 @@ namespace Illuminate\Support\Facades {
          *
          * @param \Illuminate\Http\Request $request
          * @param bool $absolute
-         * @param \Closure|array $ignoreQuery
+         * @param array $ignoreQuery
          * @return bool 
          * @static 
          */
@@ -22515,6 +22404,154 @@ namespace Illuminate\Support\Facades {
             }
     }
 
+namespace Laravel\Socialite\Facades {
+    /**
+     * 
+     *
+     * @method array getScopes()
+     * @method \Laravel\Socialite\Contracts\Provider scopes(array|string $scopes)
+     * @method \Laravel\Socialite\Contracts\Provider setScopes(array|string $scopes)
+     * @method \Laravel\Socialite\Contracts\Provider redirectUrl(string $url)
+     * @see \Laravel\Socialite\SocialiteManager
+     */
+    class Socialite {
+        /**
+         * Get a driver instance.
+         *
+         * @param string $driver
+         * @return mixed 
+         * @static 
+         */
+        public static function with($driver)
+        {
+            /** @var \Laravel\Socialite\SocialiteManager $instance */
+            return $instance->with($driver);
+        }
+
+        /**
+         * Build an OAuth 2 provider instance.
+         *
+         * @param string $provider
+         * @param array $config
+         * @return \Laravel\Socialite\Two\AbstractProvider 
+         * @static 
+         */
+        public static function buildProvider($provider, $config)
+        {
+            /** @var \Laravel\Socialite\SocialiteManager $instance */
+            return $instance->buildProvider($provider, $config);
+        }
+
+        /**
+         * Format the server configuration.
+         *
+         * @param array $config
+         * @return array 
+         * @static 
+         */
+        public static function formatConfig($config)
+        {
+            /** @var \Laravel\Socialite\SocialiteManager $instance */
+            return $instance->formatConfig($config);
+        }
+
+        /**
+         * Forget all of the resolved driver instances.
+         *
+         * @return \Laravel\Socialite\SocialiteManager 
+         * @static 
+         */
+        public static function forgetDrivers()
+        {
+            /** @var \Laravel\Socialite\SocialiteManager $instance */
+            return $instance->forgetDrivers();
+        }
+
+        /**
+         * Set the container instance used by the manager.
+         *
+         * @param \Illuminate\Contracts\Container\Container $container
+         * @return \Laravel\Socialite\SocialiteManager 
+         * @static 
+         */
+        public static function setContainer($container)
+        {
+            /** @var \Laravel\Socialite\SocialiteManager $instance */
+            return $instance->setContainer($container);
+        }
+
+        /**
+         * Get the default driver name.
+         *
+         * @return string 
+         * @throws \InvalidArgumentException
+         * @static 
+         */
+        public static function getDefaultDriver()
+        {
+            /** @var \Laravel\Socialite\SocialiteManager $instance */
+            return $instance->getDefaultDriver();
+        }
+
+        /**
+         * Get a driver instance.
+         *
+         * @param string|null $driver
+         * @return mixed 
+         * @throws \InvalidArgumentException
+         * @static 
+         */
+        public static function driver($driver = null)
+        {
+            //Method inherited from \Illuminate\Support\Manager 
+            /** @var \Laravel\Socialite\SocialiteManager $instance */
+            return $instance->driver($driver);
+        }
+
+        /**
+         * Register a custom driver creator Closure.
+         *
+         * @param string $driver
+         * @param \Closure $callback
+         * @return \Laravel\Socialite\SocialiteManager 
+         * @static 
+         */
+        public static function extend($driver, $callback)
+        {
+            //Method inherited from \Illuminate\Support\Manager 
+            /** @var \Laravel\Socialite\SocialiteManager $instance */
+            return $instance->extend($driver, $callback);
+        }
+
+        /**
+         * Get all of the created "drivers".
+         *
+         * @return array 
+         * @static 
+         */
+        public static function getDrivers()
+        {
+            //Method inherited from \Illuminate\Support\Manager 
+            /** @var \Laravel\Socialite\SocialiteManager $instance */
+            return $instance->getDrivers();
+        }
+
+        /**
+         * Get the container instance used by the manager.
+         *
+         * @return \Illuminate\Contracts\Container\Container 
+         * @static 
+         */
+        public static function getContainer()
+        {
+            //Method inherited from \Illuminate\Support\Manager 
+            /** @var \Laravel\Socialite\SocialiteManager $instance */
+            return $instance->getContainer();
+        }
+
+            }
+    }
+
 namespace Illuminate\Http {
     /**
      * 
@@ -23511,30 +23548,6 @@ namespace  {
         {
             /** @var \Illuminate\Database\Eloquent\Builder $instance */
             return $instance->withoutEagerLoads();
-        }
-
-        /**
-         * Get the "limit" value from the query or null if it's not set.
-         *
-         * @return mixed 
-         * @static 
-         */
-        public static function getLimit()
-        {
-            /** @var \Illuminate\Database\Eloquent\Builder $instance */
-            return $instance->getLimit();
-        }
-
-        /**
-         * Get the "offset" value from the query or null if it's not set.
-         *
-         * @return mixed 
-         * @static 
-         */
-        public static function getOffset()
-        {
-            /** @var \Illuminate\Database\Eloquent\Builder $instance */
-            return $instance->getOffset();
         }
 
         /**
@@ -27148,6 +27161,7 @@ namespace  {
          * Add an "or where date" clause to determine if a "date" column is today or before to the query.
          *
          * @param array|string $columns
+         * @param string $boolean
          * @return \Illuminate\Database\Eloquent\Builder<static> 
          * @static 
          */
@@ -27161,6 +27175,7 @@ namespace  {
          * Add an "or where date" clause to determine if a "date" column is after today.
          *
          * @param array|string $columns
+         * @param string $boolean
          * @return \Illuminate\Database\Eloquent\Builder<static> 
          * @static 
          */
@@ -27174,6 +27189,7 @@ namespace  {
          * Add an "or where date" clause to determine if a "date" column is today or after to the query.
          *
          * @param array|string $columns
+         * @param string $boolean
          * @return \Illuminate\Database\Eloquent\Builder<static> 
          * @static 
          */
@@ -27279,6 +27295,7 @@ namespace  {
     class Validator extends \Illuminate\Support\Facades\Validator {}
     class View extends \Illuminate\Support\Facades\View {}
     class Vite extends \Illuminate\Support\Facades\Vite {}
+    class Socialite extends \Laravel\Socialite\Facades\Socialite {}
 }
 
 

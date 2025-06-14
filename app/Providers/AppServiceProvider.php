@@ -11,7 +11,35 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // TravelPlan domain services
+        $this->app->bind(
+            \TripQuota\TravelPlan\TravelPlanRepositoryInterface::class,
+            \TripQuota\TravelPlan\TravelPlanRepository::class
+        );
+
+        // Group domain services
+        $this->app->bind(
+            \TripQuota\Group\GroupRepositoryInterface::class,
+            \TripQuota\Group\GroupRepository::class
+        );
+
+        // Member domain services
+        $this->app->bind(
+            \TripQuota\Member\MemberRepositoryInterface::class,
+            \TripQuota\Member\MemberRepository::class
+        );
+
+        // Invitation domain services
+        $this->app->bind(
+            \TripQuota\Invitation\InvitationRepositoryInterface::class,
+            \TripQuota\Invitation\InvitationRepository::class
+        );
+
+        // Itinerary domain services
+        $this->app->bind(
+            \TripQuota\Itinerary\ItineraryRepositoryInterface::class,
+            \TripQuota\Itinerary\ItineraryRepository::class
+        );
     }
 
     /**

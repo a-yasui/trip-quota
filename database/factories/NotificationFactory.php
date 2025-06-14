@@ -1,23 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Models\Notification;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Notification>
+ * @extends Factory<\App\Models\Notification>
  */
-class NotificationFactory extends Factory
+final class NotificationFactory extends Factory
 {
     /**
-     * Define the model's default state.
+     * The name of the factory's corresponding model.
      *
-     * @return array<string, mixed>
+     * @var string
+     */
+    protected $model = Notification::class;
+
+    /**
+     * Define the model's default state.
      */
     public function definition(): array
     {
         return [
-            //
         ];
     }
 }

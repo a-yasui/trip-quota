@@ -1,33 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer components {
-  .btn {
-    @apply inline-flex items-center px-4 py-2 rounded-md font-semibold text-xs uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-offset-2 transition ease-in-out duration-150;
-  }
-  
-  .btn-primary {
-    @apply btn bg-lime-500 border border-transparent text-gray-800 hover:bg-lime-400 focus:bg-lime-400 active:bg-lime-600 focus:ring-lime-500;
-  }
-  
-  .btn-secondary {
-    @apply btn bg-white border border-gray-300 text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-indigo-500 disabled:opacity-25;
-  }
-  
-  .btn-danger {
-    @apply btn bg-red-600 border border-transparent text-white hover:bg-red-500 active:bg-red-700 focus:ring-red-500;
-  }
-  
-  .btn-cancel {
-    @apply btn bg-gray-200 border border-gray-300 text-gray-700 hover:bg-gray-300 focus:ring-gray-400;
-  }
-  
-  .btn-submit {
-    @apply btn bg-blue-600 border border-transparent text-white hover:bg-blue-500 active:bg-blue-700 focus:ring-blue-500;
-  }
-  
-  .btn-delete {
-    @apply btn bg-red-700 border border-transparent text-white hover:bg-red-600 active:bg-red-800 focus:ring-red-600;
-  }
-}

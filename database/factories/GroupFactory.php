@@ -2,56 +2,58 @@
 
 namespace Database\Factories;
 
+use App\Models\Group;
 use App\Models\TravelPlan;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Group>
- */
 class GroupFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Group::class;
+
     public function definition(): array
     {
         return [
-            'name' => $this->faker->words(3, true),
-            'type' => $this->faker->randomElement(['core', 'branch']),
             'travel_plan_id' => TravelPlan::factory(),
-            'parent_group_id' => null,
-            'description' => $this->faker->sentence(),
+            'type' => fake()->randomElement(['CORE', 'BRANCH']),
+            'name' => fake()->words(2, true).'グループ',
+            'branch_key' => function (array $attributes) {
+                return $attributes['type'] === 'BRANCH' ? Str::random(8) : null;
+            },
+            'description' => fake()->optional()->sentence(),
         ];
     }
 
-    /**
-     * Indicate that the group is a core group.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
-     */
-    public function core()
+    public function core(): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'type' => 'core',
-                'parent_group_id' => null,
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'type' => 'CORE',
+            'name' => '全体グループ',
+            'branch_key' => null,
+        ]);
     }
 
-    /**
-     * Indicate that the group is a branch group.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
-     */
-    public function branch()
+    public function branch(): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'type' => 'branch',
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'type' => 'BRANCH',
+            'name' => fake()->randomElement(['A班', 'B班', 'C班', '1班', '2班', '3班']).'グループ',
+            'branch_key' => Str::random(8),
+        ]);
+    }
+
+    public function forTravelPlan(TravelPlan $travelPlan): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'travel_plan_id' => $travelPlan->id,
+        ]);
+    }
+
+    public function withBranchKey(string $branchKey): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'BRANCH',
+            'branch_key' => $branchKey,
+        ]);
     }
 }
