@@ -6,12 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use TripQuota\Group\GroupService;
+use TripQuota\Member\MemberService;
 use TripQuota\TravelPlan\TravelPlanService;
 
 class GroupController extends Controller
 {
     public function __construct(
         private GroupService $groupService,
+        private MemberService $memberService,
         private TravelPlanService $travelPlanService
     ) {}
 
@@ -107,7 +109,11 @@ class GroupController extends Controller
                 abort(404);
             }
 
-            return view('groups.show', compact('travelPlan', 'group'));
+            // グループメンバーと旅行プランの全メンバーを取得
+            $groupMembers = $this->groupService->getGroupMembers($group, Auth::user());
+            $allMembers = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
+
+            return view('groups.show', compact('travelPlan', 'group', 'groupMembers', 'allMembers'));
         } catch (\Exception $e) {
             abort(403);
         }
@@ -202,6 +208,84 @@ class GroupController extends Controller
             return redirect()
                 ->route('travel-plans.groups.index', $travelPlan->uuid)
                 ->with('success', 'グループを削除しました。');
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * グループにメンバーを追加
+     */
+    public function addMember(Request $request, string $travelPlanUuid, int $groupId)
+    {
+        $validated = $request->validate([
+            'member_id' => 'required|integer|exists:members,id',
+        ]);
+
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            $groups = $this->groupService->getGroupsForTravelPlan($travelPlan, Auth::user());
+            $group = $groups->find($groupId);
+
+            if (! $group) {
+                abort(404);
+            }
+
+            $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
+            $member = $members->find($validated['member_id']);
+
+            if (! $member) {
+                abort(404);
+            }
+
+            $this->groupService->addMemberToGroup($group, $member, Auth::user());
+
+            return redirect()
+                ->route('travel-plans.groups.show', [$travelPlan->uuid, $group->id])
+                ->with('success', 'メンバーをグループに追加しました。');
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * グループからメンバーを削除
+     */
+    public function removeMember(Request $request, string $travelPlanUuid, int $groupId, int $memberId)
+    {
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            $groups = $this->groupService->getGroupsForTravelPlan($travelPlan, Auth::user());
+            $group = $groups->find($groupId);
+
+            if (! $group) {
+                abort(404);
+            }
+
+            $groupMembers = $this->groupService->getGroupMembers($group, Auth::user());
+            $member = $groupMembers->find($memberId);
+
+            if (! $member) {
+                abort(404);
+            }
+
+            $this->groupService->removeMemberFromGroup($group, $member, Auth::user());
+
+            return redirect()
+                ->route('travel-plans.groups.show', [$travelPlan->uuid, $group->id])
+                ->with('success', 'メンバーをグループから削除しました。');
         } catch (\Exception $e) {
             return back()
                 ->withErrors(['error' => $e->getMessage()]);

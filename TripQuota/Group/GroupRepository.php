@@ -3,6 +3,7 @@
 namespace TripQuota\Group;
 
 use App\Models\Group;
+use App\Models\Member;
 use App\Models\TravelPlan;
 use Illuminate\Support\Str;
 
@@ -65,5 +66,27 @@ class GroupRepository implements GroupRepositoryInterface
         } while (Group::where('branch_key', $key)->exists());
 
         return $key;
+    }
+
+    public function addMemberToGroup(Group $group, Member $member): void
+    {
+        if (!$group->members()->where('member_id', $member->id)->exists()) {
+            $group->members()->attach($member->id);
+        }
+    }
+
+    public function removeMemberFromGroup(Group $group, Member $member): void
+    {
+        $group->members()->detach($member->id);
+    }
+
+    public function getGroupMembers(Group $group): \Illuminate\Database\Eloquent\Collection
+    {
+        return $group->members()->get();
+    }
+
+    public function isGroupEmpty(Group $group): bool
+    {
+        return $group->members()->count() === 0;
     }
 }

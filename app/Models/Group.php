@@ -75,4 +75,9 @@ class Group extends Model
     {
         return $this->hasMany(SystemBranchGroupKey::class);
     }
+
+    public function members()
+    {
+        return $this->belongsToMany(Member::class, 'group_member');
+    }
 }

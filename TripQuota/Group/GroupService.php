@@ -3,6 +3,7 @@
 namespace TripQuota\Group;
 
 use App\Models\Group;
+use App\Models\Member;
 use App\Models\TravelPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -107,6 +108,41 @@ class GroupService
         }
     }
 
+    public function addMemberToGroup(Group $group, Member $member, User $user): void
+    {
+        $this->ensureUserCanManageGroups($group->travelPlan, $user);
+        $this->ensureMemberCanBeAddedToGroup($group, $member);
+
+        $this->groupRepository->addMemberToGroup($group, $member);
+    }
+
+    public function removeMemberFromGroup(Group $group, Member $member, User $user): void
+    {
+        $this->ensureUserCanManageGroups($group->travelPlan, $user);
+        $this->ensureMemberCanBeRemovedFromGroup($group, $member);
+
+        $this->groupRepository->removeMemberFromGroup($group, $member);
+    }
+
+    public function getGroupMembers(Group $group, User $user): \Illuminate\Database\Eloquent\Collection
+    {
+        $this->ensureUserCanViewGroups($group->travelPlan, $user);
+
+        return $this->groupRepository->getGroupMembers($group);
+    }
+
+    public function duplicateGroupMembers(Group $sourceGroup, Group $targetGroup, User $user): void
+    {
+        $this->ensureUserCanManageGroups($sourceGroup->travelPlan, $user);
+        $this->ensureUserCanManageGroups($targetGroup->travelPlan, $user);
+
+        $members = $this->groupRepository->getGroupMembers($sourceGroup);
+
+        foreach ($members as $member) {
+            $this->groupRepository->addMemberToGroup($targetGroup, $member);
+        }
+    }
+
     private function ensureGroupCanBeDeleted(Group $group): void
     {
         if ($group->type === 'CORE') {
@@ -114,6 +150,26 @@ class GroupService
         }
 
         // メンバーが存在する場合は削除不可
-        // TODO: グループメンバーのチェック実装
+        if (!$this->groupRepository->isGroupEmpty($group)) {
+            throw new \Exception('メンバーが所属しているグループは削除できません。');
+        }
+    }
+
+    private function ensureMemberCanBeAddedToGroup(Group $group, Member $member): void
+    {
+        if ($group->travel_plan_id !== $member->travel_plan_id) {
+            throw new \Exception('異なる旅行プランのメンバーをグループに追加することはできません。');
+        }
+
+        if (!$member->is_confirmed) {
+            throw new \Exception('未確認のメンバーをグループに追加することはできません。');
+        }
+    }
+
+    private function ensureMemberCanBeRemovedFromGroup(Group $group, Member $member): void
+    {
+        if ($group->type === 'CORE') {
+            throw new \Exception('コアグループからメンバーを削除することはできません。');
+        }
     }
 }

@@ -3,6 +3,7 @@
 namespace TripQuota\Group;
 
 use App\Models\Group;
+use App\Models\Member;
 use App\Models\TravelPlan;
 
 interface GroupRepositoryInterface
@@ -24,4 +25,12 @@ interface GroupRepositoryInterface
     public function findByBranchKey(string $branchKey): ?Group;
 
     public function generateUniqueBranchKey(): string;
+
+    public function addMemberToGroup(Group $group, Member $member): void;
+
+    public function removeMemberFromGroup(Group $group, Member $member): void;
+
+    public function getGroupMembers(Group $group): \Illuminate\Database\Eloquent\Collection;
+
+    public function isGroupEmpty(Group $group): bool;
 }

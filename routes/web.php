@@ -46,19 +46,18 @@ Route::middleware('auth')->group(function () {
     ]);
 
     // グループ管理（旅行プラン配下）
-    Route::resource('travel-plans.groups', GroupController::class)->parameters([
-        'travel-plans' => 'uuid',
-    ])->except(['create', 'store'])->names([
-        'index' => 'travel-plans.groups.index',
-        'show' => 'travel-plans.groups.show',
-        'edit' => 'travel-plans.groups.edit',
-        'update' => 'travel-plans.groups.update',
-        'destroy' => 'travel-plans.groups.destroy',
-    ]);
-
-    // 班グループ作成（別ルート）
+    Route::get('travel-plans/{uuid}/groups', [GroupController::class, 'index'])->name('travel-plans.groups.index');
     Route::get('travel-plans/{uuid}/groups/create', [GroupController::class, 'create'])->name('travel-plans.groups.create');
     Route::post('travel-plans/{uuid}/groups', [GroupController::class, 'store'])->name('travel-plans.groups.store');
+    Route::get('travel-plans/{uuid}/groups/{group}', [GroupController::class, 'show'])->name('travel-plans.groups.show');
+    Route::get('travel-plans/{uuid}/groups/{group}/edit', [GroupController::class, 'edit'])->name('travel-plans.groups.edit');
+    Route::put('travel-plans/{uuid}/groups/{group}', [GroupController::class, 'update'])->name('travel-plans.groups.update');
+    Route::patch('travel-plans/{uuid}/groups/{group}', [GroupController::class, 'update'])->name('travel-plans.groups.update');
+    Route::delete('travel-plans/{uuid}/groups/{group}', [GroupController::class, 'destroy'])->name('travel-plans.groups.destroy');
+
+    // グループメンバー管理
+    Route::post('travel-plans/{uuid}/groups/{group}/members', [GroupController::class, 'addMember'])->name('travel-plans.groups.add-member');
+    Route::delete('travel-plans/{uuid}/groups/{group}/members/{member}', [GroupController::class, 'removeMember'])->name('travel-plans.groups.remove-member');
 
     // メンバー招待（別ルート）
     Route::get('travel-plans/{uuid}/members/invite', [MemberController::class, 'create'])->name('travel-plans.members.create');
