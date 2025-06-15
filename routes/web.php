@@ -1,65 +1,96 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ItineraryController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\TravelPlanController;
 use Illuminate\Support\Facades\Route;
 
+// ウェルカムページ
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// 認証関連ルート（ゲストのみ）
+Route::middleware('guest')->group(function () {
+    // ログイン
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // 新規登録
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [RegisterController::class, 'register']);
 
-    // 旅行計画ルート
-    Route::get('/travel-plans', [TravelPlanController::class, 'index'])->name('travel-plans.index');
-    Route::get('/travel-plans/create', [TravelPlanController::class, 'create'])->name('travel-plans.create');
-    Route::post('/travel-plans', [TravelPlanController::class, 'store'])->name('travel-plans.store');
-    Route::get('/travel-plans/{travelPlan}', [TravelPlanController::class, 'show'])->name('travel-plans.show');
-    Route::get('/travel-plans/{travelPlan}/edit', [TravelPlanController::class, 'edit'])->name('travel-plans.edit');
-    Route::put('/travel-plans/{travelPlan}', [TravelPlanController::class, 'update'])->name('travel-plans.update');
-    Route::delete('/travel-plans/{travelPlan}', [TravelPlanController::class, 'destroy'])->name('travel-plans.destroy');
-
-    // グループルート
-    Route::get('/groups', [App\Http\Controllers\GroupController::class, 'index'])->name('groups.index');
-
-    // グループメンバー管理
-    Route::get('/groups/{group}/members/create', [App\Http\Controllers\GroupMemberController::class, 'create'])->name('groups.members.create');
-    Route::post('/groups/{group}/members', [App\Http\Controllers\GroupMemberController::class, 'store'])->name('groups.members.store');
-    Route::delete('/groups/{group}/members/{member}', [App\Http\Controllers\GroupMemberController::class, 'destroy'])->name('groups.members.destroy');
-
-    // 班グループ管理
-    Route::get('/travel-plans/{travelPlan}/branch-groups/create', [App\Http\Controllers\BranchGroupController::class, 'create'])->name('travel-plans.branch-groups.create');
-    Route::post('/travel-plans/{travelPlan}/branch-groups', [App\Http\Controllers\BranchGroupController::class, 'store'])->name('travel-plans.branch-groups.store');
-    Route::get('/branch-groups/{group}', [App\Http\Controllers\BranchGroupController::class, 'show'])->name('branch-groups.show');
-    Route::get('/branch-groups/{group}/edit', [App\Http\Controllers\BranchGroupController::class, 'edit'])->name('branch-groups.edit');
-    Route::put('/branch-groups/{group}', [App\Http\Controllers\BranchGroupController::class, 'update'])->name('branch-groups.update');
-    Route::delete('/branch-groups/{group}', [App\Http\Controllers\BranchGroupController::class, 'destroy'])->name('branch-groups.destroy');
-    Route::get('/branch-groups/{group}/duplicate', [App\Http\Controllers\BranchGroupController::class, 'duplicate'])->name('branch-groups.duplicate');
-    Route::post('/branch-groups/{group}/duplicate', [App\Http\Controllers\BranchGroupController::class, 'storeDuplicate'])->name('branch-groups.store-duplicate');
-
-    // 班グループメンバー管理
-    Route::post('/branch-groups/{group}/members', [App\Http\Controllers\BranchGroupMemberController::class, 'store'])->name('branch-groups.members.store');
-    Route::delete('/branch-groups/{group}/members/{member}', [App\Http\Controllers\BranchGroupMemberController::class, 'destroy'])->name('branch-groups.members.destroy');
-
-    // 旅程管理ルート
-    Route::resource('travel-plans.itineraries', ItineraryController::class);
-
-    // 経費ルート
-    Route::resource('expenses', \App\Http\Controllers\ExpenseController::class);
-    Route::get('/travel-plans/{travelPlan}/expenses/create', [\App\Http\Controllers\ExpenseController::class, 'create'])->name('travel-plans.expenses.create');
-    Route::post('/travel-plans/{travelPlan}/expenses', [\App\Http\Controllers\ExpenseController::class, 'store'])->name('travel-plans.expenses.store');
-
-    // 経費メンバーの支払い状態を更新
-    Route::patch('/expenses/{expense}/members/{member}/toggle-payment', [\App\Http\Controllers\ExpenseController::class, 'togglePaymentStatus'])
-        ->name('expenses.members.toggle-payment');
+    // OAuth認証
+    Route::get('/auth/{provider}', [SocialiteController::class, 'redirect'])->name('oauth.redirect');
+    Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])->name('oauth.callback');
 });
 
-require __DIR__.'/auth.php';
+// 認証が必要なルート
+Route::middleware('auth')->group(function () {
+    // ログアウト
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // ダッシュボード
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    // 旅行プラン管理
+    Route::resource('travel-plans', TravelPlanController::class)->parameters([
+        'travel-plans' => 'uuid',
+    ]);
+
+    // グループ管理（旅行プラン配下）
+    Route::get('travel-plans/{uuid}/groups', [GroupController::class, 'index'])->name('travel-plans.groups.index');
+    Route::get('travel-plans/{uuid}/groups/create', [GroupController::class, 'create'])->name('travel-plans.groups.create');
+    Route::post('travel-plans/{uuid}/groups', [GroupController::class, 'store'])->name('travel-plans.groups.store');
+    Route::get('travel-plans/{uuid}/groups/{group}', [GroupController::class, 'show'])->name('travel-plans.groups.show');
+    Route::get('travel-plans/{uuid}/groups/{group}/edit', [GroupController::class, 'edit'])->name('travel-plans.groups.edit');
+    Route::put('travel-plans/{uuid}/groups/{group}', [GroupController::class, 'update'])->name('travel-plans.groups.update');
+    Route::patch('travel-plans/{uuid}/groups/{group}', [GroupController::class, 'update'])->name('travel-plans.groups.update');
+    Route::delete('travel-plans/{uuid}/groups/{group}', [GroupController::class, 'destroy'])->name('travel-plans.groups.destroy');
+
+    // グループメンバー管理
+    Route::post('travel-plans/{uuid}/groups/{group}/members', [GroupController::class, 'addMember'])->name('travel-plans.groups.add-member');
+    Route::delete('travel-plans/{uuid}/groups/{group}/members/{member}', [GroupController::class, 'removeMember'])->name('travel-plans.groups.remove-member');
+
+    // メンバー招待（別ルート）
+    Route::get('travel-plans/{uuid}/members/invite', [MemberController::class, 'create'])->name('travel-plans.members.create');
+    Route::post('travel-plans/{uuid}/members/invite', [MemberController::class, 'store'])->name('travel-plans.members.store');
+
+    // メンバー管理（旅行プラン配下）
+    Route::get('travel-plans/{uuid}/members', [MemberController::class, 'index'])->name('travel-plans.members.index');
+    Route::get('travel-plans/{uuid}/members/{member}', [MemberController::class, 'show'])->name('travel-plans.members.show');
+    Route::get('travel-plans/{uuid}/members/{member}/edit', [MemberController::class, 'edit'])->name('travel-plans.members.edit');
+    Route::put('travel-plans/{uuid}/members/{member}', [MemberController::class, 'update'])->name('travel-plans.members.update');
+    Route::patch('travel-plans/{uuid}/members/{member}', [MemberController::class, 'update'])->name('travel-plans.members.update');
+    Route::delete('travel-plans/{uuid}/members/{member}', [MemberController::class, 'destroy'])->name('travel-plans.members.destroy');
+
+
+    // 旅程タイムライン表示（resourceルートより先に定義）
+    Route::get('travel-plans/{uuid}/itineraries/timeline', [ItineraryController::class, 'timeline'])->name('travel-plans.itineraries.timeline');
+
+    // 旅程管理（旅行プラン配下）
+    Route::resource('travel-plans.itineraries', ItineraryController::class)->parameters([
+        'travel-plans' => 'uuid',
+    ])->names([
+        'index' => 'travel-plans.itineraries.index',
+        'create' => 'travel-plans.itineraries.create',
+        'store' => 'travel-plans.itineraries.store',
+        'show' => 'travel-plans.itineraries.show',
+        'edit' => 'travel-plans.itineraries.edit',
+        'update' => 'travel-plans.itineraries.update',
+        'destroy' => 'travel-plans.itineraries.destroy',
+    ]);
+
+    // 招待管理
+    Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');
+    Route::get('invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
+    Route::post('invitations/{token}/accept', [InvitationController::class, 'accept'])->name('invitations.accept');
+    Route::post('invitations/{token}/decline', [InvitationController::class, 'decline'])->name('invitations.decline');
+});

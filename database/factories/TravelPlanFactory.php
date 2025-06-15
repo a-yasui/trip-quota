@@ -2,36 +2,72 @@
 
 namespace Database\Factories;
 
+use App\Models\TravelPlan;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TravelPlan>
- */
 class TravelPlanFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = TravelPlan::class;
+
     public function definition(): array
     {
-        $user = User::factory()->create();
-        $departureDate = $this->faker->dateTimeBetween('+1 month', '+2 months');
-        $returnDate = $this->faker->dateTimeBetween(
-            $departureDate->format('Y-m-d').' +1 day',
-            $departureDate->format('Y-m-d').' +10 days'
-        );
+        $departureDate = fake()->dateTimeBetween('now', '+1 year');
+        $returnDate = fake()->dateTimeBetween($departureDate, $departureDate->format('Y-m-d').' +2 weeks');
 
         return [
-            'title' => $this->faker->sentence(3),
-            'creator_id' => $user->id,
-            'deletion_permission_holder_id' => $user->id,
+            'uuid' => Str::uuid(),
+            'plan_name' => fake()->words(3, true).'旅行',
+            'creator_user_id' => User::factory(),
+            'owner_user_id' => function (array $attributes) {
+                return $attributes['creator_user_id'];
+            },
             'departure_date' => $departureDate,
             'return_date' => $returnDate,
-            'timezone' => $this->faker->randomElement(['Asia/Tokyo', 'Asia/Seoul', 'Asia/Shanghai', 'Asia/Singapore', 'Europe/London']),
+            'timezone' => fake()->randomElement(['Asia/Tokyo', 'UTC', 'America/New_York', 'Europe/London']),
             'is_active' => true,
+            'description' => fake()->optional()->paragraph(),
         ];
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
+    }
+
+    public function withDifferentOwner(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'owner_user_id' => User::factory(),
+        ]);
+    }
+
+    public function shortTrip(): static
+    {
+        return $this->state(function (array $attributes) {
+            $departureDate = fake()->dateTimeBetween('now', '+6 months');
+            $returnDate = fake()->dateTimeBetween($departureDate, $departureDate->format('Y-m-d').' +3 days');
+
+            return [
+                'departure_date' => $departureDate,
+                'return_date' => $returnDate,
+            ];
+        });
+    }
+
+    public function longTrip(): static
+    {
+        return $this->state(function (array $attributes) {
+            $departureDate = fake()->dateTimeBetween('now', '+6 months');
+            $returnDate = fake()->dateTimeBetween($departureDate->format('Y-m-d').' +2 weeks', $departureDate->format('Y-m-d').' +2 months');
+
+            return [
+                'departure_date' => $departureDate,
+                'return_date' => $returnDate,
+            ];
+        });
     }
 }

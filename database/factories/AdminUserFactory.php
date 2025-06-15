@@ -1,23 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Models\AdminUser;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\AdminUser>
+ * @extends Factory<\App\Models\AdminUser>
  */
-class AdminUserFactory extends Factory
+final class AdminUserFactory extends Factory
 {
     /**
-     * Define the model's default state.
+     * The name of the factory's corresponding model.
      *
-     * @return array<string, mixed>
+     * @var string
+     */
+    protected $model = AdminUser::class;
+
+    /**
+     * Define the model's default state.
      */
     public function definition(): array
     {
         return [
-            //
         ];
     }
 }

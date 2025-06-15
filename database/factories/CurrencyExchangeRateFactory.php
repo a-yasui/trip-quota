@@ -1,23 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Models\CurrencyExchangeRate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CurrencyExchangeRate>
+ * @extends Factory<\App\Models\CurrencyExchangeRate>
  */
-class CurrencyExchangeRateFactory extends Factory
+final class CurrencyExchangeRateFactory extends Factory
 {
     /**
-     * Define the model's default state.
+     * The name of the factory's corresponding model.
      *
-     * @return array<string, mixed>
+     * @var string
+     */
+    protected $model = CurrencyExchangeRate::class;
+
+    /**
+     * Define the model's default state.
      */
     public function definition(): array
     {
         return [
-            //
+            'from_currency' => fake()->word,
+            'to_currency' => fake()->word,
+            'rate' => fake()->word,
+            'effective_date' => fake()->date(),
         ];
     }
 }

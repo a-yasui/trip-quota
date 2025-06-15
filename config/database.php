@@ -42,15 +42,6 @@ return [
             'synchronous' => null,
         ],
 
-        'sqlite_test' => [
-            'driver'   => 'sqlite',
-            'database' => ':memory:',
-            'prefix'   => '',
-            'busy_timeout' => null,
-            'journal_mode' => null,
-            'synchronous' => null,
-        ],
-
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),

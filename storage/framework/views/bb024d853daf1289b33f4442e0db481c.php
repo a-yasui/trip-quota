@@ -1,0 +1,194 @@
+<?php $__env->startSection('title', 'メンバー招待 - ' . $travelPlan->plan_name); ?>
+
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.container', ['class' => 'max-w-3xl']); ?>
+        <?php $__env->startComponent('components.page-header', ['title' => 'メンバー招待', 'subtitle' => $travelPlan->plan_name . 'にメンバーを招待します。']); ?>
+        <?php echo $__env->renderComponent(); ?>
+
+        <?php echo $__env->make('components.alerts', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+        <!-- フォーム -->
+        <div class="bg-white shadow-sm rounded-lg">
+            <form method="POST" action="<?php echo e(route('travel-plans.members.store', $travelPlan->uuid)); ?>" class="space-y-6 p-6">
+                <?php echo csrf_field(); ?>
+
+                <!-- 招待方法選択 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                        招待方法 <span class="text-red-500">*</span>
+                    </label>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input id="invitation_type_email" 
+                                   name="invitation_type" 
+                                   type="radio" 
+                                   value="email"
+                                   <?php echo e(old('invitation_type', 'email') === 'email' ? 'checked' : ''); ?>
+
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                            <label for="invitation_type_email" class="ml-2 block text-sm text-gray-900">
+                                メールアドレスで招待
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="invitation_type_account" 
+                                   name="invitation_type" 
+                                   type="radio" 
+                                   value="account"
+                                   <?php echo e(old('invitation_type') === 'account' ? 'checked' : ''); ?>
+
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                            <label for="invitation_type_account" class="ml-2 block text-sm text-gray-900">
+                                アカウント名で招待
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- メールアドレス入力 -->
+                <div id="email_section">
+                    <label for="email" class="block text-sm font-medium text-gray-700">
+                        メールアドレス <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           value="<?php echo e(old('email')); ?>"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                           placeholder="example@example.com">
+                    <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                </div>
+
+                <!-- アカウント名入力 -->
+                <div id="account_section" style="display: none;">
+                    <label for="account_name" class="block text-sm font-medium text-gray-700">
+                        アカウント名 <span class="text-red-500">*</span>
+                    </label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                            @
+                        </span>
+                        <input type="text" 
+                               id="account_name" 
+                               name="account_name" 
+                               value="<?php echo e(old('account_name')); ?>"
+                               class="flex-1 block w-full min-w-0 rounded-none rounded-r-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                               placeholder="username">
+                    </div>
+                    <?php $__errorArgs = ['account_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                </div>
+
+                <!-- 表示名 -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">
+                        表示名
+                    </label>
+                    <input type="text" 
+                           id="name" 
+                           name="name" 
+                           value="<?php echo e(old('name')); ?>"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                           placeholder="メンバー一覧で表示される名前（省略可）">
+                    <p class="mt-1 text-sm text-gray-500">
+                        省略した場合、メールアドレスまたはアカウントの表示名が使用されます
+                    </p>
+                    <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                </div>
+
+                <!-- 注意事項 -->
+                <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">招待について</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>招待されたユーザーには招待リンクが送信されます</li>
+                                    <li>招待の有効期限は7日間です</li>
+                                    <li>アカウント名で招待する場合、既存のTripQuotaユーザーが対象です</li>
+                                    <li>同じメールアドレス・アカウントは重複して招待できません</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ボタン -->
+                <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <a href="<?php echo e(route('travel-plans.members.index', $travelPlan->uuid)); ?>" 
+                       class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        キャンセル
+                    </a>
+                    <button type="submit" 
+                            class="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        招待を送信
+                    </button>
+                </div>
+            </form>
+        </div>
+    <?php echo $__env->renderComponent(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startPush('scripts'); ?>
+<script>
+    // 招待方法の切り替え
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailRadio = document.getElementById('invitation_type_email');
+        const accountRadio = document.getElementById('invitation_type_account');
+        const emailSection = document.getElementById('email_section');
+        const accountSection = document.getElementById('account_section');
+
+        function toggleSections() {
+            if (emailRadio.checked) {
+                emailSection.style.display = 'block';
+                accountSection.style.display = 'none';
+                document.getElementById('email').required = true;
+                document.getElementById('account_name').required = false;
+            } else {
+                emailSection.style.display = 'none';
+                accountSection.style.display = 'block';
+                document.getElementById('email').required = false;
+                document.getElementById('account_name').required = true;
+            }
+        }
+
+        emailRadio.addEventListener('change', toggleSections);
+        accountRadio.addEventListener('change', toggleSections);
+
+        // 初期状態設定
+        toggleSections();
+    });
+</script>
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/yasui/develop/trip-quota/resources/views/members/create.blade.php ENDPATH**/ ?>
