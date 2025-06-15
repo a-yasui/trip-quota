@@ -43,7 +43,8 @@
       "Edit(!dist/**)",
       "Edit(!build/**)",
       "Edit(!.next/**)",
-      "Edit(!coverage/**)"
+      "Edit(!coverage/**)",
+      "Bash(php artisan test:*)"
     ],
     "deny": [
       "Bash(rm -rf /)",

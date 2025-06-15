@@ -60,20 +60,18 @@ Route::middleware('auth')->group(function () {
     Route::get('travel-plans/{uuid}/groups/create', [GroupController::class, 'create'])->name('travel-plans.groups.create');
     Route::post('travel-plans/{uuid}/groups', [GroupController::class, 'store'])->name('travel-plans.groups.store');
 
-    // メンバー管理（旅行プラン配下）
-    Route::resource('travel-plans.members', MemberController::class)->parameters([
-        'travel-plans' => 'uuid',
-    ])->except(['create', 'store'])->names([
-        'index' => 'travel-plans.members.index',
-        'show' => 'travel-plans.members.show',
-        'edit' => 'travel-plans.members.edit',
-        'update' => 'travel-plans.members.update',
-        'destroy' => 'travel-plans.members.destroy',
-    ]);
-
     // メンバー招待（別ルート）
     Route::get('travel-plans/{uuid}/members/invite', [MemberController::class, 'create'])->name('travel-plans.members.create');
     Route::post('travel-plans/{uuid}/members/invite', [MemberController::class, 'store'])->name('travel-plans.members.store');
+
+    // メンバー管理（旅行プラン配下）
+    Route::get('travel-plans/{uuid}/members', [MemberController::class, 'index'])->name('travel-plans.members.index');
+    Route::get('travel-plans/{uuid}/members/{member}', [MemberController::class, 'show'])->name('travel-plans.members.show');
+    Route::get('travel-plans/{uuid}/members/{member}/edit', [MemberController::class, 'edit'])->name('travel-plans.members.edit');
+    Route::put('travel-plans/{uuid}/members/{member}', [MemberController::class, 'update'])->name('travel-plans.members.update');
+    Route::patch('travel-plans/{uuid}/members/{member}', [MemberController::class, 'update'])->name('travel-plans.members.update');
+    Route::delete('travel-plans/{uuid}/members/{member}', [MemberController::class, 'destroy'])->name('travel-plans.members.destroy');
+
 
     // 旅程タイムライン表示（resourceルートより先に定義）
     Route::get('travel-plans/{uuid}/itineraries/timeline', [ItineraryController::class, 'timeline'])->name('travel-plans.itineraries.timeline');

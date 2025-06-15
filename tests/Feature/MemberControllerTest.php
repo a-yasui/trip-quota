@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Account;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\TravelPlan;
@@ -52,6 +53,13 @@ class MemberControllerTest extends TestCase
 
     public function test_create_displays_invitation_form()
     {
+        // デバッグ: メンバーが正しく設定されているか確認
+        $this->assertDatabaseHas('members', [
+            'travel_plan_id' => $this->travelPlan->id,
+            'user_id' => $this->user->id,
+            'is_confirmed' => true,
+        ]);
+
         $response = $this->actingAs($this->user)
             ->get(route('travel-plans.members.create', $this->travelPlan->uuid));
 
@@ -77,12 +85,16 @@ class MemberControllerTest extends TestCase
 
     public function test_store_creates_invitation_by_account_name()
     {
-        $targetUser = User::factory()->create(['email' => 'testuser@example.com']);
+        $targetUser = User::factory()->create();
+        $account = Account::factory()->create([
+            'user_id' => $targetUser->id,
+            'account_name' => 'testuser123',
+        ]);
 
         $response = $this->actingAs($this->user)
             ->post(route('travel-plans.members.store', $this->travelPlan->uuid), [
                 'invitation_type' => 'account',
-                'account_name' => $targetUser->email, // Use email instead of name
+                'account_name' => 'testuser123',
             ]);
 
         $response->assertRedirect(route('travel-plans.members.index', $this->travelPlan->uuid));

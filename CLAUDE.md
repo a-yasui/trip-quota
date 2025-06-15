@@ -103,6 +103,11 @@ npm run test:watch
 - Mimic established patterns in the codebase
 - Never expose or commit secrets/keys
 
+### Routing Guidelines
+- **NEVER use `Route::resource()`** in `routes/web.php`
+- Always define routes explicitly using `Route::get()`, `Route::post()`, etc.
+- Use clear, descriptive route definitions for better maintainability
+
 ### Domain Guidelines
 - Create new domain services in `TripQuota/` namespace
 - Implement Repository pattern for data access

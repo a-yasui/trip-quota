@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -11,6 +12,7 @@ use TripQuota\TravelPlan\TravelPlanService;
 
 class MemberController extends Controller
 {
+    use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
     public function __construct(
         private MemberService $memberService,
         private TravelPlanService $travelPlanService,
@@ -22,22 +24,21 @@ class MemberController extends Controller
      */
     public function index(string $travelPlanUuid)
     {
-        try {
-            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+        $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-            if (! $travelPlan) {
-                abort(404);
-            }
-
-            $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
-            $confirmedMembers = $this->memberService->getConfirmedMembers($travelPlan, Auth::user());
-            $unconfirmedMembers = $this->memberService->getUnconfirmedMembers($travelPlan, Auth::user());
-            $pendingInvitations = $this->invitationService->getPendingInvitationsForTravelPlan($travelPlan, Auth::user());
-
-            return view('members.index', compact('travelPlan', 'members', 'confirmedMembers', 'unconfirmedMembers', 'pendingInvitations'));
-        } catch (\Exception $e) {
-            abort(403);
+        if (! $travelPlan) {
+            abort(404);
         }
+
+        // Policyで認可チェック
+        $this->authorize('viewAnyForTravelPlan', [Member::class, $travelPlan]);
+
+        $members = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
+        $confirmedMembers = $this->memberService->getConfirmedMembers($travelPlan, Auth::user());
+        $unconfirmedMembers = $this->memberService->getUnconfirmedMembers($travelPlan, Auth::user());
+        $pendingInvitations = $this->invitationService->getPendingInvitationsForTravelPlan($travelPlan, Auth::user());
+
+        return view('members.index', compact('travelPlan', 'members', 'confirmedMembers', 'unconfirmedMembers', 'pendingInvitations'));
     }
 
     /**
@@ -45,20 +46,16 @@ class MemberController extends Controller
      */
     public function create(string $travelPlanUuid)
     {
-        try {
-            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+        $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-            if (! $travelPlan) {
-                abort(404);
-            }
-
-            // 招待権限の確認（確認済みメンバーであることを確認）
-            $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
-
-            return view('members.create', compact('travelPlan'));
-        } catch (\Exception $e) {
-            abort(403);
+        if (! $travelPlan) {
+            abort(404);
         }
+
+        // Policyで招待権限をチェック
+        $this->authorize('invite', [Member::class, $travelPlan]);
+
+        return view('members.create', compact('travelPlan'));
     }
 
     /**
@@ -74,6 +71,15 @@ class MemberController extends Controller
         ]);
 
         try {
+            $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            // Policyで招待権限をチェック
+            $this->authorize('invite', [Member::class, $travelPlan]);
+
             $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
 
             if (! $travelPlan) {
@@ -155,7 +161,10 @@ class MemberController extends Controller
                 abort(404);
             }
 
-            return view('members.edit', compact('travelPlan', 'member'));
+            // グループ一覧を取得
+            $availableGroups = $travelPlan->groups()->orderBy('type')->orderBy('name')->get();
+
+            return view('members.edit', compact('travelPlan', 'member', 'availableGroups'));
         } catch (\Exception $e) {
             abort(403);
         }

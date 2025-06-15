@@ -93,6 +93,11 @@ class TravelPlanService
         return $travelPlan->load(['creator', 'owner', 'groups', 'members']);
     }
 
+    public function getTravelPlanByUuid(string $uuid): ?TravelPlan
+    {
+        return $this->repository->findByUuid($uuid);
+    }
+
     public function getUserTravelPlans(User $user, int $perPage = 15): LengthAwarePaginator
     {
         return $this->repository->findByUser($user, $perPage);

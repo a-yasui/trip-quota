@@ -34,6 +34,7 @@
     30 => 'Termwind\\Laravel\\TermwindServiceProvider',
     31 => 'TheDoctor0\\LaravelFactoryGenerator\\FactoryGeneratorServiceProvider',
     32 => 'App\\Providers\\AppServiceProvider',
+    33 => 'App\\Providers\\AuthServiceProvider',
   ),
   'eager' => 
   array (
@@ -53,6 +54,7 @@
     13 => 'Termwind\\Laravel\\TermwindServiceProvider',
     14 => 'TheDoctor0\\LaravelFactoryGenerator\\FactoryGeneratorServiceProvider',
     15 => 'App\\Providers\\AppServiceProvider',
+    16 => 'App\\Providers\\AuthServiceProvider',
   ),
   'deferred' => 
   array (

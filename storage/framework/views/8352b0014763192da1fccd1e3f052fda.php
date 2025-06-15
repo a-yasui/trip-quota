@@ -1,19 +1,17 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'メンバー編集 - ' . $member->name); ?>
 
-@section('title', 'メンバー編集 - ' . $member->name)
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.container', ['class' => 'max-w-3xl']); ?>
+        <?php $__env->startComponent('components.page-header', ['title' => 'メンバー編集', 'subtitle' => $travelPlan->plan_name . ' - ' . $member->name]); ?>
+        <?php echo $__env->renderComponent(); ?>
 
-@section('content')
-    @component('components.container', ['class' => 'max-w-3xl'])
-        @component('components.page-header', ['title' => 'メンバー編集', 'subtitle' => $travelPlan->plan_name . ' - ' . $member->name])
-        @endcomponent
-
-        @include('components.alerts')
+        <?php echo $__env->make('components.alerts', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- フォーム -->
         <div class="bg-white shadow-sm rounded-lg">
-            <form method="POST" action="{{ route('travel-plans.members.update', [$travelPlan->uuid, $member->id]) }}" class="space-y-6 p-6">
-                @csrf
-                @method('PUT')
+            <form method="POST" action="<?php echo e(route('travel-plans.members.update', [$travelPlan->uuid, $member->id])); ?>" class="space-y-6 p-6">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
 
                 <!-- 表示名 -->
                 <div>
@@ -23,13 +21,20 @@
                     <input type="text" 
                            id="name" 
                            name="name" 
-                           value="{{ old('name', $member->name) }}"
+                           value="<?php echo e(old('name', $member->name)); ?>"
                            required
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                            placeholder="メンバー一覧で表示される名前">
-                    @error('name')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <!-- メールアドレス -->
@@ -40,13 +45,20 @@
                     <input type="email" 
                            id="email" 
                            name="email" 
-                           value="{{ old('email', $member->email) }}"
+                           value="<?php echo e(old('email', $member->email)); ?>"
                            required
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                            placeholder="example@example.com">
-                    @error('email')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <!-- 現在の情報 -->
@@ -56,31 +68,31 @@
                         <div>
                             <dt class="text-gray-500">ステータス</dt>
                             <dd class="text-gray-900">
-                                @if($member->status === 'CONFIRMED')
+                                <?php if($member->status === 'CONFIRMED'): ?>
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         確認済み
                                     </span>
-                                @else
+                                <?php else: ?>
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                         未確認
                                     </span>
-                                @endif
+                                <?php endif; ?>
                             </dd>
                         </div>
                         <div>
                             <dt class="text-gray-500">所属グループ数</dt>
-                            <dd class="text-gray-900">{{ $member->groups->count() }}個</dd>
+                            <dd class="text-gray-900"><?php echo e($member->groups->count()); ?>個</dd>
                         </div>
                         <div>
                             <dt class="text-gray-500">参加日</dt>
-                            <dd class="text-gray-900">{{ $member->created_at->format('Y年m月d日') }}</dd>
+                            <dd class="text-gray-900"><?php echo e($member->created_at->format('Y年m月d日')); ?></dd>
                         </div>
-                        @if($member->confirmed_at)
+                        <?php if($member->confirmed_at): ?>
                             <div>
                                 <dt class="text-gray-500">確認日</dt>
-                                <dd class="text-gray-900">{{ $member->confirmed_at->format('Y年m月d日') }}</dd>
+                                <dd class="text-gray-900"><?php echo e($member->confirmed_at->format('Y年m月d日')); ?></dd>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </dl>
                 </div>
 
@@ -90,39 +102,47 @@
                         所属グループ
                     </label>
                     <div class="space-y-2">
-                        @foreach($availableGroups as $group)
+                        <?php $__currentLoopData = $availableGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="flex items-center">
-                                <input id="group_{{ $group->id }}" 
+                                <input id="group_<?php echo e($group->id); ?>" 
                                        name="groups[]" 
                                        type="checkbox" 
-                                       value="{{ $group->id }}"
-                                       {{ $member->groups->contains('id', $group->id) ? 'checked' : '' }}
+                                       value="<?php echo e($group->id); ?>"
+                                       <?php echo e($member->groups->contains('id', $group->id) ? 'checked' : ''); ?>
+
                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                <label for="group_{{ $group->id }}" class="ml-3 flex items-center">
-                                    @if($group->type === 'CORE')
+                                <label for="group_<?php echo e($group->id); ?>" class="ml-3 flex items-center">
+                                    <?php if($group->type === 'CORE'): ?>
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
                                             全体
                                         </span>
-                                    @else
+                                    <?php else: ?>
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
                                             班
                                         </span>
-                                    @endif
-                                    <span class="text-sm text-gray-900">{{ $group->name }}</span>
-                                    @if($group->group_type === 'BRANCH')
-                                        <span class="text-xs text-gray-500 ml-2">({{ $group->branch_key }})</span>
-                                    @endif
+                                    <?php endif; ?>
+                                    <span class="text-sm text-gray-900"><?php echo e($group->name); ?></span>
+                                    <?php if($group->group_type === 'BRANCH'): ?>
+                                        <span class="text-xs text-gray-500 ml-2">(<?php echo e($group->branch_key); ?>)</span>
+                                    <?php endif; ?>
                                 </label>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
-                    @error('groups')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <?php $__errorArgs = ['groups'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <!-- 権限情報 -->
-                @if($travelPlan->owner_user_id === $member->user_id || $travelPlan->creator_user_id === $member->user_id)
+                <?php if($travelPlan->owner_user_id === $member->user_id || $travelPlan->creator_user_id === $member->user_id): ?>
                     <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
                         <div class="flex">
                             <div class="flex-shrink-0">
@@ -135,18 +155,18 @@
                                 <div class="mt-2 text-sm text-blue-700">
                                     <p>このメンバーは以下の特別な権限を持っています：</p>
                                     <ul class="list-disc list-inside mt-1 space-y-1">
-                                        @if($travelPlan->owner_user_id === $member->user_id)
+                                        <?php if($travelPlan->owner_user_id === $member->user_id): ?>
                                             <li>所有者権限：このプランの完全な管理権限</li>
-                                        @endif
-                                        @if($travelPlan->creator_user_id === $member->user_id)
+                                        <?php endif; ?>
+                                        <?php if($travelPlan->creator_user_id === $member->user_id): ?>
                                             <li>作成者権限：このプランの作成者</li>
-                                        @endif
+                                        <?php endif; ?>
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
-                @endif
+                <?php endif; ?>
 
                 <!-- 警告 -->
                 <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
@@ -172,7 +192,7 @@
                 <!-- ボタン -->
                 <div class="flex items-center justify-between pt-6 border-t border-gray-200">
                     <div class="flex space-x-3">
-                        <a href="{{ route('travel-plans.members.show', [$travelPlan->uuid, $member->id]) }}" 
+                        <a href="<?php echo e(route('travel-plans.members.show', [$travelPlan->uuid, $member->id])); ?>" 
                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             キャンセル
                         </a>
@@ -183,19 +203,20 @@
                     </div>
                     
                     <!-- 削除ボタン -->
-                    @if($member->user_id !== $travelPlan->owner_user_id)
-                        <form method="POST" action="{{ route('travel-plans.members.destroy', [$travelPlan->uuid, $member->id]) }}" 
+                    <?php if($member->user_id !== $travelPlan->owner_user_id): ?>
+                        <form method="POST" action="<?php echo e(route('travel-plans.members.destroy', [$travelPlan->uuid, $member->id])); ?>" 
                               onsubmit="return confirm('本当にこのメンバーを削除しますか？\n\n削除すると以下の影響があります：\n・このメンバーはすべてのグループから除外されます\n・メンバー関連の履歴は削除されます\n・この操作は取り消せません')" class="inline">
-                            @csrf
-                            @method('DELETE')
+                            <?php echo csrf_field(); ?>
+                            <?php echo method_field('DELETE'); ?>
                             <button type="submit" 
                                     class="bg-red-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                                 メンバーを削除
                             </button>
                         </form>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </form>
         </div>
-    @endcomponent
-@endsection
+    <?php echo $__env->renderComponent(); ?>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/yasui/develop/trip-quota/resources/views/members/edit.blade.php ENDPATH**/ ?>
