@@ -196,25 +196,29 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                     </svg>
                                 </a>
+
+                                <!-- 費用管理 -->
+                                <a href="{{ route('travel-plans.expenses.index', $travelPlan->uuid) }}" 
+                                   class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <h3 class="text-sm font-medium text-gray-900">費用管理</h3>
+                                        <p class="text-sm text-gray-500">割り勘・精算管理</p>
+                                    </div>
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
                             </div>
 
                             <!-- 未実装機能 -->
                             <div class="mt-6">
                                 <h3 class="text-sm font-medium text-gray-500 mb-3">今後の機能</h3>
                                 <div class="space-y-3">
-
-                                    <!-- 費用管理 -->
-                                    <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed">
-                                        <div class="flex-shrink-0 w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                                            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        </div>
-                                        <div class="ml-4 flex-1">
-                                            <h3 class="text-sm font-medium text-gray-500">費用管理（未実装）</h3>
-                                            <p class="text-sm text-gray-400">旅行費用の管理と精算</p>
-                                        </div>
-                                    </div>
 
                                     <!-- 書類管理 -->
                                     <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed">

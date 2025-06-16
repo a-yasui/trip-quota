@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ItineraryController;
@@ -96,6 +97,18 @@ Route::middleware('auth')->group(function () {
     Route::put('travel-plans/{uuid}/accommodations/{accommodation}', [AccommodationController::class, 'update'])->name('travel-plans.accommodations.update');
     Route::patch('travel-plans/{uuid}/accommodations/{accommodation}', [AccommodationController::class, 'update'])->name('travel-plans.accommodations.update');
     Route::delete('travel-plans/{uuid}/accommodations/{accommodation}', [AccommodationController::class, 'destroy'])->name('travel-plans.accommodations.destroy');
+
+    // 費用管理（旅行プラン配下）
+    Route::get('travel-plans/{uuid}/expenses', [ExpenseController::class, 'index'])->name('travel-plans.expenses.index');
+    Route::get('travel-plans/{uuid}/expenses/create', [ExpenseController::class, 'create'])->name('travel-plans.expenses.create');
+    Route::post('travel-plans/{uuid}/expenses', [ExpenseController::class, 'store'])->name('travel-plans.expenses.store');
+    Route::get('travel-plans/{uuid}/expenses/{expense}', [ExpenseController::class, 'show'])->name('travel-plans.expenses.show');
+    Route::get('travel-plans/{uuid}/expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('travel-plans.expenses.edit');
+    Route::put('travel-plans/{uuid}/expenses/{expense}', [ExpenseController::class, 'update'])->name('travel-plans.expenses.update');
+    Route::patch('travel-plans/{uuid}/expenses/{expense}', [ExpenseController::class, 'update'])->name('travel-plans.expenses.update');
+    Route::delete('travel-plans/{uuid}/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('travel-plans.expenses.destroy');
+    Route::post('travel-plans/{uuid}/expenses/{expense}/confirm-participation', [ExpenseController::class, 'confirmParticipation'])->name('travel-plans.expenses.confirm-participation');
+    Route::post('travel-plans/{uuid}/expenses/{expense}/confirm-split', [ExpenseController::class, 'confirmSplit'])->name('travel-plans.expenses.confirm-split');
 
     // 招待管理
     Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');

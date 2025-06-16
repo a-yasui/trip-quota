@@ -46,6 +46,12 @@ class AppServiceProvider extends ServiceProvider
             \TripQuota\Accommodation\AccommodationRepositoryInterface::class,
             \TripQuota\Accommodation\AccommodationRepository::class
         );
+
+        // Expense domain services
+        $this->app->bind(
+            \TripQuota\Expense\ExpenseRepositoryInterface::class,
+            \TripQuota\Expense\ExpenseRepository::class
+        );
     }
 
     /**
