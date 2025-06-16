@@ -1,18 +1,19 @@
 @extends('layouts.master')
 
-@section('title', '宿泊施設を追加 - ' . $travelPlan->plan_name)
+@section('title', '宿泊施設を編集 - ' . $accommodation->name)
 
 @section('content')
     @component('components.container', ['class' => 'max-w-4xl'])
-        @component('components.page-header', ['title' => '宿泊施設を追加', 'subtitle' => $travelPlan->plan_name . 'に新しい宿泊施設を追加します。'])
+        @component('components.page-header', ['title' => '宿泊施設を編集', 'subtitle' => $accommodation->name . 'の情報を編集します。'])
         @endcomponent
 
         @include('components.alerts')
 
         <!-- フォーム -->
         <div class="bg-white shadow-sm rounded-lg">
-            <form method="POST" action="{{ route('travel-plans.accommodations.store', $travelPlan->uuid) }}" class="space-y-6 p-6">
+            <form method="POST" action="{{ route('travel-plans.accommodations.update', [$travelPlan->uuid, $accommodation->id]) }}" class="space-y-6 p-6">
                 @csrf
+                @method('PUT')
 
                 <!-- 宿泊施設名 -->
                 <div>
@@ -22,7 +23,7 @@
                     <input type="text" 
                            id="name" 
                            name="name" 
-                           value="{{ old('name') }}"
+                           value="{{ old('name', $accommodation->name) }}"
                            required
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                            placeholder="ホテル名、旅館名など">
@@ -40,7 +41,7 @@
                               name="address" 
                               rows="2"
                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                              placeholder="宿泊施設の住所">{{ old('address') }}</textarea>
+                              placeholder="宿泊施設の住所">{{ old('address', $accommodation->address) }}</textarea>
                     @error('address')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -55,7 +56,7 @@
                         <input type="date" 
                                id="check_in_date" 
                                name="check_in_date" 
-                               value="{{ old('check_in_date', $travelPlan->departure_date->format('Y-m-d')) }}"
+                               value="{{ old('check_in_date', $accommodation->check_in_date->format('Y-m-d')) }}"
                                min="{{ $travelPlan->departure_date->format('Y-m-d') }}"
                                @if($travelPlan->return_date) max="{{ $travelPlan->return_date->format('Y-m-d') }}" @endif
                                required
@@ -72,7 +73,7 @@
                         <input type="date" 
                                id="check_out_date" 
                                name="check_out_date" 
-                               value="{{ old('check_out_date') }}"
+                               value="{{ old('check_out_date', $accommodation->check_out_date->format('Y-m-d')) }}"
                                min="{{ $travelPlan->departure_date->format('Y-m-d') }}"
                                @if($travelPlan->return_date) max="{{ $travelPlan->return_date->format('Y-m-d') }}" @endif
                                required
@@ -92,7 +93,7 @@
                         <input type="time" 
                                id="check_in_time" 
                                name="check_in_time" 
-                               value="{{ old('check_in_time', '15:00') }}"
+                               value="{{ old('check_in_time', $accommodation->check_in_time?->format('H:i') ?? '15:00') }}"
                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         @error('check_in_time')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -106,7 +107,7 @@
                         <input type="time" 
                                id="check_out_time" 
                                name="check_out_time" 
-                               value="{{ old('check_out_time', '10:00') }}"
+                               value="{{ old('check_out_time', $accommodation->check_out_time?->format('H:i') ?? '10:00') }}"
                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         @error('check_out_time')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -123,7 +124,7 @@
                         <input type="number" 
                                id="price_per_night" 
                                name="price_per_night" 
-                               value="{{ old('price_per_night') }}"
+                               value="{{ old('price_per_night', $accommodation->price_per_night) }}"
                                min="0"
                                step="0.01"
                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -140,11 +141,11 @@
                         <select id="currency" 
                                 name="currency"
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            <option value="JPY" {{ old('currency', 'JPY') === 'JPY' ? 'selected' : '' }}>JPY (円)</option>
-                            <option value="USD" {{ old('currency') === 'USD' ? 'selected' : '' }}>USD (ドル)</option>
-                            <option value="EUR" {{ old('currency') === 'EUR' ? 'selected' : '' }}>EUR (ユーロ)</option>
-                            <option value="KRW" {{ old('currency') === 'KRW' ? 'selected' : '' }}>KRW (ウォン)</option>
-                            <option value="CNY" {{ old('currency') === 'CNY' ? 'selected' : '' }}>CNY (元)</option>
+                            <option value="JPY" {{ old('currency', $accommodation->currency) === 'JPY' ? 'selected' : '' }}>JPY (円)</option>
+                            <option value="USD" {{ old('currency', $accommodation->currency) === 'USD' ? 'selected' : '' }}>USD (ドル)</option>
+                            <option value="EUR" {{ old('currency', $accommodation->currency) === 'EUR' ? 'selected' : '' }}>EUR (ユーロ)</option>
+                            <option value="KRW" {{ old('currency', $accommodation->currency) === 'KRW' ? 'selected' : '' }}>KRW (ウォン)</option>
+                            <option value="CNY" {{ old('currency', $accommodation->currency) === 'CNY' ? 'selected' : '' }}>CNY (元)</option>
                         </select>
                         @error('currency')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -160,7 +161,7 @@
                     <input type="text" 
                            id="confirmation_number" 
                            name="confirmation_number" 
-                           value="{{ old('confirmation_number') }}"
+                           value="{{ old('confirmation_number', $accommodation->confirmation_number) }}"
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                            placeholder="予約確認番号など">
                     @error('confirmation_number')
@@ -181,7 +182,7 @@
                                            name="member_ids[]" 
                                            type="checkbox" 
                                            value="{{ $member->id }}"
-                                           {{ in_array($member->id, old('member_ids', [])) ? 'checked' : '' }}
+                                           {{ in_array($member->id, old('member_ids', $accommodation->members->pluck('id')->toArray())) ? 'checked' : '' }}
                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                                     <label for="member_{{ $member->id }}" class="ml-2 block text-sm text-gray-900">
                                         {{ $member->name }}
@@ -204,7 +205,7 @@
                               name="notes" 
                               rows="3"
                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                              placeholder="特記事項、連絡先、アクセス方法など">{{ old('notes') }}</textarea>
+                              placeholder="特記事項、連絡先、アクセス方法など">{{ old('notes', $accommodation->notes) }}</textarea>
                     @error('notes')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -219,13 +220,13 @@
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <h3 class="text-sm font-medium text-blue-800">宿泊施設について</h3>
+                            <h3 class="text-sm font-medium text-blue-800">宿泊施設の編集について</h3>
                             <div class="mt-2 text-sm text-blue-700">
                                 <ul class="list-disc list-inside space-y-1">
                                     <li>チェックアウト日はチェックイン日より後の日付を設定してください</li>
                                     <li>宿泊日程は旅行期間内である必要があります</li>
                                     <li>料金は1泊あたりの金額を入力してください（税込み・税抜きは備考欄に記載）</li>
-                                    <li>宿泊メンバーは後から変更することも可能です</li>
+                                    <li>編集内容は即座に反映されます</li>
                                 </ul>
                             </div>
                         </div>
@@ -234,13 +235,13 @@
 
                 <!-- ボタン -->
                 <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                    <a href="{{ route('travel-plans.accommodations.index', $travelPlan->uuid) }}" 
+                    <a href="{{ route('travel-plans.accommodations.show', [$travelPlan->uuid, $accommodation->id]) }}" 
                        class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         キャンセル
                     </a>
                     <button type="submit" 
                             class="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        宿泊施設を追加
+                        変更を保存
                     </button>
                 </div>
             </form>
