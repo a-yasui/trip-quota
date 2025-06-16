@@ -26,7 +26,11 @@ class AccommodationController extends Controller
             abort(404);
         }
 
-        $accommodations = $this->accommodationService->getAccommodationsForTravelPlan($travelPlan, Auth::user());
+        try {
+            $accommodations = $this->accommodationService->getAccommodationsForTravelPlan($travelPlan, Auth::user());
+        } catch (\Exception $e) {
+            abort(403);
+        }
 
         return view('accommodations.index', compact('travelPlan', 'accommodations'));
     }

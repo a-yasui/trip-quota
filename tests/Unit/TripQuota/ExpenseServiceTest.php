@@ -348,6 +348,6 @@ class ExpenseServiceTest extends TestCase
         
         $this->assertEquals($member2->id, $result[1]['member']->id);
         $this->assertEquals(3000, $result[1]['amount']); // カスタム金額
-        $this->assertFalse($result[1]['is_confirmed']);
+        $this->assertEquals(0, $result[1]['is_confirmed']); // データベースでは1/0で保存される
     }
 }

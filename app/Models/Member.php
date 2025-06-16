@@ -92,7 +92,7 @@ class Member extends Model
 
     public function accommodations()
     {
-        return $this->belongsToMany(Accommodation::class);
+        return $this->belongsToMany(Accommodation::class, 'accommodation_members');
     }
 
     public function itineraries()

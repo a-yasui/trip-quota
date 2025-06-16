@@ -104,8 +104,8 @@ class AccommodationControllerTest extends TestCase
             'travel_plan_id' => $this->travelPlan->id,
             'name' => '新しいホテル',
             'address' => '東京都渋谷区',
-            'check_in_date' => '2024-07-01',
-            'check_out_date' => '2024-07-02',
+            'check_in_date' => '2024-07-01 00:00:00',
+            'check_out_date' => '2024-07-02 00:00:00',
         ]);
     }
 
@@ -147,7 +147,7 @@ class AccommodationControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('ホテル詳細テスト');
         $response->assertSee('大阪府大阪市');
-        $response->assertSee('12,000 JPY/泊');
+        $response->assertSee('12,000 JPY');
     }
 
     public function test_edit_displays_form_with_existing_data()

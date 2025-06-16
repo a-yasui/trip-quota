@@ -26,7 +26,11 @@ class ExpenseController extends Controller
             abort(404);
         }
 
-        $expenses = $this->expenseService->getExpensesForTravelPlan($travelPlan, Auth::user());
+        try {
+            $expenses = $this->expenseService->getExpensesForTravelPlan($travelPlan, Auth::user());
+        } catch (\Exception $e) {
+            abort(403);
+        }
         
         // グループ別に費用を集計
         $expensesByGroup = $expenses->groupBy('group.name');

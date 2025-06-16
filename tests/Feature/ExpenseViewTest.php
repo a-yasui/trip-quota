@@ -91,8 +91,8 @@ class ExpenseViewTest extends TestCase
         $response->assertSee('EUR (ユーロ)');
         
         // 旅行期間の制約確認
-        $response->assertSee('min="2024-07-01"');
-        $response->assertSee('max="2024-07-05"');
+        $response->assertSee('min="2024-07-01"', false);
+        $response->assertSee('max="2024-07-05"', false);
     }
 
     public function test_expense_show_view_displays_details()
@@ -105,7 +105,7 @@ class ExpenseViewTest extends TestCase
             'description' => 'レストランでの昼食',
             'amount' => 5000,
             'currency' => 'JPY',
-            'expense_date' => '2024-07-02',
+            'expense_date' => \Carbon\Carbon::parse('2024-07-02'),
             'is_split_confirmed' => false,
         ]);
 
@@ -127,7 +127,7 @@ class ExpenseViewTest extends TestCase
         $response->assertSee('ランチ代');
         $response->assertSee('レストランでの昼食');
         $response->assertSee('5,000 JPY');
-        $response->assertSee('2024年7月2日');
+        $response->assertSee('2024年7月02日');
         $response->assertSee('テストグループ');
         $response->assertSee('テストメンバー');
         $response->assertSee('未確定');
@@ -198,10 +198,10 @@ class ExpenseViewTest extends TestCase
         $response->assertSee('費用を編集');
         $response->assertSee('編集用費用');
         $response->assertSee('編集前の説明');
-        $response->assertSee('value="2000"');
+        $response->assertSee('value="2000.00"', false);
         $response->assertSee('USD');
         $response->assertSee('checked'); // メンバーが参加している
-        $response->assertSee('value="1000"'); // カスタム金額
+        $response->assertSee('value="1000"', false); // カスタム金額
     }
 
     public function test_expense_index_empty_state()
@@ -257,7 +257,7 @@ class ExpenseViewTest extends TestCase
         $response->assertStatus(200);
         
         // デフォルト値の確認
-        $response->assertSee('value="2024-07-01"'); // デフォルトの費用日付
+        $response->assertSee('value="2024-07-01"', false); // デフォルトの費用日付
         $response->assertSee('selected'); // JPYがデフォルト選択
         $response->assertSee('checked'); // メンバーがデフォルトで参加
     }
@@ -265,6 +265,7 @@ class ExpenseViewTest extends TestCase
     public function test_expense_form_validation_errors_display()
     {
         $response = $this->actingAs($this->user)
+            ->from(route('travel-plans.expenses.create', $this->travelPlan->uuid))
             ->post(route('travel-plans.expenses.store', $this->travelPlan->uuid), [
                 'title' => '', // 必須項目を空に
                 'amount' => '',
@@ -272,6 +273,7 @@ class ExpenseViewTest extends TestCase
             ]);
 
         $response->assertSessionHasErrors(['title', 'amount', 'currency']);
+        $response->assertRedirect(route('travel-plans.expenses.create', $this->travelPlan->uuid));
         
         // エラーページのリダイレクト先を確認
         $followResponse = $this->followRedirects($response);

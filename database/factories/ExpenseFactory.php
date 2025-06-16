@@ -28,12 +28,12 @@ final class ExpenseFactory extends Factory
             'travel_plan_id' => \App\Models\TravelPlan::factory(),
             'group_id' => \App\Models\Group::factory(),
             'paid_by_member_id' => \App\Models\Member::factory(),
-            'title' => fake()->title,
+            'title' => fake()->sentence(3),
             'description' => fake()->optional()->text,
-            'amount' => fake()->word,
-            'currency' => fake()->currencyCode,
+            'amount' => fake()->randomFloat(2, 10, 10000),
+            'currency' => fake()->randomElement(['JPY', 'USD', 'EUR', 'KRW', 'CNY']),
             'expense_date' => fake()->date(),
-            'is_split_confirmed' => fake()->randomNumber(1),
+            'is_split_confirmed' => fake()->boolean(),
         ];
     }
 }

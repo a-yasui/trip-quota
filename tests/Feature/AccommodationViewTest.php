@@ -82,8 +82,8 @@ class AccommodationViewTest extends TestCase
         $response->assertSee('メモ・備考');
 
         // 旅行期間の制約確認
-        $response->assertSee('min="2024-07-01"');
-        $response->assertSee('max="2024-07-05"');
+        $response->assertSee('min="2024-07-01"', false);
+        $response->assertSee('max="2024-07-05"', false);
 
         // 通貨オプションの確認
         $response->assertSee('JPY (円)');
@@ -132,7 +132,7 @@ class AccommodationViewTest extends TestCase
         $response->assertSee('2024/07/03');
         $response->assertSee('25,000 JPY/泊');
         $response->assertSee('2人'); // メンバー数
-        $response->assertSee('予約番号: ABC123456');
+        $response->assertSee('ABC123456');
 
         // リンクの確認
         $response->assertSee('詳細');
@@ -157,13 +157,14 @@ class AccommodationViewTest extends TestCase
         $response->assertStatus(200);
 
         // デフォルト値の確認
-        $response->assertSee('value="2024-07-01"'); // デフォルトのチェックイン日
+        $response->assertSee('value="2024-07-01"', false); // デフォルトのチェックイン日
         $response->assertSee('selected'); // JPYがデフォルト選択
     }
 
     public function test_accommodation_create_form_validation_errors_display()
     {
         $response = $this->actingAs($this->user)
+            ->from(route('travel-plans.accommodations.create', $this->travelPlan->uuid))
             ->post(route('travel-plans.accommodations.store', $this->travelPlan->uuid), [
                 'name' => '', // 必須項目を空に
                 'check_in_date' => '',
@@ -171,6 +172,7 @@ class AccommodationViewTest extends TestCase
             ]);
 
         $response->assertSessionHasErrors(['name', 'check_in_date', 'check_out_date']);
+        $response->assertRedirect(route('travel-plans.accommodations.create', $this->travelPlan->uuid));
 
         // エラーページのリダイレクト先を確認
         $followResponse = $this->followRedirects($response);

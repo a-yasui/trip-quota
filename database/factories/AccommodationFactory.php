@@ -33,8 +33,8 @@ final class AccommodationFactory extends Factory
             'check_out_date' => fake()->date(),
             'check_in_time' => fake()->optional()->time(),
             'check_out_time' => fake()->optional()->time(),
-            'price_per_night' => fake()->optional()->word,
-            'currency' => fake()->currencyCode,
+            'price_per_night' => fake()->optional()->randomFloat(2, 100, 50000),
+            'currency' => fake()->randomElement(['JPY', 'USD', 'EUR', 'KRW', 'CNY']),
             'notes' => fake()->optional()->text,
             'confirmation_number' => fake()->optional()->word,
         ];
