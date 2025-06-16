@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccommodationController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialiteController;
@@ -85,6 +86,16 @@ Route::middleware('auth')->group(function () {
         'update' => 'travel-plans.itineraries.update',
         'destroy' => 'travel-plans.itineraries.destroy',
     ]);
+
+    // 宿泊施設管理（旅行プラン配下）
+    Route::get('travel-plans/{uuid}/accommodations', [AccommodationController::class, 'index'])->name('travel-plans.accommodations.index');
+    Route::get('travel-plans/{uuid}/accommodations/create', [AccommodationController::class, 'create'])->name('travel-plans.accommodations.create');
+    Route::post('travel-plans/{uuid}/accommodations', [AccommodationController::class, 'store'])->name('travel-plans.accommodations.store');
+    Route::get('travel-plans/{uuid}/accommodations/{accommodation}', [AccommodationController::class, 'show'])->name('travel-plans.accommodations.show');
+    Route::get('travel-plans/{uuid}/accommodations/{accommodation}/edit', [AccommodationController::class, 'edit'])->name('travel-plans.accommodations.edit');
+    Route::put('travel-plans/{uuid}/accommodations/{accommodation}', [AccommodationController::class, 'update'])->name('travel-plans.accommodations.update');
+    Route::patch('travel-plans/{uuid}/accommodations/{accommodation}', [AccommodationController::class, 'update'])->name('travel-plans.accommodations.update');
+    Route::delete('travel-plans/{uuid}/accommodations/{accommodation}', [AccommodationController::class, 'destroy'])->name('travel-plans.accommodations.destroy');
 
     // 招待管理
     Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');

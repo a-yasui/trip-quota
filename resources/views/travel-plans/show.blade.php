@@ -179,24 +179,29 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                     </svg>
                                 </a>
+
+                                <!-- 宿泊施設管理 -->
+                                <a href="{{ route('travel-plans.accommodations.index', $travelPlan->uuid) }}" 
+                                   class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <div class="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 8v-1a1 1 0 011-1h1a1 1 0 011 1v1m-4 0h4"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <h3 class="text-sm font-medium text-gray-900">宿泊施設管理</h3>
+                                        <p class="text-sm text-gray-500">ホテル・宿泊施設の管理</p>
+                                    </div>
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
                             </div>
 
                             <!-- 未実装機能 -->
                             <div class="mt-6">
                                 <h3 class="text-sm font-medium text-gray-500 mb-3">今後の機能</h3>
                                 <div class="space-y-3">
-                                    <!-- 宿泊施設管理 -->
-                                    <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed">
-                                        <div class="flex-shrink-0 w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                                            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 8v-1a1 1 0 011-1h1a1 1 0 011 1v1m-4 0h4"></path>
-                                            </svg>
-                                        </div>
-                                        <div class="ml-4 flex-1">
-                                            <h3 class="text-sm font-medium text-gray-500">宿泊施設管理（未実装）</h3>
-                                            <p class="text-sm text-gray-400">ホテル・宿泊施設の管理</p>
-                                        </div>
-                                    </div>
 
                                     <!-- 費用管理 -->
                                     <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed">

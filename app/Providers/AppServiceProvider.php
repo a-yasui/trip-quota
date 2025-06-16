@@ -40,6 +40,12 @@ class AppServiceProvider extends ServiceProvider
             \TripQuota\Itinerary\ItineraryRepositoryInterface::class,
             \TripQuota\Itinerary\ItineraryRepository::class
         );
+
+        // Accommodation domain services
+        $this->app->bind(
+            \TripQuota\Accommodation\AccommodationRepositoryInterface::class,
+            \TripQuota\Accommodation\AccommodationRepository::class
+        );
     }
 
     /**
