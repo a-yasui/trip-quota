@@ -27,4 +27,6 @@ interface MemberRepositoryInterface
     public function findConfirmedByTravelPlan(TravelPlan $travelPlan): \Illuminate\Database\Eloquent\Collection;
 
     public function countByTravelPlan(TravelPlan $travelPlan): int;
+
+    public function findConfirmedByUser(User $user): \Illuminate\Database\Eloquent\Collection;
 }

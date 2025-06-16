@@ -75,4 +75,13 @@ class MemberRepository implements MemberRepositoryInterface
     {
         return Member::where('travel_plan_id', $travelPlan->id)->count();
     }
+
+    public function findConfirmedByUser(User $user): \Illuminate\Database\Eloquent\Collection
+    {
+        return Member::where('user_id', $user->id)
+            ->where('is_confirmed', true)
+            ->with(['travelPlan'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
 }
