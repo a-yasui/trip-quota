@@ -28,9 +28,9 @@ final class ExpenseSettlementFactory extends Factory
             'travel_plan_id' => \App\Models\TravelPlan::factory(),
             'payer_member_id' => \App\Models\Member::factory(),
             'payee_member_id' => \App\Models\Member::factory(),
-            'amount' => fake()->word,
-            'currency' => fake()->currencyCode,
-            'is_settled' => fake()->randomNumber(1),
+            'amount' => fake()->randomFloat(2, 10, 10000),
+            'currency' => fake()->randomElement(['JPY', 'USD', 'EUR', 'KRW', 'CNY']),
+            'is_settled' => fake()->boolean(),
             'settled_at' => fake()->optional()->dateTime(),
         ];
     }

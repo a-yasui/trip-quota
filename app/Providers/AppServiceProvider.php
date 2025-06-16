@@ -52,6 +52,12 @@ class AppServiceProvider extends ServiceProvider
             \TripQuota\Expense\ExpenseRepositoryInterface::class,
             \TripQuota\Expense\ExpenseRepository::class
         );
+
+        // Settlement domain services
+        $this->app->bind(
+            \TripQuota\Settlement\SettlementRepositoryInterface::class,
+            \TripQuota\Settlement\SettlementRepository::class
+        );
     }
 
     /**
