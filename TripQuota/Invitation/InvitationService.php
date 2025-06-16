@@ -19,6 +19,11 @@ class InvitationService
         private MemberRepositoryInterface $memberRepository
     ) {}
 
+    public function findByToken(string $token): ?GroupInvitation
+    {
+        return $this->invitationRepository->findByToken($token);
+    }
+
     public function createInvitation(TravelPlan $travelPlan, User $inviter, string $email, ?string $name = null): GroupInvitation
     {
         $inviterMember = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $inviter);
