@@ -14,13 +14,15 @@ class AccommodationControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->travelPlan = TravelPlan::factory()->create([
             'owner_user_id' => $this->user->id,
@@ -237,13 +239,13 @@ class AccommodationControllerTest extends TestCase
 
         $accommodation = Accommodation::where('name', 'メンバーテストホテル')->first();
         $this->assertNotNull($accommodation);
-        
+
         // メンバーが正しく関連付けられているか確認
         $this->assertDatabaseHas('accommodation_members', [
             'accommodation_id' => $accommodation->id,
             'member_id' => $this->member->id,
         ]);
-        
+
         $this->assertDatabaseHas('accommodation_members', [
             'accommodation_id' => $accommodation->id,
             'member_id' => $member2->id,

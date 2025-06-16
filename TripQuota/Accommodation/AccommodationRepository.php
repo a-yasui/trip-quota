@@ -46,7 +46,7 @@ class AccommodationRepository implements AccommodationRepositoryInterface
                     ->orWhereBetween('check_out_date', [$startDate, $endDate])
                     ->orWhere(function ($q) use ($startDate, $endDate) {
                         $q->where('check_in_date', '<=', $startDate)
-                          ->where('check_out_date', '>=', $endDate);
+                            ->where('check_out_date', '>=', $endDate);
                     });
             })
             ->with(['createdBy', 'members'])

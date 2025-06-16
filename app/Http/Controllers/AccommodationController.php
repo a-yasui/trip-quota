@@ -22,7 +22,7 @@ class AccommodationController extends Controller
     {
         $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-        if (!$travelPlan) {
+        if (! $travelPlan) {
             abort(404);
         }
 
@@ -38,7 +38,7 @@ class AccommodationController extends Controller
     {
         $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-        if (!$travelPlan) {
+        if (! $travelPlan) {
             abort(404);
         }
 
@@ -71,7 +71,7 @@ class AccommodationController extends Controller
         try {
             $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-            if (!$travelPlan) {
+            if (! $travelPlan) {
                 abort(404);
             }
 
@@ -94,7 +94,7 @@ class AccommodationController extends Controller
     {
         $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-        if (!$travelPlan || $accommodation->travel_plan_id !== $travelPlan->id) {
+        if (! $travelPlan || $accommodation->travel_plan_id !== $travelPlan->id) {
             abort(404);
         }
 
@@ -111,7 +111,7 @@ class AccommodationController extends Controller
     {
         $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-        if (!$travelPlan || $accommodation->travel_plan_id !== $travelPlan->id) {
+        if (! $travelPlan || $accommodation->travel_plan_id !== $travelPlan->id) {
             abort(404);
         }
 
@@ -145,7 +145,7 @@ class AccommodationController extends Controller
         try {
             $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-            if (!$travelPlan || $accommodation->travel_plan_id !== $travelPlan->id) {
+            if (! $travelPlan || $accommodation->travel_plan_id !== $travelPlan->id) {
                 abort(404);
             }
 
@@ -169,7 +169,7 @@ class AccommodationController extends Controller
         try {
             $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-            if (!$travelPlan || $accommodation->travel_plan_id !== $travelPlan->id) {
+            if (! $travelPlan || $accommodation->travel_plan_id !== $travelPlan->id) {
                 abort(404);
             }
 

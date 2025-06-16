@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\TripQuota;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Accommodation;
+use App\Models\Member;
 use App\Models\TravelPlan;
 use App\Models\User;
-use App\Models\Member;
-use App\Models\Accommodation;
-use TripQuota\Accommodation\AccommodationService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 use TripQuota\Accommodation\AccommodationRepositoryInterface;
+use TripQuota\Accommodation\AccommodationService;
 use TripQuota\Member\MemberRepositoryInterface;
 
 class AccommodationServiceTest extends TestCase
@@ -17,20 +17,25 @@ class AccommodationServiceTest extends TestCase
     use RefreshDatabase;
 
     private AccommodationService $service;
+
     private AccommodationRepositoryInterface $accommodationRepository;
+
     private MemberRepositoryInterface $memberRepository;
+
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->accommodationRepository = $this->createMock(AccommodationRepositoryInterface::class);
         $this->memberRepository = $this->createMock(MemberRepositoryInterface::class);
         $this->service = new AccommodationService($this->accommodationRepository, $this->memberRepository);
-        
+
         $this->user = User::factory()->create();
         $this->travelPlan = TravelPlan::factory()->create([
             'departure_date' => '2024-07-01',
@@ -124,7 +129,7 @@ class AccommodationServiceTest extends TestCase
         $accommodation1 = Accommodation::factory()->make(['id' => 1, 'name' => 'ホテルA']);
         $accommodation2 = Accommodation::factory()->make(['id' => 2, 'name' => 'ホテルB']);
         $expectedAccommodations = new \Illuminate\Database\Eloquent\Collection([
-            $accommodation1, $accommodation2
+            $accommodation1, $accommodation2,
         ]);
 
         $this->memberRepository

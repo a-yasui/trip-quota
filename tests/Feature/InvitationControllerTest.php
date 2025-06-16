@@ -16,11 +16,14 @@ class InvitationControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
+
     private GroupInvitation $invitation;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

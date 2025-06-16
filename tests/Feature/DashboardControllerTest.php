@@ -16,10 +16,12 @@ class DashboardControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan1;
+
     private TravelPlan $travelPlan2;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -97,7 +99,7 @@ class DashboardControllerTest extends TestCase
         $invitationService = app(InvitationService::class);
         $inviterUser = User::factory()->create();
         $inviterAccount = Account::factory()->create(['user_id' => $inviterUser->id]);
-        
+
         Member::factory()->create([
             'travel_plan_id' => $this->travelPlan1->id,
             'user_id' => $inviterUser->id,
@@ -152,7 +154,7 @@ class DashboardControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('アカウント情報');
-        
+
         // Since the user has an account, we should see account info displayed
         $this->assertTrue($this->user->accounts->count() > 0);
     }
@@ -160,7 +162,7 @@ class DashboardControllerTest extends TestCase
     public function test_unauthenticated_user_cannot_access_dashboard()
     {
         $response = $this->get(route('dashboard'));
-        
+
         $response->assertRedirect(route('login'));
     }
 

@@ -124,6 +124,51 @@ npm run test:watch
 - Always create display tests for new Blade templates
 - Ensure tests pass before considering implementation complete
 
+## Recent Implementation Status
+
+### Completed Features (2025-06-16)
+
+#### Expense Management System ✅
+Comprehensive expense management with split billing functionality has been implemented:
+
+**Domain Services:**
+- `TripQuota\Expense\ExpenseRepositoryInterface` - Data access contract
+- `TripQuota\Expense\ExpenseRepository` - Eloquent implementation with pivot table handling
+- `TripQuota\Expense\ExpenseService` - Business logic for expense validation, calculation, and workflows
+
+**Controller & Routes:**
+- `ExpenseController` - Full CRUD operations plus confirmation actions
+- Explicit route definitions for all expense operations
+- Special routes for participation and split confirmation
+
+**Views:**
+- `expenses/index.blade.php` - List with statistics and multi-currency support
+- `expenses/create.blade.php` - Creation form with member assignment
+- `expenses/show.blade.php` - Detailed view with split calculation
+- `expenses/edit.blade.php` - Edit form with existing data population
+
+**Key Features:**
+- Multi-currency expense tracking (JPY, USD, EUR, KRW, CNY)
+- Split billing with equal division and custom amounts
+- Member participation confirmation workflow
+- Expense confirmation process (prevents editing after confirmation)
+- Currency aggregation and statistics
+- Comprehensive validation and error handling
+
+**Testing:**
+- 14 unit tests for ExpenseService
+- 15 feature tests for ExpenseController
+- 11 view tests for template rendering
+- Error handling and edge case coverage
+
+### Next Priority Features
+
+**High Priority:**
+- Expense splitting and settlement functionality
+- Financial settlement calculations between members
+
+**See TODO.md for complete feature roadmap and implementation details.**
+
 ## Important Restrictions
 
 - **NEVER read the `.env` file**

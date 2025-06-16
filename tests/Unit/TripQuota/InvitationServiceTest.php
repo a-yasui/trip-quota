@@ -17,13 +17,19 @@ use TripQuota\Member\MemberRepositoryInterface;
 class InvitationServiceTest extends TestCase
 {
     private InvitationService $service;
+
     private InvitationRepositoryInterface $invitationRepository;
+
     private GroupRepositoryInterface $groupRepository;
+
     private MemberRepositoryInterface $memberRepository;
 
     private TravelPlan $travelPlan;
+
     private User $user;
+
     private Member $member;
+
     private Group $coreGroup;
 
     protected function setUp(): void
@@ -41,18 +47,18 @@ class InvitationServiceTest extends TestCase
         );
 
         // Test data
-        $this->travelPlan = new TravelPlan();
+        $this->travelPlan = new TravelPlan;
         $this->travelPlan->id = 1;
 
-        $this->user = new User();
+        $this->user = new User;
         $this->user->id = 1;
         $this->user->email = 'test@example.com';
 
-        $this->member = new Member();
+        $this->member = new Member;
         $this->member->id = 1;
         $this->member->is_confirmed = true;
 
-        $this->coreGroup = new Group();
+        $this->coreGroup = new Group;
         $this->coreGroup->id = 1;
         $this->coreGroup->type = 'CORE';
     }
@@ -91,7 +97,7 @@ class InvitationServiceTest extends TestCase
             'expires_at' => Carbon::now()->addDays(7),
         ];
 
-        $invitation = new GroupInvitation();
+        $invitation = new GroupInvitation;
         $this->invitationRepository
             ->expects($this->once())
             ->method('create')
@@ -105,6 +111,7 @@ class InvitationServiceTest extends TestCase
                         return false;
                     }
                 }
+
                 return $data['expires_at'] instanceof Carbon;
             }))
             ->willReturn($invitation);
@@ -167,11 +174,11 @@ class InvitationServiceTest extends TestCase
     public function test_accept_invitation_successfully()
     {
         $token = 'valid-token';
-        $inviteeUser = new User();
+        $inviteeUser = new User;
         $inviteeUser->id = 2;
         $inviteeUser->email = 'invitee@example.com';
 
-        $invitation = new GroupInvitation();
+        $invitation = new GroupInvitation;
         $invitation->status = 'pending';
         $invitation->expires_at = Carbon::now()->addDays(1);
         $invitation->invitee_email = 'invitee@example.com';
@@ -191,7 +198,7 @@ class InvitationServiceTest extends TestCase
             ->with($this->travelPlan, 'invitee@example.com')
             ->willReturn(null);
 
-        $newMember = new Member();
+        $newMember = new Member;
         $newMember->travelPlan = $this->travelPlan;
 
         $this->memberRepository
@@ -235,7 +242,7 @@ class InvitationServiceTest extends TestCase
 
     public function test_accept_invitation_fails_when_already_processed()
     {
-        $invitation = new GroupInvitation();
+        $invitation = new GroupInvitation;
         $invitation->status = 'accepted';
 
         $this->invitationRepository
@@ -252,7 +259,7 @@ class InvitationServiceTest extends TestCase
 
     public function test_accept_invitation_fails_when_expired()
     {
-        $invitation = new GroupInvitation();
+        $invitation = new GroupInvitation;
         $invitation->status = 'pending';
         $invitation->expires_at = Carbon::now()->subDay();
 
@@ -270,7 +277,7 @@ class InvitationServiceTest extends TestCase
 
     public function test_accept_invitation_fails_when_wrong_email()
     {
-        $invitation = new GroupInvitation();
+        $invitation = new GroupInvitation;
         $invitation->status = 'pending';
         $invitation->expires_at = Carbon::now()->addDay();
         $invitation->invitee_email = 'other@example.com';
@@ -290,10 +297,10 @@ class InvitationServiceTest extends TestCase
     public function test_decline_invitation_successfully()
     {
         $token = 'valid-token';
-        $inviteeUser = new User();
+        $inviteeUser = new User;
         $inviteeUser->email = 'invitee@example.com';
 
-        $invitation = new GroupInvitation();
+        $invitation = new GroupInvitation;
         $invitation->status = 'pending';
         $invitation->invitee_email = 'invitee@example.com';
         $invitation->travelPlan = $this->travelPlan;
@@ -310,7 +317,7 @@ class InvitationServiceTest extends TestCase
             ->with($this->travelPlan, 'invitee@example.com')
             ->willReturn(null);
 
-        $updatedInvitation = new GroupInvitation();
+        $updatedInvitation = new GroupInvitation;
         $this->invitationRepository
             ->expects($this->once())
             ->method('update')
@@ -326,7 +333,7 @@ class InvitationServiceTest extends TestCase
 
     public function test_get_user_pending_invitations()
     {
-        $invitations = \Illuminate\Database\Eloquent\Collection::make([new GroupInvitation()]);
+        $invitations = \Illuminate\Database\Eloquent\Collection::make([new GroupInvitation]);
 
         $this->invitationRepository
             ->expects($this->once())
@@ -341,7 +348,7 @@ class InvitationServiceTest extends TestCase
 
     public function test_cancel_invitation_successfully()
     {
-        $invitation = new GroupInvitation();
+        $invitation = new GroupInvitation;
         $invitation->status = 'pending';
         $invitation->travelPlan = $this->travelPlan;
         $invitation->invitee_email = 'invitee@example.com';
@@ -371,7 +378,7 @@ class InvitationServiceTest extends TestCase
 
     public function test_cancel_invitation_fails_when_not_member()
     {
-        $invitation = new GroupInvitation();
+        $invitation = new GroupInvitation;
         $invitation->travelPlan = $this->travelPlan;
 
         $this->memberRepository

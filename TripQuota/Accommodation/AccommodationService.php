@@ -101,7 +101,7 @@ class AccommodationService
     {
         $member = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
 
-        if (!$member) {
+        if (! $member) {
             throw new \Exception('この旅行プランの宿泊施設を表示する権限がありません。');
         }
     }
@@ -110,7 +110,7 @@ class AccommodationService
     {
         $member = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
 
-        if (!$member || !$member->is_confirmed) {
+        if (! $member || ! $member->is_confirmed) {
             throw new \Exception('宿泊施設を管理する権限がありません。');
         }
     }
@@ -119,7 +119,7 @@ class AccommodationService
     {
         $member = $this->memberRepository->findByTravelPlanAndUser($accommodation->travelPlan, $user);
 
-        if (!$member || !$member->is_confirmed) {
+        if (! $member || ! $member->is_confirmed) {
             throw new \Exception('この宿泊施設を編集する権限がありません。');
         }
 
@@ -155,7 +155,7 @@ class AccommodationService
             ->toArray();
 
         $invalidMemberIds = array_diff($memberIds, $validMembers);
-        if (!empty($invalidMemberIds)) {
+        if (! empty($invalidMemberIds)) {
             throw new \Exception('無効なメンバーIDが含まれています。');
         }
 

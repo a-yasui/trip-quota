@@ -14,12 +14,13 @@ class AccommodationViewTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->travelPlan = TravelPlan::factory()->create([
             'owner_user_id' => $this->user->id,
@@ -27,7 +28,7 @@ class AccommodationViewTest extends TestCase
             'departure_date' => '2024-07-01',
             'return_date' => '2024-07-05',
         ]);
-        
+
         Member::factory()->create([
             'travel_plan_id' => $this->travelPlan->id,
             'user_id' => $this->user->id,
@@ -44,7 +45,7 @@ class AccommodationViewTest extends TestCase
         $response->assertViewIs('accommodations.index');
         $response->assertViewHas('travelPlan');
         $response->assertViewHas('accommodations');
-        
+
         // 基本的なページ要素の確認
         $response->assertSee('宿泊施設管理');
         $response->assertSee('テスト旅行プラン');
@@ -66,7 +67,7 @@ class AccommodationViewTest extends TestCase
         $response->assertViewIs('accommodations.create');
         $response->assertViewHas('travelPlan');
         $response->assertViewHas('members');
-        
+
         // フォーム要素の確認
         $response->assertSee('宿泊施設を追加');
         $response->assertSee('宿泊施設名');
@@ -79,16 +80,16 @@ class AccommodationViewTest extends TestCase
         $response->assertSee('宿泊メンバー');
         $response->assertSee('テストメンバー');
         $response->assertSee('メモ・備考');
-        
+
         // 旅行期間の制約確認
         $response->assertSee('min="2024-07-01"');
         $response->assertSee('max="2024-07-05"');
-        
+
         // 通貨オプションの確認
         $response->assertSee('JPY (円)');
         $response->assertSee('USD (ドル)');
         $response->assertSee('EUR (ユーロ)');
-        
+
         // 注意事項の確認
         $response->assertSee('チェックアウト日はチェックイン日より後の日付を設定してください');
         $response->assertSee('宿泊日程は旅行期間内である必要があります');
@@ -100,7 +101,7 @@ class AccommodationViewTest extends TestCase
             'travel_plan_id' => $this->travelPlan->id,
             'name' => 'メンバー1',
         ]);
-        
+
         $member2 = Member::factory()->create([
             'travel_plan_id' => $this->travelPlan->id,
             'name' => 'メンバー2',
@@ -123,7 +124,7 @@ class AccommodationViewTest extends TestCase
             ->get(route('travel-plans.accommodations.index', $this->travelPlan->uuid));
 
         $response->assertStatus(200);
-        
+
         // 宿泊施設の詳細情報
         $response->assertSee('グランドホテル東京');
         $response->assertSee('東京都千代田区大手町1-1-1');
@@ -132,7 +133,7 @@ class AccommodationViewTest extends TestCase
         $response->assertSee('25,000 JPY/泊');
         $response->assertSee('2人'); // メンバー数
         $response->assertSee('予約番号: ABC123456');
-        
+
         // リンクの確認
         $response->assertSee('詳細');
         $response->assertSee('編集');
@@ -154,7 +155,7 @@ class AccommodationViewTest extends TestCase
             ->get(route('travel-plans.accommodations.create', $this->travelPlan->uuid));
 
         $response->assertStatus(200);
-        
+
         // デフォルト値の確認
         $response->assertSee('value="2024-07-01"'); // デフォルトのチェックイン日
         $response->assertSee('selected'); // JPYがデフォルト選択
@@ -170,7 +171,7 @@ class AccommodationViewTest extends TestCase
             ]);
 
         $response->assertSessionHasErrors(['name', 'check_in_date', 'check_out_date']);
-        
+
         // エラーページのリダイレクト先を確認
         $followResponse = $this->followRedirects($response);
         $followResponse->assertSee('宿泊施設を追加');
@@ -182,7 +183,7 @@ class AccommodationViewTest extends TestCase
             ->get(route('travel-plans.accommodations.create', $this->travelPlan->uuid));
 
         $response->assertStatus(200);
-        
+
         // JavaScriptコードの存在確認
         $response->assertSee('checkInDate.addEventListener');
         $response->assertSee('checkOutDate.min = nextDay.toISOString()');
@@ -204,11 +205,11 @@ class AccommodationViewTest extends TestCase
             ->get(route('travel-plans.accommodations.index', $this->travelPlan->uuid));
 
         $response->assertStatus(200);
-        
+
         // ナビゲーションリンクの確認
         $backUrl = route('travel-plans.show', $this->travelPlan->uuid);
         $createUrl = route('travel-plans.accommodations.create', $this->travelPlan->uuid);
-        
+
         $response->assertSee($backUrl);
         $response->assertSee($createUrl);
     }
