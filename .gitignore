@@ -5,6 +5,9 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
 /vendor
 .env
 .env.backup
@@ -22,3 +25,8 @@ yarn-error.log
 /.vscode
 /.zed
 storage/debugbar
+
+# Database
+database/database.sqlite
+*.sqlite
+*.sqlite3
