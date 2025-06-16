@@ -14,7 +14,7 @@ class TravelPlanPolicy
     {
         // テスト: 一時的に常にtrueを返す
         return true;
-        
+
         // 確認済みメンバーであれば招待可能
         return $travelPlan->members()
             ->where('user_id', $user->id)

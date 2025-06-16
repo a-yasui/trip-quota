@@ -37,6 +37,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Group whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Group whereUpdatedAt($value)
  *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Member> $members
+ * @property-read int|null $members_count
+ *
  * @mixin \Eloquent
  */
 class Group extends Model

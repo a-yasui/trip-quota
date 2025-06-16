@@ -70,7 +70,7 @@ class GroupRepository implements GroupRepositoryInterface
 
     public function addMemberToGroup(Group $group, Member $member): void
     {
-        if (!$group->members()->where('member_id', $member->id)->exists()) {
+        if (! $group->members()->where('member_id', $member->id)->exists()) {
             $group->members()->attach($member->id);
         }
     }

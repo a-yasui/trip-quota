@@ -14,8 +14,11 @@ class GroupControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Group $coreGroup;
+
     private Member $member;
 
     protected function setUp(): void

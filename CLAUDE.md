@@ -8,16 +8,16 @@ TripQuota is a multi-traveler trip management web application built with Laravel
 
 ### Project specs
 
-- `@AI-docs/000-project.md`
-- `@AI-docs/001-base.md`
-- `@AI-docs/002-class-model.md`
-- `@AI-docs/database.md`
-- `@AI-docs/directory-pattern.md`
-- `@AI-docs/git-commit.md`
-- `@AI-docs/php-composer.md`
-- `@AI-docs/techinfo.md`
-- `@AI-docs/ui-info.md`
-- `@AI-docs/zzz.md`
+- `AI-docs/000-project.md`
+- `AI-docs/001-base.md`
+- `AI-docs/002-class-model.md`
+- `AI-docs/database.md`
+- `AI-docs/directory-pattern.md`
+- `AI-docs/git-commit.md`
+- `AI-docs/php-composer.md`
+- `AI-docs/techinfo.md`
+- `AI-docs/ui-info.md`
+- `AI-docs/zzz.md`
 
 
 ## Development Commands
@@ -113,6 +113,12 @@ npm run test:watch
 - Implement Repository pattern for data access
 - Write unit tests with dummy repository implementations
 - Ensure domain isolation (domains don't directly access other domains)
+
+### Model Guidelines
+- When creating new models, generate factories with `php artisan generate:factory`
+- After table schema changes, update model properties with `php artisan ide-helper:model`
+- Always format code with `php artisan pint` before committing
+- Keep model relationships and properties properly documented
 
 ### Template Testing
 - Always create display tests for new Blade templates

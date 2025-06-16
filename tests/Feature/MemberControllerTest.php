@@ -15,7 +15,9 @@ class MemberControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
 
     protected function setUp(): void

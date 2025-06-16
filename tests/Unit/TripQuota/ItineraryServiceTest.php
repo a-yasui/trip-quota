@@ -67,7 +67,7 @@ class ItineraryServiceTest extends TestCase
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
-        
+
         // 未確認メンバーを作成
         $member = Member::factory()->forUser($user)->forTravelPlan($travelPlan)->create();
         $member->update(['is_confirmed' => false]);

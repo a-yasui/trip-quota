@@ -71,7 +71,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('travel-plans/{uuid}/members/{member}', [MemberController::class, 'update'])->name('travel-plans.members.update');
     Route::delete('travel-plans/{uuid}/members/{member}', [MemberController::class, 'destroy'])->name('travel-plans.members.destroy');
 
-
     // 旅程タイムライン表示（resourceルートより先に定義）
     Route::get('travel-plans/{uuid}/itineraries/timeline', [ItineraryController::class, 'timeline'])->name('travel-plans.itineraries.timeline');
 

@@ -150,7 +150,7 @@ class GroupService
         }
 
         // メンバーが存在する場合は削除不可
-        if (!$this->groupRepository->isGroupEmpty($group)) {
+        if (! $this->groupRepository->isGroupEmpty($group)) {
             throw new \Exception('メンバーが所属しているグループは削除できません。');
         }
     }
@@ -161,7 +161,7 @@ class GroupService
             throw new \Exception('異なる旅行プランのメンバーをグループに追加することはできません。');
         }
 
-        if (!$member->is_confirmed) {
+        if (! $member->is_confirmed) {
             throw new \Exception('未確認のメンバーをグループに追加することはできません。');
         }
     }

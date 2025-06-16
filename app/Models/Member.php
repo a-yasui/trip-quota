@@ -53,6 +53,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Member whereUserId($value)
  *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Group> $groups
+ * @property-read int|null $groups_count
+ *
  * @mixin \Eloquent
  */
 class Member extends Model

@@ -13,6 +13,7 @@ use TripQuota\TravelPlan\TravelPlanService;
 class MemberController extends Controller
 {
     use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
     public function __construct(
         private MemberService $memberService,
         private TravelPlanService $travelPlanService,
