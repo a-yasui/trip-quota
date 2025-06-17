@@ -95,19 +95,11 @@
         @endif
 
         <!-- アクションボタン -->
-        <div class="mt-6 flex justify-between items-center">
-            <div>
-                <a href="{{ route('travel-plans.show', $travelPlan->uuid) }}" 
-                   class="text-blue-600 hover:text-blue-800">
-                    ← 旅行プラン詳細に戻る
-                </a>
-            </div>
-            <div>
-                <a href="{{ route('travel-plans.expenses.create', $travelPlan->uuid) }}" 
-                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                    費用を追加
-                </a>
-            </div>
+        <div class="mt-6 flex justify-end items-center">
+            <a href="{{ route('travel-plans.expenses.create', $travelPlan->uuid) }}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                費用を追加
+            </a>
         </div>
 
         <!-- 費用一覧 -->
@@ -190,5 +182,12 @@
                 </div>
             </div>
         @endif
+
+        <!-- ナビゲーション -->
+        <div class="mt-8 flex justify-center">
+            <a href="{{ route('travel-plans.show', $travelPlan->uuid) }}" class="text-blue-600 hover:text-blue-800">
+                ← 旅行プラン詳細に戻る
+            </a>
+        </div>
     @endcomponent
 @endsection

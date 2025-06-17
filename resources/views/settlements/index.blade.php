@@ -5,16 +5,6 @@
 @section('content')
     @component('components.container', ['class' => 'max-w-6xl'])
         @component('components.page-header', ['title' => '精算管理', 'subtitle' => $travelPlan->plan_name . 'の費用精算を管理します。'])
-            <div class="flex items-center space-x-4">
-                <a href="{{ route('travel-plans.show', $travelPlan->uuid) }}" 
-                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                    旅行プラン詳細に戻る
-                </a>
-                <a href="{{ route('travel-plans.expenses.index', $travelPlan->uuid) }}" 
-                   class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                    費用管理
-                </a>
-            </div>
         @endcomponent
 
         @include('components.alerts')
@@ -207,5 +197,12 @@
                 </div>
             @endforeach
         @endif
+
+        <!-- ナビゲーション -->
+        <div class="mt-8 flex justify-center">
+            <a href="{{ route('travel-plans.show', $travelPlan->uuid) }}" class="text-blue-600 hover:text-blue-800">
+                ← 旅行プラン詳細に戻る
+            </a>
+        </div>
     @endcomponent
 @endsection

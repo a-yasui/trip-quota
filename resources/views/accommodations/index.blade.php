@@ -10,13 +10,7 @@
         @include('components.alerts')
 
         <!-- ヘッダーアクション -->
-        <div class="flex justify-between items-center mb-6">
-            <div class="flex items-center space-x-4">
-                <a href="{{ route('travel-plans.show', $travelPlan->uuid) }}" 
-                   class="text-blue-600 hover:text-blue-800">
-                    ← 旅行プラン詳細に戻る
-                </a>
-            </div>
+        <div class="flex justify-end items-center mb-6">
             <a href="{{ route('travel-plans.accommodations.create', $travelPlan->uuid) }}" 
                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                 <svg class="-ml-1 mr-2 h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,5 +113,12 @@
                 </div>
             </div>
         @endif
+
+        <!-- ナビゲーション -->
+        <div class="mt-8 flex justify-center">
+            <a href="{{ route('travel-plans.show', $travelPlan->uuid) }}" class="text-blue-600 hover:text-blue-800">
+                ← 旅行プラン詳細に戻る
+            </a>
+        </div>
     @endcomponent
 @endsection

@@ -179,15 +179,8 @@
         </div>
 
         <!-- アクションボタン -->
-        <div class="mt-6 flex justify-between items-center">
-            <div>
-                <a href="{{ route('travel-plans.expenses.index', $travelPlan->uuid) }}" 
-                   class="text-blue-600 hover:text-blue-800">
-                    ← 費用一覧に戻る
-                </a>
-            </div>
-            
-            @if(!$expense->is_split_confirmed)
+        @if(!$expense->is_split_confirmed)
+            <div class="mt-6 flex justify-end items-center">
                 <div class="flex items-center space-x-3">
                     <!-- 現在のユーザーの参加確認 -->
                     @if($currentUserMember && !$expense->members->where('id', $currentUserMember->id)->first()?->pivot?->is_confirmed)
@@ -212,8 +205,8 @@
                         </form>
                     @endif
                 </div>
-            @endif
-        </div>
+            </div>
+        @endif
 
         <!-- 作成情報 -->
         <div class="mt-6 bg-white shadow-sm rounded-lg">
@@ -234,6 +227,13 @@
                     @endif
                 </div>
             </div>
+        </div>
+
+        <!-- ナビゲーション -->
+        <div class="mt-8 flex justify-center">
+            <a href="{{ route('travel-plans.expenses.index', $travelPlan->uuid) }}" class="text-blue-600 hover:text-blue-800">
+                ← 費用一覧に戻る
+            </a>
         </div>
     @endcomponent
 @endsection
