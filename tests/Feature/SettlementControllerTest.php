@@ -47,7 +47,6 @@ class SettlementControllerTest extends TestCase
             'payee_member_id' => $this->member->id,
             'amount' => 1000,
             'currency' => 'JPY',
-            'is_settled' => false,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -90,7 +89,6 @@ class SettlementControllerTest extends TestCase
             'payee_member_id' => $payee->id,
             'amount' => 1500,
             'currency' => 'JPY',
-            'is_settled' => false,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -110,7 +108,6 @@ class SettlementControllerTest extends TestCase
             'travel_plan_id' => $this->travelPlan->id,
             'payer_member_id' => $this->member->id,
             'payee_member_id' => $this->member->id,
-            'is_settled' => false,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -120,7 +117,7 @@ class SettlementControllerTest extends TestCase
         $response->assertSessionHas('success', '精算を完了として記録しました。');
 
         $settlement->refresh();
-        $this->assertTrue($settlement->is_settled);
+        $this->assertNotNull($settlement->settled_at);
         $this->assertNotNull($settlement->settled_at);
     }
 
@@ -130,14 +127,13 @@ class SettlementControllerTest extends TestCase
             'travel_plan_id' => $this->travelPlan->id,
             'payer_member_id' => $this->member->id,
             'payee_member_id' => $this->member->id,
-            'is_settled' => false,
         ]);
 
         ExpenseSettlement::factory()->create([
             'travel_plan_id' => $this->travelPlan->id,
             'payer_member_id' => $this->member->id,
             'payee_member_id' => $this->member->id,
-            'is_settled' => true,
+            'settled_at' => now(),
         ]);
 
         $response = $this->actingAs($this->user)
@@ -149,7 +145,7 @@ class SettlementControllerTest extends TestCase
         // 未精算のもののみ削除される
         $this->assertEquals(1, ExpenseSettlement::where('travel_plan_id', $this->travelPlan->id)->count());
         $this->assertEquals(1, ExpenseSettlement::where('travel_plan_id', $this->travelPlan->id)
-            ->where('is_settled', true)->count());
+            ->whereNotNull('settled_at')->count());
     }
 
     public function test_unauthorized_user_cannot_access_settlements()
@@ -192,7 +188,7 @@ class SettlementControllerTest extends TestCase
             'travel_plan_id' => $this->travelPlan->id,
             'payer_member_id' => $this->member->id,
             'payee_member_id' => $this->member->id,
-            'is_settled' => true,
+            'settled_at' => now(),
         ]);
 
         $response = $this->actingAs($this->user)
@@ -210,7 +206,6 @@ class SettlementControllerTest extends TestCase
             'payee_member_id' => $this->member->id,
             'amount' => 1000,
             'currency' => 'JPY',
-            'is_settled' => false,
         ]);
 
         ExpenseSettlement::factory()->create([
@@ -219,7 +214,7 @@ class SettlementControllerTest extends TestCase
             'payee_member_id' => $this->member->id,
             'amount' => 2000,
             'currency' => 'JPY',
-            'is_settled' => true,
+            'settled_at' => now(),
         ]);
 
         $response = $this->actingAs($this->user)

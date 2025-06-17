@@ -30,8 +30,15 @@ final class ExpenseSettlementFactory extends Factory
             'payee_member_id' => \App\Models\Member::factory(),
             'amount' => fake()->randomFloat(2, 10, 10000),
             'currency' => fake()->randomElement(['JPY', 'USD', 'EUR', 'KRW', 'CNY']),
-            'is_settled' => fake()->boolean(),
-            'settled_at' => fake()->optional()->dateTime(),
+            'settled_at' => fake()->boolean() ? fake()->optional()->dateTime() : null,
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterMaking(function (ExpenseSettlement $settlement) {
+            // Ensure is_settled is never set during creation
+            unset($settlement->is_settled);
+        });
     }
 }

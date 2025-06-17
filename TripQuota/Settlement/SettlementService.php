@@ -153,7 +153,6 @@ class SettlementService
                         'payee_member_id' => $creditorId,
                         'amount' => round($settlementAmount, 2),
                         'currency' => $currency,
-                        'is_settled' => false,
                     ];
 
                     $debtors[$debtorId] -= $settlementAmount;
@@ -198,7 +197,7 @@ class SettlementService
     {
         $this->ensureUserCanManageSettlements($settlement->travelPlan, $user);
 
-        if ($settlement->is_settled) {
+        if ($settlement->settled_at !== null) {
             throw new \Exception('この精算は既に完了済みです。');
         }
 
@@ -236,8 +235,8 @@ class SettlementService
         
         $statistics = [
             'total_settlements' => $settlements->count(),
-            'completed_settlements' => $settlements->where('is_settled', true)->count(),
-            'pending_settlements' => $settlements->where('is_settled', false)->count(),
+            'completed_settlements' => $settlements->whereNotNull('settled_at')->count(),
+            'pending_settlements' => $settlements->whereNull('settled_at')->count(),
             'by_currency' => [],
         ];
 
@@ -246,8 +245,8 @@ class SettlementService
         foreach ($settlementsByCurrency as $currency => $currencySettlements) {
             $statistics['by_currency'][$currency] = [
                 'total_amount' => $currencySettlements->sum('amount'),
-                'completed_amount' => $currencySettlements->where('is_settled', true)->sum('amount'),
-                'pending_amount' => $currencySettlements->where('is_settled', false)->sum('amount'),
+                'completed_amount' => $currencySettlements->whereNotNull('settled_at')->sum('amount'),
+                'pending_amount' => $currencySettlements->whereNull('settled_at')->sum('amount'),
                 'count' => $currencySettlements->count(),
             ];
         }

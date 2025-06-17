@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $payee_member_id
  * @property numeric $amount
  * @property string $currency
- * @property bool $is_settled
  * @property \Illuminate\Support\Carbon|null $settled_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -28,7 +27,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement whereCurrency($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement whereIsSettled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement wherePayeeMemberId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement wherePayerMemberId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseSettlement whereSettledAt($value)
@@ -47,15 +45,20 @@ class ExpenseSettlement extends Model
         'payee_member_id',
         'amount',
         'currency',
-        'is_settled',
         'settled_at',
     ];
 
+    protected $guarded = ['is_settled'];
+
     protected $casts = [
         'amount' => 'decimal:2',
-        'is_settled' => 'boolean',
         'settled_at' => 'datetime',
     ];
+
+    public function getIsSettledAttribute(): bool
+    {
+        return $this->settled_at !== null;
+    }
 
     public function travelPlan()
     {

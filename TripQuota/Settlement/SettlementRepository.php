@@ -20,7 +20,7 @@ class SettlementRepository implements SettlementRepositoryInterface
     public function findPendingByTravelPlan(TravelPlan $travelPlan): Collection
     {
         return ExpenseSettlement::where('travel_plan_id', $travelPlan->id)
-            ->where('is_settled', false)
+            ->whereNull('settled_at')
             ->with(['payer', 'payee'])
             ->orderBy('amount', 'desc')
             ->get();
@@ -40,7 +40,6 @@ class SettlementRepository implements SettlementRepositoryInterface
     public function markAsSettled(ExpenseSettlement $settlement): ExpenseSettlement
     {
         $settlement->update([
-            'is_settled' => true,
             'settled_at' => now(),
         ]);
         
@@ -66,7 +65,7 @@ class SettlementRepository implements SettlementRepositoryInterface
     public function clearByTravelPlan(TravelPlan $travelPlan): void
     {
         ExpenseSettlement::where('travel_plan_id', $travelPlan->id)
-            ->where('is_settled', false)
+            ->whereNull('settled_at')
             ->delete();
     }
 }

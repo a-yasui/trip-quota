@@ -141,54 +141,66 @@ class SettlementServiceTest extends TestCase
         $member1 = Member::factory()->make(['id' => 1, 'name' => 'メンバー1']);
         $member2 = Member::factory()->make(['id' => 2, 'name' => 'メンバー2']);
 
-        // メンバー1が1500円、メンバー2が500円を支払い、それぞれ1000円ずつ分担
-        $expense1 = Expense::factory()->make([
-            'id' => 1,
-            'paid_by_member_id' => 1,
-            'amount' => 1500,
-            'currency' => 'JPY',
-            'is_split_confirmed' => true,
-        ]);
-
-        $expense2 = Expense::factory()->make([
-            'id' => 2,
-            'paid_by_member_id' => 2,
-            'amount' => 500,
-            'currency' => 'JPY',
-            'is_split_confirmed' => true,
-        ]);
-
         $this->memberRepository
             ->expects($this->once())
             ->method('findByTravelPlanAndUser')
             ->willReturn($this->member);
+
+        // Create mock expenses with proper member relations
+        $expense1Query = $this->createMock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
+        $expense1Query->method('wherePivot')->willReturnSelf();
+        $expense1Query->method('get')->willReturn(new Collection([
+            $this->createMemberWithPivot($member1, true, null),
+            $this->createMemberWithPivot($member2, true, null),
+        ]));
+        
+        $expense2Query = $this->createMock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
+        $expense2Query->method('wherePivot')->willReturnSelf();
+        $expense2Query->method('get')->willReturn(new Collection([
+            $this->createMemberWithPivot($member1, true, null),
+            $this->createMemberWithPivot($member2, true, null),
+        ]));
+
+        // Create mock objects that properly expose properties
+        $expense1 = new class {
+            public $paid_by_member_id = 1;
+            public $amount = 1500;
+            public $currency = 'JPY';
+            public $is_split_confirmed = true;
+            private $membersQuery;
+            
+            public function setMembersQuery($query) {
+                $this->membersQuery = $query;
+            }
+            
+            public function members() {
+                return $this->membersQuery;
+            }
+        };
+        $expense1->setMembersQuery($expense1Query);
+
+        $expense2 = new class {
+            public $paid_by_member_id = 2;
+            public $amount = 500;
+            public $currency = 'JPY';
+            public $is_split_confirmed = true;
+            private $membersQuery;
+            
+            public function setMembersQuery($query) {
+                $this->membersQuery = $query;
+            }
+            
+            public function members() {
+                return $this->membersQuery;
+            }
+        };
+        $expense2->setMembersQuery($expense2Query);
 
         $expenses = new Collection([$expense1, $expense2]);
         $this->expenseRepository
             ->expects($this->once())
             ->method('findByTravelPlan')
             ->willReturn($expenses);
-
-        // 各費用のメンバー関係をモック
-        $expense1->members = function() use ($member1, $member2) {
-            $query = $this->createMock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
-            $query->method('wherePivot')->willReturnSelf();
-            $query->method('get')->willReturn(new Collection([
-                $this->createMemberWithPivot($member1, true, null),
-                $this->createMemberWithPivot($member2, true, null),
-            ]));
-            return $query;
-        };
-
-        $expense2->members = function() use ($member1, $member2) {
-            $query = $this->createMock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
-            $query->method('wherePivot')->willReturnSelf();
-            $query->method('get')->willReturn(new Collection([
-                $this->createMemberWithPivot($member1, true, null),
-                $this->createMemberWithPivot($member2, true, null),
-            ]));
-            return $query;
-        };
 
         $result = $this->service->calculateSettlements($this->travelPlan, $this->user);
 
@@ -226,7 +238,7 @@ class SettlementServiceTest extends TestCase
     {
         $settlement = ExpenseSettlement::factory()->make([
             'id' => 1,
-            'is_settled' => false,
+            'settled_at' => null,
         ]);
         $settlement->travelPlan = $this->travelPlan;
 
@@ -237,7 +249,7 @@ class SettlementServiceTest extends TestCase
 
         $updatedSettlement = ExpenseSettlement::factory()->make([
             'id' => 1,
-            'is_settled' => true,
+            'settled_at' => now(),
         ]);
 
         $this->settlementRepository
@@ -248,7 +260,7 @@ class SettlementServiceTest extends TestCase
 
         $result = $this->service->markSettlementAsCompleted($settlement, $this->user);
 
-        $this->assertTrue($result->is_settled);
+        $this->assertNotNull($result->settled_at);
     }
 
     public function test_mark_settlement_as_completed_fails_when_already_settled()
@@ -257,7 +269,7 @@ class SettlementServiceTest extends TestCase
         $this->expectExceptionMessage('この精算は既に完了済みです。');
 
         $settlement = ExpenseSettlement::factory()->make([
-            'is_settled' => true,
+            'settled_at' => now(),
         ]);
         $settlement->travelPlan = $this->travelPlan;
 
@@ -275,17 +287,17 @@ class SettlementServiceTest extends TestCase
             ExpenseSettlement::factory()->make([
                 'currency' => 'JPY',
                 'amount' => 1000,
-                'is_settled' => false,
+                'settled_at' => null,
             ]),
             ExpenseSettlement::factory()->make([
                 'currency' => 'JPY',
                 'amount' => 2000,
-                'is_settled' => true,
+                'settled_at' => now(),
             ]),
             ExpenseSettlement::factory()->make([
                 'currency' => 'USD',
                 'amount' => 50,
-                'is_settled' => false,
+                'settled_at' => null,
             ]),
         ]);
 
@@ -348,6 +360,7 @@ class SettlementServiceTest extends TestCase
     private function createMemberWithPivot($member, $isParticipating, $amount)
     {
         $pivot = new \stdClass();
+        $pivot->is_participating = $isParticipating;
         $pivot->amount = $amount;
 
         $memberWithPivot = clone $member;

@@ -177,7 +177,7 @@
                                             <div class="text-sm text-gray-500">
                                                 {{ number_format($settlement->amount) }} {{ $settlement->currency }}
                                                 @if($settlement->is_settled)
-                                                    • 精算完了 ({{ $settlement->settled_at->format('Y/m/d H:i') }})
+                                                    • 精算完了 @if($settlement->settled_at)({{ $settlement->settled_at->format('Y/m/d H:i') }})@endif
                                                 @else
                                                     • 未精算
                                                 @endif
