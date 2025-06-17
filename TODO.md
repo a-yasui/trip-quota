@@ -39,10 +39,18 @@
 - 精算リセット機能
 - ポリシーベース認証
 
+### UI統一・UX改善
+- [x] **旅程管理改善** - 交通手段に「電車」追加、時刻ラベル変更（出発/到着時刻）
+- [x] **メンバー招待修正** - バリデーションエラー修正、フォームフィールドクリア機能追加
+- [x] **テンプレート統一** - travel-plansテンプレートのmaster.blade.php統一
+- [x] **ナビゲーション統一** - 全ページのサブメニューを下部に統一配置
+- [x] **ダッシュボード改善** - メンバー管理アイコン追加
+
 ## 進行中・次の優先事項 🚧
 
 ### 高優先度
-- [ ] **費用管理・分割請求システム** - 全体的なシステム統合
+- [ ] **itinerary管理機能** - 旅程作成・編集・表示機能の完全実装
+- [ ] **レスポンシブ対応** - モバイル・タブレット対応の UI 改善
 
 ### 中優先度
 - [ ] **通知システム** - 招待・費用共有の通知機能
@@ -70,6 +78,43 @@
 - **費用管理**: ExpenseMembers, ExpenseSettlements（多通貨対応）
 
 ## 最新の実装状況
+
+### UI統一・UX改善（2025-06-17完了）
+最新のコミットで実装されたユーザーインターフェース統一・改善：
+
+#### 修正されたファイル
+```
+resources/views/
+├── dashboard.blade.php (メンバー管理アイコン追加)
+├── accommodations/index.blade.php (ナビゲーション統一)
+├── expenses/index.blade.php (ナビゲーション統一)
+├── expenses/show.blade.php (ナビゲーション統一)
+├── settlements/index.blade.php (ナビゲーション統一)
+├── itineraries/create.blade.php (電車オプション、時刻ラベル)
+├── itineraries/edit.blade.php (電車オプション、時刻ラベル)
+├── members/create.blade.php (フィールドクリア機能)
+├── travel-plans/index.blade.php (master統一)
+├── travel-plans/create.blade.php (master統一)
+├── travel-plans/edit.blade.php (master統一)
+└── travel-plans/show.blade.php (master統一)
+
+app/Http/Controllers/
+└── MemberController.php (バリデーション修正)
+```
+
+#### 主要改善点
+- **ナビゲーション統一**: 全ページのサブメニューを下部に統一配置
+- **テンプレート統一**: travel-plansの全テンプレートでmaster.blade.php使用
+- **交通手段追加**: 旅程管理に「電車」オプション追加
+- **ラベル改善**: 「開始時刻/終了時刻」→「出発時刻/到着時刻」に変更
+- **バグ修正**: メンバー招待のバリデーションエラー解決
+- **ダッシュボード改善**: メンバー管理のクイックアクション追加
+
+#### 統一されたデザインパターン
+- サブメニュー: `mt-8 flex justify-center`スタイル
+- リンク色: `text-blue-600 hover:text-blue-800`
+- レイアウト: `@extends('layouts.master')`
+- コンポーネント: `@component('components.page-header')`
 
 ### 精算管理システム（2025-06-16完了）
 最新のコミットで実装された包括的な精算管理システム：
@@ -161,6 +206,6 @@ tests/
 - Laravel・Vue.jsのベストプラクティス遵守
 
 ---
-*最終更新: 2025-06-16*
-*最新完了: 精算管理システム実装・データモデル最適化*
-*次の優先事項: 費用管理・分割請求システムの全体統合*
+*最終更新: 2025-06-17*
+*最新完了: UI統一・UX改善（ナビゲーション統一、テンプレート統一、バグ修正）*
+*次の優先事項: itinerary管理機能の完全実装、レスポンシブ対応*
