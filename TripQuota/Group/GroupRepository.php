@@ -34,6 +34,7 @@ class GroupRepository implements GroupRepositoryInterface
     public function findByTravelPlan(TravelPlan $travelPlan): \Illuminate\Database\Eloquent\Collection
     {
         return Group::where('travel_plan_id', $travelPlan->id)
+            ->with('members')
             ->orderBy('type')
             ->orderBy('created_at')
             ->get();
@@ -43,6 +44,7 @@ class GroupRepository implements GroupRepositoryInterface
     {
         return Group::where('travel_plan_id', $travelPlan->id)
             ->where('type', 'CORE')
+            ->with('members')
             ->first();
     }
 
@@ -50,6 +52,7 @@ class GroupRepository implements GroupRepositoryInterface
     {
         return Group::where('travel_plan_id', $travelPlan->id)
             ->where('type', 'BRANCH')
+            ->with('members')
             ->orderBy('created_at')
             ->get();
     }
