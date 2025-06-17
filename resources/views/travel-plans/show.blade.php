@@ -1,75 +1,51 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $travelPlan->plan_name }} - TripQuota</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- ヘッダー -->
-        <div class="mb-8">
-            <div class="flex justify-between items-start">
-                <div class="flex-1">
-                    <h1 class="text-3xl font-bold text-gray-900">{{ $travelPlan->plan_name }}</h1>
-                    <div class="mt-2 flex items-center text-sm text-gray-500">
-                        <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        <span>
-                            {{ $travelPlan->departure_date->format('Y年n月d日') }}
-                            @if($travelPlan->return_date)
-                                〜 {{ $travelPlan->return_date->format('Y年n月d日') }}
-                            @endif
-                        </span>
-                        <span class="ml-4">{{ $travelPlan->timezone }}</span>
-                    </div>
-                    @if(!$travelPlan->is_active)
-                        <div class="mt-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                無効
-                            </span>
-                        </div>
+@extends('layouts.master')
+
+@section('title', $travelPlan->plan_name . ' - 旅行プラン詳細')
+
+@section('content')
+    @component('components.container', ['class' => 'max-w-7xl'])
+        @component('components.page-header', ['title' => $travelPlan->plan_name, 'subtitle' => '旅行プランの詳細情報と管理機能'])
+            <div class="flex items-center space-x-3">
+                <a href="{{ route('travel-plans.edit', $travelPlan->uuid) }}" 
+                   class="bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 border border-gray-300 rounded-md text-sm font-medium">
+                    編集
+                </a>
+                @if($travelPlan->owner_user_id === auth()->id())
+                    <form method="POST" action="{{ route('travel-plans.destroy', $travelPlan->uuid) }}" 
+                          onsubmit="return confirm('本当に削除しますか？この操作は取り消せません。')" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" 
+                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                            削除
+                        </button>
+                    </form>
+                @endif
+            </div>
+        @endcomponent
+
+        @include('components.alerts')
+
+        <!-- 旅行期間と状態 -->
+        <div class="mb-6 bg-white shadow-sm rounded-lg p-6">
+            <div class="flex items-center text-sm text-gray-600">
+                <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span>
+                    {{ $travelPlan->departure_date->format('Y年n月d日') }}
+                    @if($travelPlan->return_date)
+                        〜 {{ $travelPlan->return_date->format('Y年n月d日') }}
                     @endif
-                </div>
-                <div class="flex items-center space-x-3">
-                    <a href="{{ route('travel-plans.edit', $travelPlan->uuid) }}" 
-                       class="bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 border border-gray-300 rounded-md text-sm font-medium">
-                        編集
-                    </a>
-                    @if($travelPlan->owner_user_id === auth()->id())
-                        <form method="POST" action="{{ route('travel-plans.destroy', $travelPlan->uuid) }}" 
-                              onsubmit="return confirm('本当に削除しますか？この操作は取り消せません。')" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" 
-                                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
-                                削除
-                            </button>
-                        </form>
-                    @endif
-                </div>
+                </span>
+                <span class="ml-4">{{ $travelPlan->timezone }}</span>
+                @if(!$travelPlan->is_active)
+                    <span class="ml-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        無効
+                    </span>
+                @endif
             </div>
         </div>
-
-        <!-- 成功メッセージ -->
-        @if(session('success'))
-            <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <!-- エラーメッセージ -->
-        @if($errors->any())
-            <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- メインコンテンツ -->
@@ -213,13 +189,29 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                     </svg>
                                 </a>
+
+                                <!-- 精算管理 -->
+                                <a href="{{ route('travel-plans.settlements.index', $travelPlan->uuid) }}" 
+                                   class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <div class="flex-shrink-0 w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <h3 class="text-sm font-medium text-gray-900">精算管理</h3>
+                                        <p class="text-sm text-gray-500">メンバー間の精算・決済</p>
+                                    </div>
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
                             </div>
 
                             <!-- 未実装機能 -->
                             <div class="mt-6">
                                 <h3 class="text-sm font-medium text-gray-500 mb-3">今後の機能</h3>
                                 <div class="space-y-3">
-
                                     <!-- 書類管理 -->
                                     <div class="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed">
                                         <div class="flex-shrink-0 w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -308,6 +300,5 @@
                 ← 旅行プラン一覧に戻る
             </a>
         </div>
-    </div>
-</body>
-</html>
+    @endcomponent
+@endsection

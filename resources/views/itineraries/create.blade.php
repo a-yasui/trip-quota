@@ -69,7 +69,7 @@
                             </div>
                             <div>
                                 <label for="start_time" class="block text-sm font-medium text-gray-700">
-                                    開始時刻
+                                    出発時刻
                                 </label>
                                 <input type="time" 
                                        id="start_time" 
@@ -82,7 +82,7 @@
                             </div>
                             <div>
                                 <label for="end_time" class="block text-sm font-medium text-gray-700">
-                                    終了時刻
+                                    到着時刻
                                 </label>
                                 <input type="time" 
                                        id="end_time" 
@@ -131,6 +131,7 @@
                                 <option value="bike" {{ old('transportation_type') === 'bike' ? 'selected' : '' }}>自転車</option>
                                 <option value="car" {{ old('transportation_type') === 'car' ? 'selected' : '' }}>車</option>
                                 <option value="bus" {{ old('transportation_type') === 'bus' ? 'selected' : '' }}>バス</option>
+                                <option value="train" {{ old('transportation_type') === 'train' ? 'selected' : '' }}>電車</option>
                                 <option value="ferry" {{ old('transportation_type') === 'ferry' ? 'selected' : '' }}>フェリー</option>
                                 <option value="airplane" {{ old('transportation_type') === 'airplane' ? 'selected' : '' }}>飛行機</option>
                             </select>

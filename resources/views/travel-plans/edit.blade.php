@@ -1,29 +1,13 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $travelPlan->plan_name }}の編集 - TripQuota</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- ヘッダー -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">旅行プランを編集</h1>
-            <p class="mt-2 text-sm text-gray-600">{{ $travelPlan->plan_name }}の設定を変更します。</p>
-        </div>
+@extends('layouts.master')
 
-        <!-- エラーメッセージ -->
-        @if($errors->any())
-            <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+@section('title', $travelPlan->plan_name . 'の編集')
+
+@section('content')
+    @component('components.container', ['class' => 'max-w-3xl'])
+        @component('components.page-header', ['title' => '旅行プランを編集', 'subtitle' => $travelPlan->plan_name . 'の設定を変更します。'])
+        @endcomponent
+
+        @include('components.alerts')
 
         <!-- フォーム -->
         <div class="bg-white shadow-sm rounded-lg">
@@ -171,27 +155,28 @@
                 </div>
             </div>
         @endif
-    </div>
+    @endcomponent
+@endsection
 
-    <script>
-        // 出発日の変更時に帰国日の最小値を更新
-        document.getElementById('departure_date').addEventListener('change', function() {
-            const departureDate = this.value;
-            const returnDateInput = document.getElementById('return_date');
-            if (departureDate) {
-                returnDateInput.min = departureDate;
-                // 帰国日が出発日より前の場合はクリア
-                if (returnDateInput.value && returnDateInput.value <= departureDate) {
-                    returnDateInput.value = '';
-                }
+@push('scripts')
+<script>
+    // 出発日の変更時に帰国日の最小値を更新
+    document.getElementById('departure_date').addEventListener('change', function() {
+        const departureDate = this.value;
+        const returnDateInput = document.getElementById('return_date');
+        if (departureDate) {
+            returnDateInput.min = departureDate;
+            // 帰国日が出発日より前の場合はクリア
+            if (returnDateInput.value && returnDateInput.value <= departureDate) {
+                returnDateInput.value = '';
             }
-        });
-        
-        // 初期設定
-        document.addEventListener('DOMContentLoaded', function() {
-            const departureDateInput = document.getElementById('departure_date');
-            departureDateInput.dispatchEvent(new Event('change'));
-        });
-    </script>
-</body>
-</html>
+        }
+    });
+    
+    // 初期設定
+    document.addEventListener('DOMContentLoaded', function() {
+        const departureDateInput = document.getElementById('departure_date');
+        departureDateInput.dispatchEvent(new Event('change'));
+    });
+</script>
+@endpush

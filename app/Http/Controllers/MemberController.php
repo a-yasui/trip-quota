@@ -66,8 +66,8 @@ class MemberController extends Controller
     {
         $validated = $request->validate([
             'invitation_type' => 'required|in:email,account',
-            'email' => 'required_if:invitation_type,email|email|max:255',
-            'account_name' => 'required_if:invitation_type,account|string|max:255',
+            'email' => 'required_if:invitation_type,email|nullable|email|max:255',
+            'account_name' => 'required_if:invitation_type,account|nullable|string|max:255',
             'name' => 'nullable|string|max:255',
         ]);
 
@@ -92,10 +92,15 @@ class MemberController extends Controller
                     $travelPlan,
                     Auth::user(),
                     $validated['email'],
-                    $validated['name']
+                    $validated['name'] ?? null
                 );
                 $message = $validated['email'].'に招待を送信しました。';
             } else {
+                // アカウント名招待の場合、account_nameが必須
+                if (empty($validated['account_name']) || !is_string($validated['account_name'])) {
+                    throw new \Exception('アカウント名が正しく入力されていません。');
+                }
+                
                 $this->memberService->inviteMemberByAccountName(
                     $travelPlan,
                     Auth::user(),

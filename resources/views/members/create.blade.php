@@ -154,11 +154,15 @@
                 accountSection.style.display = 'none';
                 document.getElementById('email').required = true;
                 document.getElementById('account_name').required = false;
+                // 非表示フィールドの値をクリア
+                document.getElementById('account_name').value = '';
             } else {
                 emailSection.style.display = 'none';
                 accountSection.style.display = 'block';
                 document.getElementById('email').required = false;
                 document.getElementById('account_name').required = true;
+                // 非表示フィールドの値をクリア
+                document.getElementById('email').value = '';
             }
         }
 
