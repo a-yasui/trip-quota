@@ -102,8 +102,8 @@ class ItineraryViewTest extends TestCase
         $response->assertSee('タイトル');
         $response->assertSee('説明');
         $response->assertSee('日付');
-        $response->assertSee('開始時刻');
-        $response->assertSee('終了時刻');
+        $response->assertSee('出発時刻');
+        $response->assertSee('到着時刻');
         $response->assertSee('対象グループ');
         $response->assertSee('[班] Test Group');
         $response->assertSee('交通手段');

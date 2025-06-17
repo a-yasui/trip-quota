@@ -84,7 +84,7 @@ class ItineraryController extends Controller
             'end_time' => 'nullable|date_format:H:i|after:start_time',
             'timezone' => 'nullable|string|max:50',
             'group_id' => 'nullable|exists:groups,id',
-            'transportation_type' => ['nullable', Rule::in(['walking', 'bike', 'car', 'ferry', 'bus', 'airplane'])],
+            'transportation_type' => ['nullable', Rule::in(['walking', 'bike', 'car', 'bus', 'train', 'ferry', 'airplane'])],
             'airline' => 'nullable|string|max:255',
             'flight_number' => 'nullable|string|max:255',
             'departure_time' => 'nullable|date',
