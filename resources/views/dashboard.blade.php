@@ -15,6 +15,9 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-sm text-gray-700">{{ Auth::user()->email }}</span>
+                    <a href="{{ route('profile.show') }}" class="text-sm text-gray-500 hover:text-gray-700">
+                        設定
+                    </a>
                     <form method="POST" action="{{ route('logout') }}" class="inline">
                         @csrf
                         <button type="submit" class="text-sm text-gray-500 hover:text-gray-700">
