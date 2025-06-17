@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'TripQuota')</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -107,7 +107,7 @@
 
         // グローバルな成功メッセージの自動非表示
         document.addEventListener('DOMContentLoaded', function() {
-            const successAlert = document.querySelector('.bg-green-100');
+            const successAlert = document.querySelector('.success-message-box');
             if (successAlert) {
                 setTimeout(function() {
                     successAlert.style.transition = 'opacity 0.5s ease-out';

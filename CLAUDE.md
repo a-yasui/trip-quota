@@ -8,16 +8,16 @@ TripQuota is a multi-traveler trip management web application built with Laravel
 
 ### Project specs
 
-- `AI-docs/000-project.md`
-- `AI-docs/001-base.md`
-- `AI-docs/002-class-model.md`
-- `AI-docs/database.md`
-- `AI-docs/directory-pattern.md`
-- `AI-docs/git-commit.md`
-- `AI-docs/php-composer.md`
-- `AI-docs/techinfo.md`
-- `AI-docs/ui-info.md`
-- `AI-docs/zzz.md`
+- @AI-docs/000-project.md
+- @AI-docs/001-base.md
+- @AI-docs/002-class-model.md
+- @AI-docs/database.md
+- @AI-docs/directory-pattern.md
+- @AI-docs/git-commit.md
+- @AI-docs/php-composer.md
+- @AI-docs/techinfo.md
+- @AI-docs/ui-info.md
+- AI-docs/zzz.md -- 読んでるか怪しい時に有効にしている。
 
 
 ## Development Commands
