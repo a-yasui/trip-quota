@@ -47,6 +47,7 @@ class SettlementControllerTest extends TestCase
             'payee_member_id' => $this->member->id,
             'amount' => 1000,
             'currency' => 'JPY',
+            'settled_at' => null,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -89,6 +90,7 @@ class SettlementControllerTest extends TestCase
             'payee_member_id' => $payee->id,
             'amount' => 1500,
             'currency' => 'JPY',
+            'settled_at' => null,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -108,6 +110,7 @@ class SettlementControllerTest extends TestCase
             'travel_plan_id' => $this->travelPlan->id,
             'payer_member_id' => $this->member->id,
             'payee_member_id' => $this->member->id,
+            'settled_at' => null, // 未精算状態で作成
         ]);
 
         $response = $this->actingAs($this->user)
@@ -127,6 +130,7 @@ class SettlementControllerTest extends TestCase
             'travel_plan_id' => $this->travelPlan->id,
             'payer_member_id' => $this->member->id,
             'payee_member_id' => $this->member->id,
+            'settled_at' => null, // 未精算状態で作成
         ]);
 
         ExpenseSettlement::factory()->create([
@@ -174,6 +178,7 @@ class SettlementControllerTest extends TestCase
         $otherTravelPlan = TravelPlan::factory()->create();
         $settlement = ExpenseSettlement::factory()->create([
             'travel_plan_id' => $otherTravelPlan->id,
+            'settled_at' => null,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -206,6 +211,7 @@ class SettlementControllerTest extends TestCase
             'payee_member_id' => $this->member->id,
             'amount' => 1000,
             'currency' => 'JPY',
+            'settled_at' => null, // 未精算状態で作成
         ]);
 
         ExpenseSettlement::factory()->create([

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ItineraryRequest;
 use App\Models\Group;
 use App\Models\Itinerary;
 use App\Models\TravelPlan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use TripQuota\Itinerary\ItineraryService;
 
@@ -72,43 +72,10 @@ class ItineraryController extends Controller
         }
     }
 
-    public function store(Request $request, string $travelPlanUuid)
+    public function store(ItineraryRequest $request, string $uuid)
     {
-        $travelPlan = TravelPlan::where('uuid', $travelPlanUuid)->firstOrFail();
-
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after:start_time',
-            'timezone' => 'nullable|string|max:50',
-            'group_id' => 'nullable|exists:groups,id',
-            'transportation_type' => ['nullable', Rule::in(['walking', 'bike', 'car', 'bus', 'train', 'ferry', 'airplane'])],
-            // 飛行機関連フィールド
-            'airline' => 'nullable|string|max:255',
-            'flight_number' => 'nullable|string|max:255',
-            'departure_airport' => 'nullable|string|max:255',
-            'arrival_airport' => 'nullable|string|max:255',
-            // 電車関連フィールド
-            'train_line' => 'nullable|string|max:255',
-            'departure_station' => 'nullable|string|max:255',
-            'arrival_station' => 'nullable|string|max:255',
-            'train_type' => 'nullable|string|max:255',
-            // バス・フェリー関連フィールド
-            'departure_terminal' => 'nullable|string|max:255',
-            'arrival_terminal' => 'nullable|string|max:255',
-            'company' => 'nullable|string|max:255',
-            // 既存フィールド
-            'departure_time' => 'nullable|date',
-            'arrival_time' => 'nullable|date|after:departure_time',
-            'departure_location' => 'nullable|string|max:255',
-            'arrival_location' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-            'member_ids' => 'nullable|array',
-            'member_ids.*' => 'exists:members,id',
-        ]);
+        $travelPlan = TravelPlan::where('uuid', $uuid)->firstOrFail();
+        $validatedData = $request->validated();
 
         try {
             $itinerary = $this->itineraryService->createItinerary($travelPlan, Auth::user(), $validatedData);
@@ -174,48 +141,16 @@ class ItineraryController extends Controller
         }
     }
 
-    public function update(Request $request, string $travelPlanUuid, Itinerary $itinerary)
+    public function update(ItineraryRequest $request, string $uuid, Itinerary $itinerary)
     {
-        $travelPlan = TravelPlan::where('uuid', $travelPlanUuid)->firstOrFail();
+        $travelPlan = TravelPlan::where('uuid', $uuid)->firstOrFail();
 
         // 旅程が旅行プランに属していることを確認
         if ($itinerary->travel_plan_id !== $travelPlan->id) {
             abort(404);
         }
 
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after:start_time',
-            'timezone' => 'nullable|string|max:50',
-            'group_id' => 'nullable|exists:groups,id',
-            'transportation_type' => ['nullable', Rule::in(['walking', 'bike', 'car', 'bus', 'train', 'ferry', 'airplane'])],
-            // 飛行機関連フィールド
-            'airline' => 'nullable|string|max:255',
-            'flight_number' => 'nullable|string|max:255',
-            'departure_airport' => 'nullable|string|max:255',
-            'arrival_airport' => 'nullable|string|max:255',
-            // 電車関連フィールド
-            'train_line' => 'nullable|string|max:255',
-            'departure_station' => 'nullable|string|max:255',
-            'arrival_station' => 'nullable|string|max:255',
-            'train_type' => 'nullable|string|max:255',
-            // バス・フェリー関連フィールド
-            'departure_terminal' => 'nullable|string|max:255',
-            'arrival_terminal' => 'nullable|string|max:255',
-            'company' => 'nullable|string|max:255',
-            // 既存フィールド
-            'departure_time' => 'nullable|date',
-            'arrival_time' => 'nullable|date|after:departure_time',
-            'departure_location' => 'nullable|string|max:255',
-            'arrival_location' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-            'member_ids' => 'nullable|array',
-            'member_ids.*' => 'exists:members,id',
-        ]);
+        $validatedData = $request->validated();
 
         try {
             $updatedItinerary = $this->itineraryService->updateItinerary($itinerary, Auth::user(), $validatedData);

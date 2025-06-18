@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TransportationType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -99,6 +100,7 @@ class Itinerary extends Model
         'end_time' => 'datetime:H:i',
         'departure_time' => 'datetime',
         'arrival_time' => 'datetime',
+        'transportation_type' => TransportationType::class,
     ];
 
     public function travelPlan()
@@ -126,16 +128,15 @@ class Itinerary extends Model
      */
     public function getTransportationTypeNameAttribute(): string
     {
-        return match($this->transportation_type) {
-            'walking' => '徒歩',
-            'bike' => '自転車',
-            'car' => '車',
-            'bus' => 'バス',
-            'train' => '電車',
-            'ferry' => 'フェリー',
-            'airplane' => '飛行機',
-            default => '未設定'
-        };
+        return $this->transportation_type?->label() ?? '未設定';
+    }
+
+    /**
+     * 移動手段のアイコンを取得
+     */
+    public function getTransportationIconAttribute(): string
+    {
+        return $this->transportation_type?->icon() ?? '📍';
     }
 
     /**
@@ -143,20 +144,22 @@ class Itinerary extends Model
      */
     public function getTransportationDetailsAttribute(): array
     {
+        if (!$this->transportation_type) return [];
+
         return match($this->transportation_type) {
-            'airplane' => [
+            TransportationType::AIRPLANE => [
                 'airline' => $this->airline,
                 'flight_number' => $this->flight_number,
                 'departure_airport' => $this->departure_airport,
                 'arrival_airport' => $this->arrival_airport,
             ],
-            'train' => [
+            TransportationType::TRAIN => [
                 'line' => $this->train_line,
                 'departure_station' => $this->departure_station,
                 'arrival_station' => $this->arrival_station,
                 'train_type' => $this->train_type,
             ],
-            'bus', 'ferry' => [
+            TransportationType::BUS, TransportationType::FERRY => [
                 'company' => $this->company,
                 'departure_terminal' => $this->departure_terminal,
                 'arrival_terminal' => $this->arrival_terminal,
@@ -170,14 +173,16 @@ class Itinerary extends Model
      */
     public function getTransportationSummaryAttribute(): ?string
     {
+        if (!$this->transportation_type) return null;
+
         return match($this->transportation_type) {
-            'airplane' => $this->airline && $this->flight_number 
+            TransportationType::AIRPLANE => $this->airline && $this->flight_number 
                 ? "{$this->airline} {$this->flight_number}" 
                 : null,
-            'train' => $this->train_line && $this->train_type
+            TransportationType::TRAIN => $this->train_line && $this->train_type
                 ? "{$this->train_line}（{$this->train_type}）"
                 : $this->train_line,
-            'bus', 'ferry' => $this->company,
+            TransportationType::BUS, TransportationType::FERRY => $this->company,
             default => null
         };
     }
@@ -188,16 +193,16 @@ class Itinerary extends Model
     public function getRouteInfoAttribute(): ?string
     {
         $departure = match($this->transportation_type) {
-            'airplane' => $this->departure_airport,
-            'train' => $this->departure_station,
-            'bus', 'ferry' => $this->departure_terminal,
+            TransportationType::AIRPLANE => $this->departure_airport,
+            TransportationType::TRAIN => $this->departure_station,
+            TransportationType::BUS, TransportationType::FERRY => $this->departure_terminal,
             default => $this->departure_location
         };
 
         $arrival = match($this->transportation_type) {
-            'airplane' => $this->arrival_airport,
-            'train' => $this->arrival_station,
-            'bus', 'ferry' => $this->arrival_terminal,
+            TransportationType::AIRPLANE => $this->arrival_airport,
+            TransportationType::TRAIN => $this->arrival_station,
+            TransportationType::BUS, TransportationType::FERRY => $this->arrival_terminal,
             default => $this->arrival_location
         };
 

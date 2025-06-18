@@ -128,13 +128,11 @@
                             </label>
                             <select name="transportation_type" id="transportation_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 <option value="">選択してください</option>
-                                <option value="walking" {{ old('transportation_type', $itinerary->transportation_type) === 'walking' ? 'selected' : '' }}>徒歩</option>
-                                <option value="bike" {{ old('transportation_type', $itinerary->transportation_type) === 'bike' ? 'selected' : '' }}>自転車</option>
-                                <option value="car" {{ old('transportation_type', $itinerary->transportation_type) === 'car' ? 'selected' : '' }}>車</option>
-                                <option value="bus" {{ old('transportation_type', $itinerary->transportation_type) === 'bus' ? 'selected' : '' }}>バス</option>
-                                <option value="train" {{ old('transportation_type', $itinerary->transportation_type) === 'train' ? 'selected' : '' }}>電車</option>
-                                <option value="ferry" {{ old('transportation_type', $itinerary->transportation_type) === 'ferry' ? 'selected' : '' }}>フェリー</option>
-                                <option value="airplane" {{ old('transportation_type', $itinerary->transportation_type) === 'airplane' ? 'selected' : '' }}>飛行機</option>
+                                @foreach(\App\Enums\TransportationType::cases() as $type)
+                                    <option value="{{ $type->value }}" {{ old('transportation_type', $itinerary->transportation_type?->value) === $type->value ? 'selected' : '' }}>
+                                        {{ $type->icon() }} {{ $type->label() }}
+                                    </option>
+                                @endforeach
                             </select>
                             @error('transportation_type')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -144,7 +142,7 @@
                         <!-- 移動手段詳細（条件表示） -->
                         <div id="transportation_details">
                             <!-- 飛行機詳細 -->
-                            <div id="airplane_details" class="transportation-detail" style="display: {{ old('transportation_type', $itinerary->transportation_type) === 'airplane' ? 'block' : 'none' }};">
+                            <div id="airplane_details" class="transportation-detail" style="display: {{ old('transportation_type', $itinerary->transportation_type?->value) === 'airplane' ? 'block' : 'none' }};">
                                 <h4 class="text-sm font-medium text-gray-700 mb-3">飛行機詳細</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -207,7 +205,7 @@
                             </div>
 
                             <!-- 電車詳細 -->
-                            <div id="train_details" class="transportation-detail" style="display: {{ old('transportation_type', $itinerary->transportation_type) === 'train' ? 'block' : 'none' }};">
+                            <div id="train_details" class="transportation-detail" style="display: {{ old('transportation_type', $itinerary->transportation_type?->value) === 'train' ? 'block' : 'none' }};">
                                 <h4 class="text-sm font-medium text-gray-700 mb-3">電車詳細</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -270,7 +268,7 @@
                             </div>
 
                             <!-- バス・フェリー詳細 -->
-                            <div id="bus_ferry_details" class="transportation-detail" style="display: {{ old('transportation_type', $itinerary->transportation_type) === 'bus' || old('transportation_type', $itinerary->transportation_type) === 'ferry' ? 'block' : 'none' }};">
+                            <div id="bus_ferry_details" class="transportation-detail" style="display: {{ old('transportation_type', $itinerary->transportation_type?->value) === 'bus' || old('transportation_type', $itinerary->transportation_type?->value) === 'ferry' ? 'block' : 'none' }};">
                                 <h4 class="text-sm font-medium text-gray-700 mb-3">バス・フェリー詳細</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -493,14 +491,14 @@
 
             const selectedType = transportationType.value;
             
-            if (selectedType === 'airplane') {
+            if (selectedType === '{{ \App\Enums\TransportationType::AIRPLANE->value }}') {
                 document.getElementById('airplane_details').style.display = 'block';
                 document.getElementById('airline').required = true;
                 document.getElementById('flight_number').required = true;
-            } else if (selectedType === 'train') {
+            } else if (selectedType === '{{ \App\Enums\TransportationType::TRAIN->value }}') {
                 document.getElementById('train_details').style.display = 'block';
                 document.getElementById('train_line').required = true;
-            } else if (selectedType === 'bus' || selectedType === 'ferry') {
+            } else if (selectedType === '{{ \App\Enums\TransportationType::BUS->value }}' || selectedType === '{{ \App\Enums\TransportationType::FERRY->value }}') {
                 document.getElementById('bus_ferry_details').style.display = 'block';
             }
         }

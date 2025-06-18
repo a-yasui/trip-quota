@@ -277,7 +277,7 @@ class ItineraryControllerTest extends TestCase
         $updateData = [
             'title' => 'Updated Title',
             'description' => 'Updated description',
-            'date' => $itinerary->date->format('Y-m-d'),
+            'date' => $this->travelPlan->departure_date->format('Y-m-d'),
             'transportation_type' => 'bus',
         ];
 
@@ -285,12 +285,11 @@ class ItineraryControllerTest extends TestCase
             ->put(route('travel-plans.itineraries.update', [$this->travelPlan->uuid, $itinerary->id]), $updateData);
 
         $response->assertStatus(302);
-        $this->assertDatabaseHas('itineraries', [
-            'id' => $itinerary->id,
-            'title' => 'Updated Title',
-            'description' => 'Updated description',
-            'transportation_type' => 'bus',
-        ]);
+        $response->assertSessionDoesntHaveErrors();
+        $itinerary->refresh();
+        $this->assertEquals('Updated Title', $itinerary->title);
+        $this->assertEquals('Updated description', $itinerary->description);
+        $this->assertEquals(\App\Enums\TransportationType::BUS, $itinerary->transportation_type);
     }
 
     public function test_destroy_deletes_itinerary()

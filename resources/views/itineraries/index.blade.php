@@ -71,16 +71,8 @@
                                 <div class="flex-1">
                                     <div class="flex items-center">
                                         <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                            @if($itinerary->transportation_type === 'airplane')
-                                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                                                </svg>
-                                            @elseif($itinerary->transportation_type === 'car')
-                                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 6h3l2 3H8l2-3h3z"></path>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 17h14v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2z"></path>
-                                                </svg>
+                                            @if($itinerary->transportation_type)
+                                                <span class="text-blue-600 text-xl">{{ $itinerary->transportation_icon }}</span>
                                             @else
                                                 <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>

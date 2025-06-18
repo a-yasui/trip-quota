@@ -99,31 +99,7 @@
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500">交通手段</dt>
                                         <dd class="mt-1 text-sm text-gray-900">
-                                            @switch($itinerary->transportation_type)
-                                                @case('walking')
-                                                    🚶 徒歩
-                                                    @break
-                                                @case('bike')
-                                                    🚲 自転車
-                                                    @break
-                                                @case('car')
-                                                    🚗 車
-                                                    @break
-                                                @case('bus')
-                                                    🚌 バス
-                                                    @break
-                                                @case('train')
-                                                    🚆 電車
-                                                    @break
-                                                @case('ferry')
-                                                    ⛴️ フェリー
-                                                    @break
-                                                @case('airplane')
-                                                    ✈️ 飛行機
-                                                    @break
-                                                @default
-                                                    {{ $itinerary->transportation_type_name }}
-                                            @endswitch
+                                            {{ $itinerary->transportation_icon }} {{ $itinerary->transportation_type_name }}
                                         </dd>
                                     </div>
                                 @endif
@@ -137,7 +113,7 @@
                                 @endif
                                 
                                 {{-- 飛行機特有の情報 --}}
-                                @if($itinerary->transportation_type === 'airplane')
+                                @if($itinerary->transportation_type === \App\Enums\TransportationType::AIRPLANE)
                                     @if($itinerary->airline)
                                         <div>
                                             <dt class="text-sm font-medium text-gray-500">航空会社</dt>
@@ -165,7 +141,7 @@
                                 @endif
                                 
                                 {{-- 電車特有の情報 --}}
-                                @if($itinerary->transportation_type === 'train')
+                                @if($itinerary->transportation_type === \App\Enums\TransportationType::TRAIN)
                                     @if($itinerary->train_line)
                                         <div>
                                             <dt class="text-sm font-medium text-gray-500">路線名</dt>
@@ -193,7 +169,7 @@
                                 @endif
                                 
                                 {{-- バス・フェリー特有の情報 --}}
-                                @if(in_array($itinerary->transportation_type, ['bus', 'ferry']))
+                                @if(in_array($itinerary->transportation_type, [\App\Enums\TransportationType::BUS, \App\Enums\TransportationType::FERRY]))
                                     @if($itinerary->company)
                                         <div>
                                             <dt class="text-sm font-medium text-gray-500">運営会社</dt>
