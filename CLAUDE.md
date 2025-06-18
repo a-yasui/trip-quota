@@ -13,6 +13,7 @@ TripQuota is a multi-traveler trip management web application built with Laravel
 - @AI-docs/002-class-model.md
 - @AI-docs/database.md
 - @AI-docs/directory-pattern.md
+- @AI-docs/laravel.md
 - @AI-docs/git-commit.md
 - @AI-docs/php-composer.md
 - @AI-docs/techinfo.md
