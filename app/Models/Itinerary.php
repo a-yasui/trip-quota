@@ -80,6 +80,16 @@ class Itinerary extends Model
         'arrival_time',
         'departure_location',
         'arrival_location',
+        'location',
+        'train_line',
+        'departure_station',
+        'arrival_station',
+        'train_type',
+        'departure_terminal',
+        'arrival_terminal',
+        'company',
+        'departure_airport',
+        'arrival_airport',
         'notes',
     ];
 
@@ -109,5 +119,92 @@ class Itinerary extends Model
     public function members()
     {
         return $this->belongsToMany(Member::class);
+    }
+
+    /**
+     * 移動手段の日本語名を取得
+     */
+    public function getTransportationTypeNameAttribute(): string
+    {
+        return match($this->transportation_type) {
+            'walking' => '徒歩',
+            'bike' => '自転車',
+            'car' => '車',
+            'bus' => 'バス',
+            'train' => '電車',
+            'ferry' => 'フェリー',
+            'airplane' => '飛行機',
+            default => '未設定'
+        };
+    }
+
+    /**
+     * 移動手段詳細情報を取得
+     */
+    public function getTransportationDetailsAttribute(): array
+    {
+        return match($this->transportation_type) {
+            'airplane' => [
+                'airline' => $this->airline,
+                'flight_number' => $this->flight_number,
+                'departure_airport' => $this->departure_airport,
+                'arrival_airport' => $this->arrival_airport,
+            ],
+            'train' => [
+                'line' => $this->train_line,
+                'departure_station' => $this->departure_station,
+                'arrival_station' => $this->arrival_station,
+                'train_type' => $this->train_type,
+            ],
+            'bus', 'ferry' => [
+                'company' => $this->company,
+                'departure_terminal' => $this->departure_terminal,
+                'arrival_terminal' => $this->arrival_terminal,
+            ],
+            default => []
+        };
+    }
+
+    /**
+     * 移動手段詳細のサマリー文字列を取得
+     */
+    public function getTransportationSummaryAttribute(): ?string
+    {
+        return match($this->transportation_type) {
+            'airplane' => $this->airline && $this->flight_number 
+                ? "{$this->airline} {$this->flight_number}" 
+                : null,
+            'train' => $this->train_line && $this->train_type
+                ? "{$this->train_line}（{$this->train_type}）"
+                : $this->train_line,
+            'bus', 'ferry' => $this->company,
+            default => null
+        };
+    }
+
+    /**
+     * 出発地・到着地のサマリーを取得
+     */
+    public function getRouteInfoAttribute(): ?string
+    {
+        $departure = match($this->transportation_type) {
+            'airplane' => $this->departure_airport,
+            'train' => $this->departure_station,
+            'bus', 'ferry' => $this->departure_terminal,
+            default => $this->departure_location
+        };
+
+        $arrival = match($this->transportation_type) {
+            'airplane' => $this->arrival_airport,
+            'train' => $this->arrival_station,
+            'bus', 'ferry' => $this->arrival_terminal,
+            default => $this->arrival_location
+        };
+
+        if ($departure && $arrival) {
+            return "{$departure} → {$arrival}";
+        }
+
+        return $departure ?: $arrival;
     }
 }

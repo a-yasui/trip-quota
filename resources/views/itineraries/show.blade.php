@@ -112,6 +112,9 @@
                                                 @case('bus')
                                                     🚌 バス
                                                     @break
+                                                @case('train')
+                                                    🚆 電車
+                                                    @break
                                                 @case('ferry')
                                                     ⛴️ フェリー
                                                     @break
@@ -119,21 +122,111 @@
                                                     ✈️ 飛行機
                                                     @break
                                                 @default
-                                                    {{ $itinerary->transportation_type }}
+                                                    {{ $itinerary->transportation_type_name }}
                                             @endswitch
                                         </dd>
                                     </div>
                                 @endif
-                                @if($itinerary->airline)
+                                
+                                {{-- 移動手段詳細情報を表示 --}}
+                                @if($itinerary->transportation_summary)
                                     <div>
-                                        <dt class="text-sm font-medium text-gray-500">航空会社</dt>
-                                        <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->airline }}</dd>
+                                        <dt class="text-sm font-medium text-gray-500">詳細情報</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 font-medium">{{ $itinerary->transportation_summary }}</dd>
                                     </div>
                                 @endif
-                                @if($itinerary->flight_number)
+                                
+                                {{-- 飛行機特有の情報 --}}
+                                @if($itinerary->transportation_type === 'airplane')
+                                    @if($itinerary->airline)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">航空会社</dt>
+                                            <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->airline }}</dd>
+                                        </div>
+                                    @endif
+                                    @if($itinerary->flight_number)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">便名</dt>
+                                            <dd class="mt-1 text-sm text-gray-900 font-mono">{{ $itinerary->flight_number }}</dd>
+                                        </div>
+                                    @endif
+                                    @if($itinerary->departure_airport)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">出発空港</dt>
+                                            <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->departure_airport }}</dd>
+                                        </div>
+                                    @endif
+                                    @if($itinerary->arrival_airport)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">到着空港</dt>
+                                            <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->arrival_airport }}</dd>
+                                        </div>
+                                    @endif
+                                @endif
+                                
+                                {{-- 電車特有の情報 --}}
+                                @if($itinerary->transportation_type === 'train')
+                                    @if($itinerary->train_line)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">路線名</dt>
+                                            <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->train_line }}</dd>
+                                        </div>
+                                    @endif
+                                    @if($itinerary->train_type)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">列車種別</dt>
+                                            <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->train_type }}</dd>
+                                        </div>
+                                    @endif
+                                    @if($itinerary->departure_station)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">出発駅</dt>
+                                            <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->departure_station }}</dd>
+                                        </div>
+                                    @endif
+                                    @if($itinerary->arrival_station)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">到着駅</dt>
+                                            <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->arrival_station }}</dd>
+                                        </div>
+                                    @endif
+                                @endif
+                                
+                                {{-- バス・フェリー特有の情報 --}}
+                                @if(in_array($itinerary->transportation_type, ['bus', 'ferry']))
+                                    @if($itinerary->company)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">運営会社</dt>
+                                            <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->company }}</dd>
+                                        </div>
+                                    @endif
+                                    @if($itinerary->departure_terminal)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">出発ターミナル・港</dt>
+                                            <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->departure_terminal }}</dd>
+                                        </div>
+                                    @endif
+                                    @if($itinerary->arrival_terminal)
+                                        <div>
+                                            <dt class="text-sm font-medium text-gray-500">到着ターミナル・港</dt>
+                                            <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->arrival_terminal }}</dd>
+                                        </div>
+                                    @endif
+                                @endif
+                                
+                                {{-- ルート情報の表示 --}}
+                                @if($itinerary->route_info)
+                                    <div class="sm:col-span-2">
+                                        <dt class="text-sm font-medium text-gray-500">ルート</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded">
+                                            {{ $itinerary->route_info }}
+                                        </dd>
+                                    </div>
+                                @endif
+                                @if($itinerary->location)
                                     <div>
-                                        <dt class="text-sm font-medium text-gray-500">便名</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 font-mono">{{ $itinerary->flight_number }}</dd>
+                                        <dt class="text-sm font-medium text-gray-500">場所・目的地</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">{{ $itinerary->location }}</dd>
                                     </div>
                                 @endif
                                 @if($itinerary->departure_location)

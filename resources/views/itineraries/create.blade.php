@@ -140,36 +140,181 @@
                             @enderror
                         </div>
 
-                        <!-- 飛行機詳細（条件表示） -->
-                        <div id="airplane_details" style="display: none;">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="airline" class="block text-sm font-medium text-gray-700">
-                                        航空会社
-                                    </label>
-                                    <input type="text" 
-                                           id="airline" 
-                                           name="airline" 
-                                           value="{{ old('airline') }}"
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                           placeholder="例：JAL、ANA">
-                                    @error('airline')
-                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
+                        <!-- 移動手段詳細（条件表示） -->
+                        <div id="transportation_details">
+                            <!-- 飛行機詳細 -->
+                            <div id="airplane_details" class="transportation-detail" style="display: none;">
+                                <h4 class="text-sm font-medium text-gray-700 mb-3">飛行機詳細</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="airline" class="block text-sm font-medium text-gray-700">
+                                            航空会社 <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               id="airline" 
+                                               name="airline" 
+                                               value="{{ old('airline') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：JAL、ANA">
+                                        @error('airline')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="flight_number" class="block text-sm font-medium text-gray-700">
+                                            便名 <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               id="flight_number" 
+                                               name="flight_number" 
+                                               value="{{ old('flight_number') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：JL123">
+                                        @error('flight_number')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="departure_airport" class="block text-sm font-medium text-gray-700">
+                                            出発空港
+                                        </label>
+                                        <input type="text" 
+                                               id="departure_airport" 
+                                               name="departure_airport" 
+                                               value="{{ old('departure_airport') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：羽田空港">
+                                        @error('departure_airport')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="arrival_airport" class="block text-sm font-medium text-gray-700">
+                                            到着空港
+                                        </label>
+                                        <input type="text" 
+                                               id="arrival_airport" 
+                                               name="arrival_airport" 
+                                               value="{{ old('arrival_airport') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：関西国際空港">
+                                        @error('arrival_airport')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
-                                <div>
-                                    <label for="flight_number" class="block text-sm font-medium text-gray-700">
-                                        便名
-                                    </label>
-                                    <input type="text" 
-                                           id="flight_number" 
-                                           name="flight_number" 
-                                           value="{{ old('flight_number') }}"
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                           placeholder="例：JL123">
-                                    @error('flight_number')
-                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
+                            </div>
+
+                            <!-- 電車詳細 -->
+                            <div id="train_details" class="transportation-detail" style="display: none;">
+                                <h4 class="text-sm font-medium text-gray-700 mb-3">電車詳細</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="train_line" class="block text-sm font-medium text-gray-700">
+                                            路線名 <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               id="train_line" 
+                                               name="train_line" 
+                                               value="{{ old('train_line') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：東海道新幹線、JR山手線">
+                                        @error('train_line')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="train_type" class="block text-sm font-medium text-gray-700">
+                                            列車種別
+                                        </label>
+                                        <input type="text" 
+                                               id="train_type" 
+                                               name="train_type" 
+                                               value="{{ old('train_type') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：のぞみ、ひかり、各駅停車">
+                                        @error('train_type')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="departure_station" class="block text-sm font-medium text-gray-700">
+                                            出発駅
+                                        </label>
+                                        <input type="text" 
+                                               id="departure_station" 
+                                               name="departure_station" 
+                                               value="{{ old('departure_station') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：東京駅">
+                                        @error('departure_station')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="arrival_station" class="block text-sm font-medium text-gray-700">
+                                            到着駅
+                                        </label>
+                                        <input type="text" 
+                                               id="arrival_station" 
+                                               name="arrival_station" 
+                                               value="{{ old('arrival_station') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：新大阪駅">
+                                        @error('arrival_station')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- バス・フェリー詳細 -->
+                            <div id="bus_ferry_details" class="transportation-detail" style="display: none;">
+                                <h4 class="text-sm font-medium text-gray-700 mb-3">バス・フェリー詳細</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="company" class="block text-sm font-medium text-gray-700">
+                                            運営会社
+                                        </label>
+                                        <input type="text" 
+                                               id="company" 
+                                               name="company" 
+                                               value="{{ old('company') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：JRバス、阪急フェリー">
+                                        @error('company')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div></div>
+                                    <div>
+                                        <label for="departure_terminal" class="block text-sm font-medium text-gray-700">
+                                            出発ターミナル・港
+                                        </label>
+                                        <input type="text" 
+                                               id="departure_terminal" 
+                                               name="departure_terminal" 
+                                               value="{{ old('departure_terminal') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：東京駅八重洲口、新宿港">
+                                        @error('departure_terminal')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="arrival_terminal" class="block text-sm font-medium text-gray-700">
+                                            到着ターミナル・港
+                                        </label>
+                                        <input type="text" 
+                                               id="arrival_terminal" 
+                                               name="arrival_terminal" 
+                                               value="{{ old('arrival_terminal') }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="例：大阪駅前、関西港">
+                                        @error('arrival_terminal')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -271,22 +416,38 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const transportationType = document.getElementById('transportation_type');
-        const airplaneDetails = document.getElementById('airplane_details');
+        const transportationDetails = document.querySelectorAll('.transportation-detail');
 
-        function toggleAirplaneDetails() {
-            if (transportationType.value === 'airplane') {
-                airplaneDetails.style.display = 'block';
+        function toggleTransportationDetails() {
+            // すべての詳細セクションを非表示にする
+            transportationDetails.forEach(detail => {
+                detail.style.display = 'none';
+            });
+
+            // 必須フィールドをリセット
+            document.querySelectorAll('#transportation_details input').forEach(input => {
+                input.required = false;
+            });
+
+            // 選択された移動手段に応じて詳細を表示
+            const selectedType = transportationType.value;
+            
+            if (selectedType === 'airplane') {
+                document.getElementById('airplane_details').style.display = 'block';
+                document.getElementById('airline').required = true;
                 document.getElementById('flight_number').required = true;
-            } else {
-                airplaneDetails.style.display = 'none';
-                document.getElementById('flight_number').required = false;
+            } else if (selectedType === 'train') {
+                document.getElementById('train_details').style.display = 'block';
+                document.getElementById('train_line').required = true;
+            } else if (selectedType === 'bus' || selectedType === 'ferry') {
+                document.getElementById('bus_ferry_details').style.display = 'block';
             }
         }
 
-        transportationType.addEventListener('change', toggleAirplaneDetails);
+        transportationType.addEventListener('change', toggleTransportationDetails);
         
         // 初期状態の設定
-        toggleAirplaneDetails();
+        toggleTransportationDetails();
     });
 </script>
 @endpush

@@ -244,12 +244,8 @@ class ItineraryService
         }
 
         // 移動手段固有の検証
-        if (isset($data['transportation_type']) && $data['transportation_type'] === 'airplane') {
-            if (empty($data['flight_number'])) {
-                throw ValidationException::withMessages([
-                    'flight_number' => ['飛行機の場合、便名は必須です。'],
-                ]);
-            }
+        if (isset($data['transportation_type'])) {
+            $this->validateTransportationSpecificFields($data);
         }
     }
 
@@ -287,6 +283,39 @@ class ItineraryService
             throw ValidationException::withMessages([
                 'date' => ['旅程の日付は旅行終了日以前である必要があります。'],
             ]);
+        }
+    }
+
+    private function validateTransportationSpecificFields(array $data): void
+    {
+        $transportationType = $data['transportation_type'];
+
+        switch ($transportationType) {
+            case 'airplane':
+                if (empty($data['airline'])) {
+                    throw ValidationException::withMessages([
+                        'airline' => ['飛行機の場合、航空会社は必須です。'],
+                    ]);
+                }
+                if (empty($data['flight_number'])) {
+                    throw ValidationException::withMessages([
+                        'flight_number' => ['飛行機の場合、便名は必須です。'],
+                    ]);
+                }
+                break;
+
+            case 'train':
+                if (empty($data['train_line'])) {
+                    throw ValidationException::withMessages([
+                        'train_line' => ['電車の場合、路線名は必須です。'],
+                    ]);
+                }
+                break;
+
+            case 'bus':
+            case 'ferry':
+                // バス・フェリーは会社名があると良いが必須ではない
+                break;
         }
     }
 }
