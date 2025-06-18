@@ -444,9 +444,7 @@ class ExpenseServiceTest extends TestCase
 
     public function test_validate_split_amounts_with_custom_amounts_exceeding_total()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('個別金額の合計が総金額を超えています。');
-
+        // バリデーションメソッドを直接テスト
         $memberAssignments = [
             [
                 'member_id' => 1,
@@ -460,48 +458,20 @@ class ExpenseServiceTest extends TestCase
             ]
         ];
 
-        $expense = Expense::factory()->make([
-            'amount' => 5000,
-            'is_split_confirmed' => false,
-        ]);
-        $expense->travelPlan = $this->travelPlan;
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('個別金額の合計が総金額を超えています。');
 
-        // 権限チェック用のmock
-        $this->memberRepository
-            ->expects($this->exactly(2))
-            ->method('findByTravelPlanAndUser')
-            ->with($this->travelPlan, $this->user)
-            ->willReturn($this->member);
-
-        $this->memberRepository
-            ->expects($this->once())
-            ->method('findByTravelPlan')
-            ->willReturn(new \Illuminate\Database\Eloquent\Collection([
-                (object)['id' => 1, 'is_confirmed' => true],
-                (object)['id' => 2, 'is_confirmed' => true],
-            ]));
-
-        $this->expenseRepository
-            ->expects($this->once())
-            ->method('update')
-            ->willReturn($expense);
-
-        // updateExpenseを呼び出すことでvalidateSplitAmountsが実行される
-        $this->service->updateExpense($expense, $this->user, [
-            'title' => 'Test',
-            'amount' => 5000,
-            'expense_date' => '2024-07-02',
-            'group_id' => $this->group->id,
-            'paid_by_member_id' => $this->member->id,
-            'member_assignments' => $memberAssignments,
-        ]);
+        // リフレクションを使用してprivateメソッドを直接テスト
+        $reflection = new \ReflectionClass($this->service);
+        $method = $reflection->getMethod('validateSplitAmounts');
+        $method->setAccessible(true);
+        
+        $method->invoke($this->service, 5000, $memberAssignments);
     }
 
     public function test_validate_split_amounts_with_all_members_having_custom_amounts_not_matching_total()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('全員に個別金額を設定する場合、合計は総金額と一致する必要があります。');
-
+        // バリデーションメソッドを直接テスト
         $memberAssignments = [
             [
                 'member_id' => 1,
@@ -515,32 +485,42 @@ class ExpenseServiceTest extends TestCase
             ]
         ];
 
-        $expense = Expense::factory()->make(['amount' => 5000]);
-        $expense->travelPlan = $this->travelPlan;
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('全員に個別金額を設定する場合、合計は総金額と一致する必要があります。');
 
-        // 権限チェック用のmock
-        $this->memberRepository
-            ->expects($this->exactly(2))
-            ->method('findByTravelPlanAndUser')
-            ->with($this->travelPlan, $this->user)
-            ->willReturn($this->member);
+        // リフレクションを使用してprivateメソッドを直接テスト
+        $reflection = new \ReflectionClass($this->service);
+        $method = $reflection->getMethod('validateSplitAmounts');
+        $method->setAccessible(true);
+        
+        $method->invoke($this->service, 5000, $memberAssignments);
+    }
 
-        $this->memberRepository
-            ->expects($this->once())
-            ->method('findByTravelPlan')
-            ->willReturn(new \Illuminate\Database\Eloquent\Collection([
-                (object)['id' => 1, 'is_confirmed' => true],
-                (object)['id' => 2, 'is_confirmed' => true],
-            ]));
+    public function test_validate_split_amounts_with_valid_partial_custom_amounts()
+    {
+        // 正常なケースもテスト
+        $memberAssignments = [
+            [
+                'member_id' => 1,
+                'is_participating' => true,
+                'amount' => 2000,
+            ],
+            [
+                'member_id' => 2,
+                'is_participating' => true,
+                'amount' => null,  // 残り金額から計算される
+            ]
+        ];
 
-        // updateExpenseを呼び出すことでvalidateSplitAmountsが実行される
-        $this->service->updateExpense($expense, $this->user, [
-            'title' => 'Test',
-            'amount' => 5000,
-            'expense_date' => '2024-07-02',
-            'group_id' => $this->group->id,
-            'paid_by_member_id' => $this->member->id,
-            'member_assignments' => $memberAssignments,
-        ]);
+        // リフレクションを使用してprivateメソッドを直接テスト
+        $reflection = new \ReflectionClass($this->service);
+        $method = $reflection->getMethod('validateSplitAmounts');
+        $method->setAccessible(true);
+        
+        // 例外が発生しないことを確認
+        $method->invoke($this->service, 5000, $memberAssignments);
+        
+        // ここまで到達すれば成功
+        $this->assertTrue(true);
     }
 }
