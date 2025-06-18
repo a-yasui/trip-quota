@@ -354,27 +354,84 @@
 
                         <!-- 参加者選択 -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-3">
-                                参加者
-                            </label>
-                            <div class="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-3 space-y-2">
-                                @foreach($members as $member)
-                                    <div class="flex items-center">
-                                        <input id="member_{{ $member->id }}" 
-                                               name="member_ids[]" 
-                                               type="checkbox" 
-                                               value="{{ $member->id }}"
-                                               {{ in_array($member->id, old('member_ids', $itinerary->members->pluck('id')->toArray())) ? 'checked' : '' }}
-                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                        <label for="member_{{ $member->id }}" class="ml-3 text-sm text-gray-900">
-                                            {{ $member->name }}
-                                        </label>
-                                    </div>
-                                @endforeach
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="block text-sm font-medium text-gray-700">
+                                    参加者
+                                </label>
+                                <div class="flex space-x-2">
+                                    <button type="button" id="select-all-members" 
+                                            class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">
+                                        全選択
+                                    </button>
+                                    <button type="button" id="deselect-all-members" 
+                                            class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200">
+                                        全解除
+                                    </button>
+                                </div>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500">
-                                選択しない場合、作成者のみが参加者として設定されます
-                            </p>
+                            
+                            <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-3">
+                                <div id="member-selection-list" class="space-y-3">
+                                    @foreach($members as $member)
+                                        <div class="flex items-center member-item" data-groups="{{ $member->groups->pluck('id')->join(',') }}">
+                                            <input id="member_{{ $member->id }}" 
+                                                   name="member_ids[]" 
+                                                   type="checkbox" 
+                                                   value="{{ $member->id }}"
+                                                   {{ in_array($member->id, old('member_ids', $itinerary->members->pluck('id')->toArray())) ? 'checked' : '' }}
+                                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded member-checkbox">
+                                            
+                                            <div class="ml-3 flex items-center space-x-3 flex-1">
+                                                <!-- アバター -->
+                                                <div class="h-8 w-8 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-medium">
+                                                    {{ substr($member->name, 0, 1) }}
+                                                </div>
+                                                
+                                                <div class="flex-1">
+                                                    <label for="member_{{ $member->id }}" class="block text-sm font-medium text-gray-900 cursor-pointer">
+                                                        {{ $member->name }}
+                                                    </label>
+                                                    
+                                                    <!-- グループ情報 -->
+                                                    @if($member->groups->count() > 0)
+                                                        <div class="flex flex-wrap gap-1 mt-1">
+                                                            @foreach($member->groups as $group)
+                                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                                                    {{ $group->type === 'CORE' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                                                    @if($group->type === 'CORE')
+                                                                        全体
+                                                                    @else
+                                                                        {{ $group->name }}
+                                                                    @endif
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                
+                                                <!-- 状態表示 -->
+                                                <div class="flex items-center">
+                                                    @if($member->is_confirmed)
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            確認済み
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                            未確認
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2 text-xs text-gray-500 space-y-1">
+                                <p>選択しない場合、作成者のみが参加者として設定されます</p>
+                                <p>グループを選択すると、そのグループのメンバーが自動的に選択されます</p>
+                            </div>
+                            
                             @error('member_ids')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -418,19 +475,22 @@
     document.addEventListener('DOMContentLoaded', function() {
         const transportationType = document.getElementById('transportation_type');
         const transportationDetails = document.querySelectorAll('.transportation-detail');
+        const groupSelect = document.getElementById('group_id');
+        const memberCheckboxes = document.querySelectorAll('.member-checkbox');
+        const selectAllBtn = document.getElementById('select-all-members');
+        const deselectAllBtn = document.getElementById('deselect-all-members');
+        const memberItems = document.querySelectorAll('.member-item');
 
+        // 移動手段詳細の表示切り替え
         function toggleTransportationDetails() {
-            // すべての詳細セクションを非表示にする
             transportationDetails.forEach(detail => {
                 detail.style.display = 'none';
             });
 
-            // 必須フィールドをリセット
             document.querySelectorAll('#transportation_details input').forEach(input => {
                 input.required = false;
             });
 
-            // 選択された移動手段に応じて詳細を表示
             const selectedType = transportationType.value;
             
             if (selectedType === 'airplane') {
@@ -445,10 +505,54 @@
             }
         }
 
+        // グループ選択時のメンバーフィルタリング(編集モードでは自動選択しない)
+        function handleGroupSelection() {
+            const selectedGroupId = groupSelect.value;
+            
+            if (!selectedGroupId) {
+                // グループが選択されていない場合、全メンバーを表示
+                memberItems.forEach(item => {
+                    item.style.display = 'flex';
+                });
+                return;
+            }
+
+            // グループのメンバーのみ表示（編集時は自動選択はしない）
+            memberItems.forEach(item => {
+                const memberGroups = item.dataset.groups ? item.dataset.groups.split(',') : [];
+                
+                if (memberGroups.includes(selectedGroupId)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // 全選択/全解除機能
+        function selectAllMembers() {
+            const visibleCheckboxes = Array.from(memberCheckboxes).filter(cb => {
+                return cb.closest('.member-item').style.display !== 'none';
+            });
+            visibleCheckboxes.forEach(cb => cb.checked = true);
+        }
+
+        function deselectAllMembers() {
+            const visibleCheckboxes = Array.from(memberCheckboxes).filter(cb => {
+                return cb.closest('.member-item').style.display !== 'none';
+            });
+            visibleCheckboxes.forEach(cb => cb.checked = false);
+        }
+
+        // イベントリスナーの設定
         transportationType.addEventListener('change', toggleTransportationDetails);
+        groupSelect.addEventListener('change', handleGroupSelection);
+        selectAllBtn.addEventListener('click', selectAllMembers);
+        deselectAllBtn.addEventListener('click', deselectAllMembers);
         
         // 初期状態の設定
         toggleTransportationDetails();
+        handleGroupSelection();
     });
 </script>
 @endpush

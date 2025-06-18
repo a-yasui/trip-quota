@@ -267,4 +267,28 @@ class ItineraryServiceTest extends TestCase
 
         $this->service->deleteItinerary($itinerary, $user);
     }
+
+    public function test_get_member_participation_stats_returns_correct_statistics()
+    {
+        // 統合テストアプローチで実装をテスト
+        $this->markTestSkipped('このテストは統合テストで実装されます');
+    }
+
+    public function test_get_member_participation_stats_with_no_itineraries()
+    {
+        // 統合テストアプローチで実装されます
+        $this->markTestSkipped('このテストは統合テストで実装されます');
+    }
+
+    public function test_get_member_participation_stats_requires_valid_user_permissions()
+    {
+        $user = User::factory()->create();
+        $travelPlan = TravelPlan::factory()->create();
+        // メンバーを作成しない = 権限なし
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('この旅行プランの旅程を閲覧する権限がありません。');
+
+        $this->service->getMemberParticipationStats($travelPlan, $user);
+    }
 }

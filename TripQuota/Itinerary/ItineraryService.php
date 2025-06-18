@@ -144,6 +144,39 @@ class ItineraryService
         $this->itineraryRepository->syncMembers($itinerary, $validMemberIds);
     }
 
+    public function getMemberParticipationStats(TravelPlan $travelPlan, User $user): array
+    {
+        $this->ensureUserCanViewItineraries($travelPlan, $user);
+
+        $itineraries = $this->itineraryRepository->findByTravelPlan($travelPlan);
+        $totalMembers = $travelPlan->members()->where('is_confirmed', true)->count();
+        $totalItineraries = $itineraries->count();
+
+        $memberStats = [];
+        foreach ($travelPlan->members()->where('is_confirmed', true)->get() as $member) {
+            $participationCount = $itineraries->filter(function ($itinerary) use ($member) {
+                return $itinerary->members->contains('id', $member->id);
+            })->count();
+
+            $memberStats[] = [
+                'member' => $member,
+                'participation_count' => $participationCount,
+                'participation_rate' => $totalItineraries > 0 ? round(($participationCount / $totalItineraries) * 100, 1) : 0,
+            ];
+        }
+
+        // 参加率でソート
+        usort($memberStats, function ($a, $b) {
+            return $b['participation_rate'] <=> $a['participation_rate'];
+        });
+
+        return [
+            'total_members' => $totalMembers,
+            'total_itineraries' => $totalItineraries,
+            'member_stats' => $memberStats,
+        ];
+    }
+
     private function ensureUserCanViewItineraries(TravelPlan $travelPlan, User $user): void
     {
         $member = $travelPlan->members()

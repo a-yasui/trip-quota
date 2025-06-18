@@ -265,16 +265,54 @@
                     </div>
                     <div class="px-6 py-4">
                         @if($itinerary->members->count() > 0)
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 @foreach($itinerary->members as $member)
-                                    <div class="flex items-center p-3 border border-gray-200 rounded-lg">
-                                        <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                                            <span class="text-sm font-medium text-gray-700">
-                                                {{ substr($member->name, 0, 1) }}
-                                            </span>
+                                    <div class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <!-- アバター -->
+                                        <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-medium">
+                                            {{ substr($member->name, 0, 1) }}
                                         </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-medium text-gray-900">{{ $member->name }}</p>
+                                        
+                                        <div class="ml-4 flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <p class="text-sm font-medium text-gray-900">{{ $member->name }}</p>
+                                                
+                                                <!-- 状態バッジ -->
+                                                @if($member->is_confirmed)
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        確認済み
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                        未確認
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            
+                                            <!-- グループ情報 -->
+                                            @if($member->groups->count() > 0)
+                                                <div class="flex flex-wrap gap-1 mt-2">
+                                                    @foreach($member->groups as $group)
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                                            {{ $group->type === 'CORE' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                                            @if($group->type === 'CORE')
+                                                                全体
+                                                            @else
+                                                                {{ $group->name }}
+                                                            @endif
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                            
+                                            <!-- 作成者バッジ -->
+                                            @if($member->id === $itinerary->created_by_member_id)
+                                                <div class="mt-1">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                        作成者
+                                                    </span>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 @endforeach
