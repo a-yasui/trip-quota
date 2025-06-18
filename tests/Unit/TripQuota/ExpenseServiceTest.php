@@ -342,12 +342,205 @@ class ExpenseServiceTest extends TestCase
         $result = $this->service->calculateSplitAmounts($expense);
 
         $this->assertCount(2, $result);
-        $this->assertEquals($member1->id, $result[0]['member']->id);
-        $this->assertEquals(2500, $result[0]['amount']); // 等分計算
-        $this->assertEquals(1, $result[0]['is_confirmed']); // データベースでは1/0で保存される
         
-        $this->assertEquals($member2->id, $result[1]['member']->id);
-        $this->assertEquals(3000, $result[1]['amount']); // カスタム金額
-        $this->assertEquals(0, $result[1]['is_confirmed']); // データベースでは1/0で保存される
+        // カスタム金額設定済みメンバー（member2）が先に配列に追加される
+        $this->assertEquals($member2->id, $result[0]['member']->id);
+        $this->assertEquals(3000, $result[0]['amount']); // カスタム金額
+        $this->assertEquals(0, $result[0]['is_confirmed']); // データベースでは1/0で保存される
+        
+        // 残り金額から計算されるメンバー（member1）
+        $this->assertEquals($member1->id, $result[1]['member']->id);
+        $this->assertEquals(2000, $result[1]['amount']); // 残り金額 (5000 - 3000 = 2000)
+        $this->assertEquals(1, $result[1]['is_confirmed']); // データベースでは1/0で保存される
+    }
+
+    public function test_calculate_split_amounts_with_error_when_custom_amounts_exceed_total()
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('カスタム金額の合計が総金額を超えています。');
+
+        $member1 = Member::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'name' => 'メンバー1',
+        ]);
+        $member2 = Member::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'name' => 'メンバー2',
+        ]);
+
+        $expense = Expense::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'group_id' => $this->group->id,
+            'paid_by_member_id' => $this->member->id,
+            'amount' => 5000,
+        ]);
+
+        // カスタム金額の合計が総金額を超える場合
+        $expense->members()->attach([
+            $member1->id => [
+                'is_participating' => true,
+                'amount' => 3000,
+                'is_confirmed' => true,
+            ],
+            $member2->id => [
+                'is_participating' => true,
+                'amount' => 3000, // 合計6000円で総金額5000円を超える
+                'is_confirmed' => false,
+            ]
+        ]);
+
+        $this->service->calculateSplitAmounts($expense);
+    }
+
+    public function test_calculate_split_amounts_with_multiple_members_no_custom_amounts()
+    {
+        $member1 = Member::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'name' => 'メンバー1',
+        ]);
+        $member2 = Member::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'name' => 'メンバー2',
+        ]);
+        $member3 = Member::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'name' => 'メンバー3',
+        ]);
+
+        $expense = Expense::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'group_id' => $this->group->id,
+            'paid_by_member_id' => $this->member->id,
+            'amount' => 9000,
+        ]);
+
+        // 全員にカスタム金額なし
+        $expense->members()->attach([
+            $member1->id => [
+                'is_participating' => true,
+                'amount' => null,
+                'is_confirmed' => true,
+            ],
+            $member2->id => [
+                'is_participating' => true,
+                'amount' => null,
+                'is_confirmed' => false,
+            ],
+            $member3->id => [
+                'is_participating' => true,
+                'amount' => null,
+                'is_confirmed' => false,
+            ]
+        ]);
+
+        $result = $this->service->calculateSplitAmounts($expense);
+
+        $this->assertCount(3, $result);
+        // 全員3000円ずつ
+        foreach ($result as $split) {
+            $this->assertEquals(3000, $split['amount']);
+        }
+    }
+
+    public function test_validate_split_amounts_with_custom_amounts_exceeding_total()
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('個別金額の合計が総金額を超えています。');
+
+        $memberAssignments = [
+            [
+                'member_id' => 1,
+                'is_participating' => true,
+                'amount' => 3000,
+            ],
+            [
+                'member_id' => 2,
+                'is_participating' => true,
+                'amount' => 3000,
+            ]
+        ];
+
+        $expense = Expense::factory()->make([
+            'amount' => 5000,
+            'is_split_confirmed' => false,
+        ]);
+        $expense->travelPlan = $this->travelPlan;
+
+        // 権限チェック用のmock
+        $this->memberRepository
+            ->expects($this->exactly(2))
+            ->method('findByTravelPlanAndUser')
+            ->with($this->travelPlan, $this->user)
+            ->willReturn($this->member);
+
+        $this->memberRepository
+            ->expects($this->once())
+            ->method('findByTravelPlan')
+            ->willReturn(new \Illuminate\Database\Eloquent\Collection([
+                (object)['id' => 1, 'is_confirmed' => true],
+                (object)['id' => 2, 'is_confirmed' => true],
+            ]));
+
+        $this->expenseRepository
+            ->expects($this->once())
+            ->method('update')
+            ->willReturn($expense);
+
+        // updateExpenseを呼び出すことでvalidateSplitAmountsが実行される
+        $this->service->updateExpense($expense, $this->user, [
+            'title' => 'Test',
+            'amount' => 5000,
+            'expense_date' => '2024-07-02',
+            'group_id' => $this->group->id,
+            'paid_by_member_id' => $this->member->id,
+            'member_assignments' => $memberAssignments,
+        ]);
+    }
+
+    public function test_validate_split_amounts_with_all_members_having_custom_amounts_not_matching_total()
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('全員に個別金額を設定する場合、合計は総金額と一致する必要があります。');
+
+        $memberAssignments = [
+            [
+                'member_id' => 1,
+                'is_participating' => true,
+                'amount' => 2000,
+            ],
+            [
+                'member_id' => 2,
+                'is_participating' => true,
+                'amount' => 2000,
+            ]
+        ];
+
+        $expense = Expense::factory()->make(['amount' => 5000]);
+        $expense->travelPlan = $this->travelPlan;
+
+        // 権限チェック用のmock
+        $this->memberRepository
+            ->expects($this->exactly(2))
+            ->method('findByTravelPlanAndUser')
+            ->with($this->travelPlan, $this->user)
+            ->willReturn($this->member);
+
+        $this->memberRepository
+            ->expects($this->once())
+            ->method('findByTravelPlan')
+            ->willReturn(new \Illuminate\Database\Eloquent\Collection([
+                (object)['id' => 1, 'is_confirmed' => true],
+                (object)['id' => 2, 'is_confirmed' => true],
+            ]));
+
+        // updateExpenseを呼び出すことでvalidateSplitAmountsが実行される
+        $this->service->updateExpense($expense, $this->user, [
+            'title' => 'Test',
+            'amount' => 5000,
+            'expense_date' => '2024-07-02',
+            'group_id' => $this->group->id,
+            'paid_by_member_id' => $this->member->id,
+            'member_assignments' => $memberAssignments,
+        ]);
     }
 }

@@ -155,14 +155,50 @@ class ExpenseService
 
         $totalAmount = $expense->amount;
         $memberCount = $participatingMembers->count();
-        $splitAmount = $totalAmount / $memberCount;
 
-        $splits = [];
+        // カスタム金額が設定されているメンバーの合計を計算
+        $customAmountTotal = 0;
+        $membersWithCustomAmount = [];
+        $membersWithoutCustomAmount = [];
+
         foreach ($participatingMembers as $member) {
             $customAmount = $member->pivot->amount;
+            if ($customAmount !== null && $customAmount > 0) {
+                $customAmountTotal += $customAmount;
+                $membersWithCustomAmount[] = $member;
+            } else {
+                $membersWithoutCustomAmount[] = $member;
+            }
+        }
+
+        // 残り金額を計算
+        $remainingAmount = $totalAmount - $customAmountTotal;
+        $remainingMemberCount = count($membersWithoutCustomAmount);
+
+        // 残り金額が負の場合はエラー
+        if ($remainingAmount < 0) {
+            throw new \Exception('カスタム金額の合計が総金額を超えています。');
+        }
+
+        // 残りメンバーの一人当たり金額を計算
+        $remainingSplitAmount = $remainingMemberCount > 0 ? $remainingAmount / $remainingMemberCount : 0;
+
+        $splits = [];
+        
+        // カスタム金額設定済みメンバー
+        foreach ($membersWithCustomAmount as $member) {
             $splits[] = [
                 'member' => $member,
-                'amount' => $customAmount ?? $splitAmount,
+                'amount' => $member->pivot->amount,
+                'is_confirmed' => $member->pivot->is_confirmed,
+            ];
+        }
+
+        // カスタム金額未設定メンバー
+        foreach ($membersWithoutCustomAmount as $member) {
+            $splits[] = [
+                'member' => $member,
+                'amount' => $remainingSplitAmount,
                 'is_confirmed' => $member->pivot->is_confirmed,
             ];
         }
@@ -233,6 +269,40 @@ class ExpenseService
             }
         }
 
+        // 分割金額の合計検証
+        $this->validateSplitAmounts($expense->amount, $memberAssignments);
+
         $this->expenseRepository->assignMembers($expense, $memberAssignments);
+    }
+
+    private function validateSplitAmounts(float $totalAmount, array $memberAssignments): void
+    {
+        $customAmountTotal = 0;
+        $participatingCount = 0;
+        $customAmountCount = 0;
+
+        foreach ($memberAssignments as $assignment) {
+            if ($assignment['is_participating']) {
+                $participatingCount++;
+                
+                if (isset($assignment['amount']) && $assignment['amount'] !== null && $assignment['amount'] > 0) {
+                    $customAmountTotal += $assignment['amount'];
+                    $customAmountCount++;
+                }
+            }
+        }
+
+        // カスタム金額が設定されたメンバーがいる場合の検証
+        if ($customAmountCount > 0) {
+            // カスタム金額の合計が総金額を超える場合はエラー
+            if ($customAmountTotal > $totalAmount) {
+                throw new \Exception('個別金額の合計が総金額を超えています。');
+            }
+
+            // 全員にカスタム金額が設定されている場合、合計が総金額と一致する必要がある
+            if ($customAmountCount === $participatingCount && $customAmountTotal != $totalAmount) {
+                throw new \Exception('全員に個別金額を設定する場合、合計は総金額と一致する必要があります。');
+            }
+        }
     }
 }

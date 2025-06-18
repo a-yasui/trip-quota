@@ -237,3 +237,118 @@
         </div>
     @endcomponent
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const amountInput = document.getElementById('amount');
+        const memberCheckboxes = document.querySelectorAll('input[name$="[is_participating]"]');
+        const memberAmountInputs = document.querySelectorAll('input[name$="[amount]"]');
+        
+        function calculateSplitAmounts() {
+            const totalAmount = parseFloat(amountInput.value) || 0;
+            const participatingMembers = [];
+            
+            // 参加メンバーとカスタム金額を収集
+            memberCheckboxes.forEach((checkbox, index) => {
+                if (checkbox.checked) {
+                    const amountInput = memberAmountInputs[index];
+                    const customAmount = parseFloat(amountInput.value) || null;
+                    participatingMembers.push({
+                        checkbox: checkbox,
+                        amountInput: amountInput,
+                        customAmount: customAmount
+                    });
+                }
+            });
+            
+            if (participatingMembers.length === 0) {
+                return;
+            }
+            
+            // カスタム金額設定済みメンバーとそれ以外を分離
+            let customAmountTotal = 0;
+            let membersWithCustomAmount = [];
+            let membersWithoutCustomAmount = [];
+            
+            participatingMembers.forEach(member => {
+                if (member.customAmount !== null && member.customAmount > 0) {
+                    customAmountTotal += member.customAmount;
+                    membersWithCustomAmount.push(member);
+                } else {
+                    membersWithoutCustomAmount.push(member);
+                }
+            });
+            
+            // 残り金額を計算
+            const remainingAmount = totalAmount - customAmountTotal;
+            const remainingMemberCount = membersWithoutCustomAmount.length;
+            
+            // エラーチェックと表示
+            const errorMessage = document.getElementById('split-error-message');
+            if (!errorMessage) {
+                // エラーメッセージ要素を作成
+                const errorDiv = document.createElement('div');
+                errorDiv.id = 'split-error-message';
+                errorDiv.className = 'mt-2 text-sm text-red-600 hidden';
+                amountInput.parentNode.appendChild(errorDiv);
+            }
+            
+            const errorDiv = document.getElementById('split-error-message');
+            
+            if (remainingAmount < 0) {
+                errorDiv.textContent = 'カスタム金額の合計が総金額を超えています。';
+                errorDiv.classList.remove('hidden');
+                return;
+            } else {
+                errorDiv.classList.add('hidden');
+            }
+            
+            // 残りメンバーの一人当たり金額を計算して表示
+            const remainingSplitAmount = remainingMemberCount > 0 ? remainingAmount / remainingMemberCount : 0;
+            
+            membersWithoutCustomAmount.forEach(member => {
+                member.amountInput.placeholder = `自動計算: ${remainingSplitAmount.toFixed(0)}`;
+            });
+            
+            // 合計金額表示を更新
+            updateSummary(totalAmount, participatingMembers.length, customAmountTotal, remainingAmount);
+        }
+        
+        function updateSummary(totalAmount, participatingCount, customAmountTotal, remainingAmount) {
+            // サマリー要素がない場合は作成
+            let summaryDiv = document.getElementById('split-summary');
+            if (!summaryDiv) {
+                summaryDiv = document.createElement('div');
+                summaryDiv.id = 'split-summary';
+                summaryDiv.className = 'mt-4 p-3 bg-gray-50 rounded-md text-sm';
+                
+                // メンバー割り当てセクションの後に挿入
+                const memberSection = document.querySelector('.space-y-3').parentNode;
+                memberSection.appendChild(summaryDiv);
+            }
+            
+            summaryDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <div><span class="text-gray-600">総金額:</span> <span class="font-semibold">${totalAmount.toLocaleString()}</span></div>
+                    <div><span class="text-gray-600">参加者数:</span> <span class="font-semibold">${participatingCount}人</span></div>
+                    <div><span class="text-gray-600">設定済み合計:</span> <span class="font-semibold">${customAmountTotal.toLocaleString()}</span></div>
+                    <div><span class="text-gray-600">残り金額:</span> <span class="font-semibold">${remainingAmount.toLocaleString()}</span></div>
+                </div>
+            `;
+        }
+        
+        // イベントリスナーを設定
+        amountInput.addEventListener('input', calculateSplitAmounts);
+        memberCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', calculateSplitAmounts);
+        });
+        memberAmountInputs.forEach(input => {
+            input.addEventListener('input', calculateSplitAmounts);
+        });
+        
+        // 初期計算
+        calculateSplitAmounts();
+    });
+</script>
+@endpush
