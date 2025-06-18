@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Account;
 use App\Models\OAuthProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProfileViewTest extends TestCase
@@ -20,7 +21,7 @@ class ProfileViewTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /** @test */
+    #[Test]
     public function profile_view_displays_correctly()
     {
         $response = $this->actingAs($this->user)
@@ -34,7 +35,7 @@ class ProfileViewTest extends TestCase
         $response->assertSee('パスワード変更');
     }
 
-    /** @test */
+    #[Test]
     public function profile_view_shows_basic_information()
     {
         $response = $this->actingAs($this->user)
@@ -44,7 +45,7 @@ class ProfileViewTest extends TestCase
         $response->assertSee($this->user->created_at->format('Y年m月d日'));
     }
 
-    /** @test */
+    #[Test]
     public function profile_view_shows_accounts_when_present()
     {
         Account::factory()->create([
@@ -60,7 +61,7 @@ class ProfileViewTest extends TestCase
         $response->assertSee('@test_user');
     }
 
-    /** @test */
+    #[Test]
     public function profile_view_shows_empty_state_when_no_accounts()
     {
         $response = $this->actingAs($this->user)
@@ -69,7 +70,7 @@ class ProfileViewTest extends TestCase
         $response->assertSee('アカウントが設定されていません。');
     }
 
-    /** @test */
+    #[Test]
     public function profile_view_shows_oauth_providers_when_present()
     {
         OAuthProvider::factory()->create([
@@ -85,7 +86,7 @@ class ProfileViewTest extends TestCase
         $response->assertSee('連携済み');
     }
 
-    /** @test */
+    #[Test]
     public function profile_view_shows_empty_state_when_no_oauth()
     {
         $response = $this->actingAs($this->user)
@@ -94,7 +95,7 @@ class ProfileViewTest extends TestCase
         $response->assertSee('OAuth連携がありません。');
     }
 
-    /** @test */
+    #[Test]
     public function profile_view_shows_password_change_form()
     {
         $response = $this->actingAs($this->user)
@@ -106,7 +107,7 @@ class ProfileViewTest extends TestCase
         $response->assertSee('パスワードを変更');
     }
 
-    /** @test */
+    #[Test]
     public function profile_view_shows_navigation_link()
     {
         $response = $this->actingAs($this->user)
@@ -115,7 +116,7 @@ class ProfileViewTest extends TestCase
         $response->assertSee('ダッシュボードに戻る');
     }
 
-    /** @test */
+    #[Test]
     public function profile_view_shows_account_thumbnails()
     {
         Account::factory()->create([
@@ -132,7 +133,7 @@ class ProfileViewTest extends TestCase
         $response->assertSee('User With Thumbnail');
     }
 
-    /** @test */
+    #[Test]
     public function profile_view_shows_account_initials_when_no_thumbnail()
     {
         Account::factory()->create([

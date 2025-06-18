@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\OAuthProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProfileControllerTest extends TestCase
@@ -21,7 +22,7 @@ class ProfileControllerTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /** @test */
+    #[Test]
     public function show_displays_profile_page()
     {
         $response = $this->actingAs($this->user)
@@ -33,7 +34,7 @@ class ProfileControllerTest extends TestCase
         $response->assertSee($this->user->email);
     }
 
-    /** @test */
+    #[Test]
     public function show_displays_user_accounts()
     {
         $account = Account::factory()->create([
@@ -50,7 +51,7 @@ class ProfileControllerTest extends TestCase
         $response->assertSee('@test_account');
     }
 
-    /** @test */
+    #[Test]
     public function show_displays_oauth_providers()
     {
         OAuthProvider::factory()->create([
@@ -67,7 +68,7 @@ class ProfileControllerTest extends TestCase
         $response->assertSee('連携済み');
     }
 
-    /** @test */
+    #[Test]
     public function update_password_successfully_changes_password()
     {
         $currentPassword = 'current_password';
@@ -91,7 +92,7 @@ class ProfileControllerTest extends TestCase
         $this->assertTrue(Hash::check($newPassword, $this->user->fresh()->password));
     }
 
-    /** @test */
+    #[Test]
     public function update_password_fails_with_wrong_current_password()
     {
         $currentPassword = 'current_password';
@@ -115,7 +116,7 @@ class ProfileControllerTest extends TestCase
         $this->assertTrue(Hash::check($currentPassword, $this->user->fresh()->password));
     }
 
-    /** @test */
+    #[Test]
     public function update_password_fails_with_password_confirmation_mismatch()
     {
         $currentPassword = 'current_password';
@@ -135,7 +136,7 @@ class ProfileControllerTest extends TestCase
         $response->assertSessionHasErrors(['password']);
     }
 
-    /** @test */
+    #[Test]
     public function update_password_fails_with_weak_password()
     {
         $currentPassword = 'current_password';
@@ -155,7 +156,7 @@ class ProfileControllerTest extends TestCase
         $response->assertSessionHasErrors(['password']);
     }
 
-    /** @test */
+    #[Test]
     public function update_password_requires_authentication()
     {
         $response = $this->put(route('profile.password.update'), [
@@ -167,7 +168,7 @@ class ProfileControllerTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    /** @test */
+    #[Test]
     public function show_requires_authentication()
     {
         $response = $this->get(route('profile.show'));
