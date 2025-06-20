@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon $check_out_date
  * @property \Illuminate\Support\Carbon|null $check_in_time
  * @property \Illuminate\Support\Carbon|null $check_out_time
+ * @property string|null $timezone
  * @property numeric|null $price_per_night
  * @property string $currency
  * @property string|null $notes
@@ -61,6 +62,7 @@ class Accommodation extends Model
         'check_out_date',
         'check_in_time',
         'check_out_time',
+        'timezone',
         'price_per_night',
         'currency',
         'notes',

@@ -51,6 +51,8 @@ class ItineraryRequest extends FormRequest
                 $this->validateEndTimeAfterStart(),
             ],
             'timezone' => 'nullable|string|max:50',
+            'departure_timezone' => 'nullable|string|max:50',
+            'arrival_timezone' => 'nullable|string|max:50',
             'group_id' => [
                 'nullable',
                 'exists:groups,id',

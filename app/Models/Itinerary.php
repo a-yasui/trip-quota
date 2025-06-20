@@ -14,10 +14,13 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $title
  * @property string|null $description
  * @property \Illuminate\Support\Carbon $date
+ * @property \Illuminate\Support\Carbon|null $arrival_date
  * @property \Illuminate\Support\Carbon|null $start_time
  * @property \Illuminate\Support\Carbon|null $end_time
  * @property string $timezone
- * @property string|null $transportation_type
+ * @property string|null $departure_timezone
+ * @property string|null $arrival_timezone
+ * @property \App\Enums\TransportationType|null $transportation_type
  * @property string|null $airline
  * @property string|null $flight_number
  * @property \Illuminate\Support\Carbon|null $departure_time
@@ -75,6 +78,8 @@ class Itinerary extends Model
         'start_time',
         'end_time',
         'timezone',
+        'departure_timezone',
+        'arrival_timezone',
         'transportation_type',
         'airline',
         'flight_number',

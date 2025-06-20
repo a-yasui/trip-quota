@@ -38,6 +38,8 @@ class ItineraryFactory extends Factory
             'start_time' => $startTime,
             'end_time' => $endTime,
             'timezone' => fake()->randomElement(['Asia/Tokyo', 'UTC', 'America/New_York', 'Europe/London']),
+            'departure_timezone' => fake()->optional(0.4)->randomElement(['Asia/Tokyo', 'UTC', 'America/New_York', 'Europe/London', 'Asia/Seoul', 'Europe/Paris']),
+            'arrival_timezone' => fake()->optional(0.3)->randomElement(['Asia/Tokyo', 'UTC', 'America/New_York', 'Europe/London', 'Asia/Seoul', 'Europe/Paris']),
             'transportation_type' => fake()->optional()->randomElement(['walking', 'bike', 'car', 'bus', 'ferry', 'airplane']),
             'airline' => fake()->optional()->randomElement(['JAL', 'ANA', 'JetStar', 'Peach', 'Skymark']),
             'flight_number' => fake()->optional()->bothify('??###'),
