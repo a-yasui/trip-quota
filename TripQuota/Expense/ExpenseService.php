@@ -143,6 +143,44 @@ class ExpenseService
         $expense->members()->updateExistingPivot($member->id, ['is_confirmed' => true]);
     }
 
+    public function autoParticipateCurrentUser(Expense $expense, User $user): void
+    {
+        // 費用が確定済みの場合は何もしない
+        if ($expense->is_split_confirmed) {
+            return;
+        }
+
+        // ユーザーのメンバー情報を取得
+        $member = $this->memberRepository->findByTravelPlanAndUser(
+            $expense->travelPlan,
+            $user
+        );
+
+        if (! $member) {
+            return;
+        }
+
+        // 既に参加済みかチェック
+        $existingPivot = $expense->members()->where('members.id', $member->id)->first();
+
+        if ($existingPivot) {
+            // 既に参加しているが、is_confirmとis_participatingがfalseの場合は自動確認
+            if (! $existingPivot->pivot->is_participating || ! $existingPivot->pivot->is_confirmed) {
+                $expense->members()->updateExistingPivot($member->id, [
+                    'is_participating' => true,
+                    'is_confirmed' => true,
+                ]);
+            }
+        } else {
+            // まだ参加していない場合は自動参加
+            $expense->members()->attach($member->id, [
+                'is_participating' => true,
+                'is_confirmed' => true,
+                'amount' => null,
+            ]);
+        }
+    }
+
     public function calculateSplitAmounts(Expense $expense): array
     {
         $participatingMembers = $expense->members()
@@ -184,7 +222,7 @@ class ExpenseService
         $remainingSplitAmount = $remainingMemberCount > 0 ? $remainingAmount / $remainingMemberCount : 0;
 
         $splits = [];
-        
+
         // カスタム金額設定済みメンバー
         foreach ($membersWithCustomAmount as $member) {
             $splits[] = [
@@ -204,6 +242,30 @@ class ExpenseService
         }
 
         return $splits;
+    }
+
+    public function updateExpenseSplits(Expense $expense, User $user, array $splits): void
+    {
+        // 費用が確定済みの場合はエラー
+        if ($expense->is_split_confirmed) {
+            throw new \Exception('確定済みの費用の分割金額は変更できません。');
+        }
+
+        // ユーザーが管理権限を持つかチェック
+        $this->ensureUserCanManageExpenses($expense->travelPlan, $user);
+
+        // 分割金額の合計が総金額と一致するかチェック
+        $totalSplitAmount = array_sum(array_column($splits, 'amount'));
+        if (abs($totalSplitAmount - $expense->amount) > 0.01) {
+            throw new \Exception('分割金額の合計が総金額と一致しません。');
+        }
+
+        // 各メンバーの分割金額を更新
+        foreach ($splits as $split) {
+            $expense->members()->updateExistingPivot($split['member_id'], [
+                'amount' => $split['amount'],
+            ]);
+        }
     }
 
     private function ensureUserCanViewExpenses(TravelPlan $travelPlan, User $user): void
@@ -284,7 +346,7 @@ class ExpenseService
         foreach ($memberAssignments as $assignment) {
             if ($assignment['is_participating']) {
                 $participatingCount++;
-                
+
                 if (isset($assignment['amount']) && $assignment['amount'] !== null && $assignment['amount'] > 0) {
                     $customAmountTotal += $assignment['amount'];
                     $customAmountCount++;

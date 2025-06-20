@@ -34,6 +34,7 @@ class SettlementRepository implements SettlementRepositoryInterface
     public function update(ExpenseSettlement $settlement, array $data): ExpenseSettlement
     {
         $settlement->update($data);
+
         return $settlement->fresh();
     }
 
@@ -42,7 +43,7 @@ class SettlementRepository implements SettlementRepositoryInterface
         $settlement->update([
             'settled_at' => now(),
         ]);
-        
+
         return $settlement->fresh();
     }
 
@@ -58,6 +59,7 @@ class SettlementRepository implements SettlementRepositoryInterface
             foreach ($settlements as $settlementData) {
                 $created[] = $this->create($settlementData);
             }
+
             return new Collection($created);
         });
     }

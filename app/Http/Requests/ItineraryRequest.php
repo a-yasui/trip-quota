@@ -109,8 +109,8 @@ class ItineraryRequest extends FormRequest
             switch ($transportationType) {
                 case TransportationType::AIRPLANE:
                     $rules = array_merge($rules, [
-                        'airline' => 'required_if:transportation_type,' . TransportationType::AIRPLANE->value . '|string|max:255',
-                        'flight_number' => 'required_if:transportation_type,' . TransportationType::AIRPLANE->value . '|string|max:255',
+                        'airline' => 'required_if:transportation_type,'.TransportationType::AIRPLANE->value.'|string|max:255',
+                        'flight_number' => 'required_if:transportation_type,'.TransportationType::AIRPLANE->value.'|string|max:255',
                         'departure_airport' => 'nullable|string|max:255',
                         'arrival_airport' => 'nullable|string|max:255',
                         'departure_time' => [
@@ -129,7 +129,7 @@ class ItineraryRequest extends FormRequest
 
                 case TransportationType::TRAIN:
                     $rules = array_merge($rules, [
-                        'train_line' => 'required_if:transportation_type,' . TransportationType::TRAIN->value . '|string|max:255',
+                        'train_line' => 'required_if:transportation_type,'.TransportationType::TRAIN->value.'|string|max:255',
                         'train_type' => 'nullable|string|max:255',
                         'departure_station' => 'nullable|string|max:255',
                         'arrival_station' => 'nullable|string|max:255',
@@ -185,7 +185,7 @@ class ItineraryRequest extends FormRequest
             $rules['arrival_station'] = 'nullable|string|max:255';
         }
 
-        if (!in_array($transportationType, [TransportationType::BUS, TransportationType::FERRY])) {
+        if (! in_array($transportationType, [TransportationType::BUS, TransportationType::FERRY])) {
             $rules['company'] = 'nullable|string|max:255';
             $rules['departure_terminal'] = 'nullable|string|max:255';
             $rules['arrival_terminal'] = 'nullable|string|max:255';
@@ -201,19 +201,23 @@ class ItineraryRequest extends FormRequest
     {
         return function (string $attribute, mixed $value, \Closure $fail) {
             $travelPlan = $this->getTravelPlan();
-            if (!$travelPlan) return;
+            if (! $travelPlan) {
+                return;
+            }
 
             $date = Carbon::parse($value);
             $startDate = $travelPlan->departure_date;
             $endDate = $travelPlan->return_date;
 
             if ($date->lt($startDate)) {
-                $fail('日付は旅行開始日（' . $startDate->format('Y年n月d日') . '）以降に設定してください。');
+                $fail('日付は旅行開始日（'.$startDate->format('Y年n月d日').'）以降に設定してください。');
+
                 return;
             }
 
             if ($endDate && $date->gt($endDate)) {
-                $fail('日付は旅行終了日（' . $endDate->format('Y年n月d日') . '）以前に設定してください。');
+                $fail('日付は旅行終了日（'.$endDate->format('Y年n月d日').'）以前に設定してください。');
+
                 return;
             }
         };
@@ -225,7 +229,9 @@ class ItineraryRequest extends FormRequest
     private function validateTimeConflicts(): \Closure
     {
         return function (string $attribute, mixed $value, \Closure $fail) {
-            if (!$value) return;
+            if (! $value) {
+                return;
+            }
 
             // 時刻の重複チェック
             $this->checkTimeConflicts($attribute, $value, $fail);
@@ -238,7 +244,9 @@ class ItineraryRequest extends FormRequest
     private function validateEndTimeAfterStart(): \Closure
     {
         return function (string $attribute, mixed $value, \Closure $fail) {
-            if (!$value || !$this->input('start_time')) return;
+            if (! $value || ! $this->input('start_time')) {
+                return;
+            }
 
             $startTime = Carbon::createFromFormat('H:i', $this->input('start_time'));
             $endTime = Carbon::createFromFormat('H:i', $value);
@@ -246,6 +254,7 @@ class ItineraryRequest extends FormRequest
             // 同じ時刻は許可しない
             if ($endTime->eq($startTime)) {
                 $fail('終了時刻は開始時刻と異なる時刻に設定してください。');
+
                 return;
             }
 
@@ -266,13 +275,17 @@ class ItineraryRequest extends FormRequest
     private function validateGroupBelongsToTravelPlan(): \Closure
     {
         return function (string $attribute, mixed $value, \Closure $fail) {
-            if (!$value) return;
+            if (! $value) {
+                return;
+            }
 
             $travelPlan = $this->getTravelPlan();
-            if (!$travelPlan) return;
+            if (! $travelPlan) {
+                return;
+            }
 
             $group = Group::find($value);
-            if (!$group || $group->travel_plan_id !== $travelPlan->id) {
+            if (! $group || $group->travel_plan_id !== $travelPlan->id) {
                 $fail('選択されたグループはこの旅行プランに属していません。');
             }
         };
@@ -285,10 +298,12 @@ class ItineraryRequest extends FormRequest
     {
         return function (string $attribute, mixed $value, \Closure $fail) {
             $travelPlan = $this->getTravelPlan();
-            if (!$travelPlan) return;
+            if (! $travelPlan) {
+                return;
+            }
 
             $memberExists = $travelPlan->members()->where('id', $value)->exists();
-            if (!$memberExists) {
+            if (! $memberExists) {
                 $fail('選択されたメンバーはこの旅行プランに属していません。');
             }
         };
@@ -300,7 +315,9 @@ class ItineraryRequest extends FormRequest
     private function validateFutureDateTime(): \Closure
     {
         return function (string $attribute, mixed $value, \Closure $fail) {
-            if (!$value) return;
+            if (! $value) {
+                return;
+            }
 
             $dateTime = Carbon::parse($value);
             if ($dateTime->isPast()) {
@@ -315,7 +332,9 @@ class ItineraryRequest extends FormRequest
     private function validateFlightDuration(): \Closure
     {
         return function (string $attribute, mixed $value, \Closure $fail) {
-            if (!$value || !$this->input('departure_time')) return;
+            if (! $value || ! $this->input('departure_time')) {
+                return;
+            }
 
             $departureTime = Carbon::parse($this->input('departure_time'));
             $arrivalTime = Carbon::parse($value);
@@ -340,7 +359,9 @@ class ItineraryRequest extends FormRequest
     private function checkTimeConflicts(string $attribute, mixed $value, \Closure $fail): void
     {
         $travelPlan = $this->getTravelPlan();
-        if (!$travelPlan) return;
+        if (! $travelPlan) {
+            return;
+        }
 
         $date = $this->input('date');
         $startTime = $this->input('start_time');
@@ -348,7 +369,9 @@ class ItineraryRequest extends FormRequest
         $groupId = $this->input('group_id');
         $memberIds = $this->input('member_ids', []);
 
-        if (!$date || !$startTime) return;
+        if (! $date || ! $startTime) {
+            return;
+        }
 
         // 現在編集中の旅程は除外
         $currentItineraryId = $this->route('itinerary')?->id;
@@ -372,8 +395,9 @@ class ItineraryRequest extends FormRequest
                     $fail(sprintf(
                         '時刻が重複しています。%s（%s）と重複しています。',
                         $existing->title,
-                        $existing->start_time->format('H:i') . ($existing->end_time ? '〜' . $existing->end_time->format('H:i') : '')
+                        $existing->start_time->format('H:i').($existing->end_time ? '〜'.$existing->end_time->format('H:i') : '')
                     ));
+
                     return;
                 }
 
@@ -383,9 +407,10 @@ class ItineraryRequest extends FormRequest
                     $fail(sprintf(
                         '時刻が重複しています。%s（%s）で以下のメンバーが重複しています：%s',
                         $existing->title,
-                        $existing->start_time->format('H:i') . ($existing->end_time ? '〜' . $existing->end_time->format('H:i') : ''),
+                        $existing->start_time->format('H:i').($existing->end_time ? '〜'.$existing->end_time->format('H:i') : ''),
                         implode('、', $conflictMembers)
                     ));
+
                     return;
                 }
             }
@@ -412,7 +437,7 @@ class ItineraryRequest extends FormRequest
     private function hasGroupConflict(?int $groupId, Itinerary $existing): bool
     {
         // 全体（グループなし）同士の重複
-        if (!$groupId && !$existing->group_id) {
+        if (! $groupId && ! $existing->group_id) {
             return true;
         }
 
@@ -434,7 +459,8 @@ class ItineraryRequest extends FormRequest
         }
 
         $existingMemberIds = $existing->members->pluck('id')->toArray();
-        return !empty(array_intersect($memberIds, $existingMemberIds));
+
+        return ! empty(array_intersect($memberIds, $existingMemberIds));
     }
 
     /**
@@ -444,7 +470,7 @@ class ItineraryRequest extends FormRequest
     {
         $existingMemberIds = $existing->members->pluck('id')->toArray();
         $conflictIds = array_intersect($memberIds, $existingMemberIds);
-        
+
         return $existing->members->whereIn('id', $conflictIds)->pluck('name')->toArray();
     }
 
@@ -455,15 +481,17 @@ class ItineraryRequest extends FormRequest
     {
         // ルートパラメータから取得を試行
         $uuid = $this->route('uuid');
-        if (!$uuid) {
+        if (! $uuid) {
             // フォールバック: URLから抽出
             $path = $this->path();
             if (preg_match('/travel-plans\/([^\/]+)/', $path, $matches)) {
                 $uuid = $matches[1];
             }
         }
-        
-        if (!$uuid) return null;
+
+        if (! $uuid) {
+            return null;
+        }
 
         return TravelPlan::where('uuid', $uuid)->first();
     }

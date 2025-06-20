@@ -115,7 +115,12 @@
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         <option value="">グループを選択してください</option>
                         @foreach($groups as $group)
-                            <option value="{{ $group->id }}" {{ old('group_id') == $group->id ? 'selected' : '' }}>
+                            <option value="{{ $group->id }}" 
+                                {{ 
+                                    old('group_id') 
+                                        ? (old('group_id') == $group->id ? 'selected' : '') 
+                                        : ($coreGroup && $group->id === $coreGroup->id ? 'selected' : '') 
+                                }}>
                                 {{ $group->name }} ({{ $group->members->count() }}人)
                             </option>
                         @endforeach
@@ -136,7 +141,12 @@
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         <option value="">支払い者を選択してください</option>
                         @foreach($members as $member)
-                            <option value="{{ $member->id }}" {{ old('paid_by_member_id') == $member->id ? 'selected' : '' }}>
+                            <option value="{{ $member->id }}" 
+                                {{ 
+                                    old('paid_by_member_id') 
+                                        ? (old('paid_by_member_id') == $member->id ? 'selected' : '') 
+                                        : ($currentUserMember && $member->id === $currentUserMember->id ? 'selected' : '') 
+                                }}>
                                 {{ $member->name }}
                             </option>
                         @endforeach
@@ -212,6 +222,17 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- ナビゲーションリンク -->
+                <div class="mb-6 pb-6 border-b border-gray-200">
+                    <a href="{{ route('travel-plans.expenses.index', $travelPlan->uuid) }}" 
+                       class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        費用一覧に戻る
+                    </a>
                 </div>
 
                 <!-- ボタン -->

@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Account;
 use App\Models\OAuthProvider;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -51,7 +51,7 @@ class ProfileViewTest extends TestCase
         Account::factory()->create([
             'user_id' => $this->user->id,
             'account_name' => 'test_user',
-            'display_name' => 'Test User'
+            'display_name' => 'Test User',
         ]);
 
         $response = $this->actingAs($this->user)
@@ -76,7 +76,7 @@ class ProfileViewTest extends TestCase
         OAuthProvider::factory()->create([
             'user_id' => $this->user->id,
             'provider' => 'github',
-            'provider_id' => '987654321'
+            'provider_id' => '987654321',
         ]);
 
         $response = $this->actingAs($this->user)
@@ -123,7 +123,7 @@ class ProfileViewTest extends TestCase
             'user_id' => $this->user->id,
             'account_name' => 'user_with_thumb',
             'display_name' => 'User With Thumbnail',
-            'thumbnail_url' => 'https://example.com/thumb.jpg'
+            'thumbnail_url' => 'https://example.com/thumb.jpg',
         ]);
 
         $response = $this->actingAs($this->user)
@@ -139,7 +139,7 @@ class ProfileViewTest extends TestCase
         Account::factory()->create([
             'user_id' => $this->user->id,
             'account_name' => 'example_user',
-            'display_name' => 'Example User'
+            'display_name' => 'Example User',
         ]);
 
         $response = $this->actingAs($this->user)

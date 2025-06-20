@@ -2,15 +2,15 @@
 
 namespace Tests\Unit\TripQuota;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Expense;
+use App\Models\Group;
+use App\Models\Member;
 use App\Models\TravelPlan;
 use App\Models\User;
-use App\Models\Member;
-use App\Models\Group;
-use App\Models\Expense;
-use TripQuota\Expense\ExpenseService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 use TripQuota\Expense\ExpenseRepositoryInterface;
+use TripQuota\Expense\ExpenseService;
 use TripQuota\Member\MemberRepositoryInterface;
 
 class ExpenseServiceTest extends TestCase
@@ -18,21 +18,27 @@ class ExpenseServiceTest extends TestCase
     use RefreshDatabase;
 
     private ExpenseService $service;
+
     private ExpenseRepositoryInterface $expenseRepository;
+
     private MemberRepositoryInterface $memberRepository;
+
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
+
     private Group $group;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->expenseRepository = $this->createMock(ExpenseRepositoryInterface::class);
         $this->memberRepository = $this->createMock(MemberRepositoryInterface::class);
         $this->service = new ExpenseService($this->expenseRepository, $this->memberRepository);
-        
+
         $this->user = User::factory()->create();
         $this->travelPlan = TravelPlan::factory()->create([
             'departure_date' => '2024-07-01',
@@ -245,7 +251,7 @@ class ExpenseServiceTest extends TestCase
         $expense1 = Expense::factory()->make(['id' => 1, 'title' => '費用A']);
         $expense2 = Expense::factory()->make(['id' => 2, 'title' => '費用B']);
         $expectedExpenses = new \Illuminate\Database\Eloquent\Collection([
-            $expense1, $expense2
+            $expense1, $expense2,
         ]);
 
         $this->memberRepository
@@ -273,15 +279,16 @@ class ExpenseServiceTest extends TestCase
         ]);
 
         // 全メンバーが確認済みの状態をモック
-        $confirmedMember = new \stdClass();
-        $confirmedMember->pivot = new \stdClass();
+        $confirmedMember = new \stdClass;
+        $confirmedMember->pivot = new \stdClass;
         $confirmedMember->pivot->is_confirmed = true;
 
         $membersCollection = collect([$confirmedMember]);
-        $expense->members = function() use ($membersCollection) {
+        $expense->members = function () {
             $query = $this->createMock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
             $query->method('wherePivot')->willReturnSelf();
             $query->method('count')->willReturn(0); // 未確認メンバー0人
+
             return $query;
         };
 
@@ -336,18 +343,18 @@ class ExpenseServiceTest extends TestCase
                 'is_participating' => true,
                 'amount' => 3000, // カスタム金額
                 'is_confirmed' => false,
-            ]
+            ],
         ]);
 
         $result = $this->service->calculateSplitAmounts($expense);
 
         $this->assertCount(2, $result);
-        
+
         // カスタム金額設定済みメンバー（member2）が先に配列に追加される
         $this->assertEquals($member2->id, $result[0]['member']->id);
         $this->assertEquals(3000, $result[0]['amount']); // カスタム金額
         $this->assertEquals(0, $result[0]['is_confirmed']); // データベースでは1/0で保存される
-        
+
         // 残り金額から計算されるメンバー（member1）
         $this->assertEquals($member1->id, $result[1]['member']->id);
         $this->assertEquals(2000, $result[1]['amount']); // 残り金額 (5000 - 3000 = 2000)
@@ -386,7 +393,7 @@ class ExpenseServiceTest extends TestCase
                 'is_participating' => true,
                 'amount' => 3000, // 合計6000円で総金額5000円を超える
                 'is_confirmed' => false,
-            ]
+            ],
         ]);
 
         $this->service->calculateSplitAmounts($expense);
@@ -430,7 +437,7 @@ class ExpenseServiceTest extends TestCase
                 'is_participating' => true,
                 'amount' => null,
                 'is_confirmed' => false,
-            ]
+            ],
         ]);
 
         $result = $this->service->calculateSplitAmounts($expense);
@@ -455,7 +462,7 @@ class ExpenseServiceTest extends TestCase
                 'member_id' => 2,
                 'is_participating' => true,
                 'amount' => 3000,
-            ]
+            ],
         ];
 
         $this->expectException(\Exception::class);
@@ -465,7 +472,7 @@ class ExpenseServiceTest extends TestCase
         $reflection = new \ReflectionClass($this->service);
         $method = $reflection->getMethod('validateSplitAmounts');
         $method->setAccessible(true);
-        
+
         $method->invoke($this->service, 5000, $memberAssignments);
     }
 
@@ -482,7 +489,7 @@ class ExpenseServiceTest extends TestCase
                 'member_id' => 2,
                 'is_participating' => true,
                 'amount' => 2000,
-            ]
+            ],
         ];
 
         $this->expectException(\Exception::class);
@@ -492,7 +499,7 @@ class ExpenseServiceTest extends TestCase
         $reflection = new \ReflectionClass($this->service);
         $method = $reflection->getMethod('validateSplitAmounts');
         $method->setAccessible(true);
-        
+
         $method->invoke($this->service, 5000, $memberAssignments);
     }
 
@@ -509,17 +516,17 @@ class ExpenseServiceTest extends TestCase
                 'member_id' => 2,
                 'is_participating' => true,
                 'amount' => null,  // 残り金額から計算される
-            ]
+            ],
         ];
 
         // リフレクションを使用してprivateメソッドを直接テスト
         $reflection = new \ReflectionClass($this->service);
         $method = $reflection->getMethod('validateSplitAmounts');
         $method->setAccessible(true);
-        
+
         // 例外が発生しないことを確認
         $method->invoke($this->service, 5000, $memberAssignments);
-        
+
         // ここまで到達すれば成功
         $this->assertTrue(true);
     }

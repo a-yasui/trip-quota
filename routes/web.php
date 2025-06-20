@@ -116,6 +116,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('travel-plans/{uuid}/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('travel-plans.expenses.destroy');
     Route::post('travel-plans/{uuid}/expenses/{expense}/confirm-participation', [ExpenseController::class, 'confirmParticipation'])->name('travel-plans.expenses.confirm-participation');
     Route::post('travel-plans/{uuid}/expenses/{expense}/confirm-split', [ExpenseController::class, 'confirmSplit'])->name('travel-plans.expenses.confirm-split');
+    Route::post('travel-plans/{uuid}/expenses/{expense}/update-splits', [ExpenseController::class, 'updateSplits'])->name('travel-plans.expenses.update-splits');
 
     // 精算管理（旅行プラン配下）
     Route::get('travel-plans/{uuid}/settlements', [SettlementController::class, 'index'])->name('travel-plans.settlements.index');

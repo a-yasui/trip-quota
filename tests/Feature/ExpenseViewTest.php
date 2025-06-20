@@ -15,14 +15,17 @@ class ExpenseViewTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
+
     private Group $group;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->travelPlan = TravelPlan::factory()->create([
             'owner_user_id' => $this->user->id,
@@ -30,7 +33,7 @@ class ExpenseViewTest extends TestCase
             'departure_date' => '2024-07-01',
             'return_date' => '2024-07-05',
         ]);
-        
+
         $this->member = Member::factory()->create([
             'travel_plan_id' => $this->travelPlan->id,
             'user_id' => $this->user->id,
@@ -53,7 +56,7 @@ class ExpenseViewTest extends TestCase
         $response->assertViewIs('expenses.index');
         $response->assertViewHas('travelPlan');
         $response->assertViewHas('expenses');
-        
+
         // 基本的なページ要素の確認
         $response->assertSee('費用管理');
         $response->assertSee('テスト旅行プラン');
@@ -71,7 +74,7 @@ class ExpenseViewTest extends TestCase
         $response->assertViewHas('travelPlan');
         $response->assertViewHas('members');
         $response->assertViewHas('groups');
-        
+
         // フォーム要素の確認
         $response->assertSee('費用を追加');
         $response->assertSee('費用タイトル');
@@ -84,12 +87,12 @@ class ExpenseViewTest extends TestCase
         $response->assertSee('分割対象メンバー');
         $response->assertSee('テストメンバー');
         $response->assertSee('テストグループ');
-        
+
         // 通貨オプションの確認
         $response->assertSee('JPY (円)');
         $response->assertSee('USD (ドル)');
         $response->assertSee('EUR (ユーロ)');
-        
+
         // 旅行期間の制約確認
         $response->assertSee('min="2024-07-01"', false);
         $response->assertSee('max="2024-07-05"', false);
@@ -122,7 +125,7 @@ class ExpenseViewTest extends TestCase
         $response->assertViewIs('expenses.show');
         $response->assertViewHas('expense');
         $response->assertViewHas('splitAmounts');
-        
+
         // 費用詳細の確認
         $response->assertSee('ランチ代');
         $response->assertSee('レストランでの昼食');
@@ -131,12 +134,12 @@ class ExpenseViewTest extends TestCase
         $response->assertSee('テストグループ');
         $response->assertSee('テストメンバー');
         $response->assertSee('未確定');
-        
+
         // 分割詳細の確認
         $response->assertSee('分割詳細');
-        $response->assertSee('未確認');
-        $response->assertSee('参加を確認');
-        
+        $response->assertSee('確認済み'); // 自動参加により確認済みになる
+        $response->assertSee('分割金額を調整'); // 分割編集フォームが表示される
+
         // 編集・削除ボタンの確認（未確定の場合）
         $response->assertSee('編集');
         $response->assertSee('削除');
@@ -160,10 +163,11 @@ class ExpenseViewTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('確定済み費用');
         $response->assertSee('確定済み');
-        
-        // 確定済みなので編集・削除ボタンは表示されない
-        $response->assertDontSee('編集');
-        $response->assertDontSee('削除');
+
+        // 確定済みなので編集・削除ボタンと分割編集フォームは表示されない
+        $response->assertDontSee('class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium">');
+        $response->assertDontSee('class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">');
+        $response->assertDontSee('分割金額を調整');
     }
 
     public function test_expense_edit_view_renders_correctly()
@@ -193,7 +197,7 @@ class ExpenseViewTest extends TestCase
         $response->assertViewHas('expense');
         $response->assertViewHas('members');
         $response->assertViewHas('groups');
-        
+
         // フォーム要素と既存値の確認
         $response->assertSee('費用を編集');
         $response->assertSee('編集用費用');
@@ -239,7 +243,7 @@ class ExpenseViewTest extends TestCase
             ->get(route('travel-plans.expenses.index', $this->travelPlan->uuid));
 
         $response->assertStatus(200);
-        
+
         // 統計情報の確認
         $response->assertSee('総費用');
         $response->assertSee('3,000 JPY');
@@ -255,7 +259,7 @@ class ExpenseViewTest extends TestCase
             ->get(route('travel-plans.expenses.create', $this->travelPlan->uuid));
 
         $response->assertStatus(200);
-        
+
         // デフォルト値の確認
         $response->assertSee('value="2024-07-01"', false); // デフォルトの費用日付
         $response->assertSee('selected'); // JPYがデフォルト選択
@@ -274,7 +278,7 @@ class ExpenseViewTest extends TestCase
 
         $response->assertSessionHasErrors(['title', 'amount', 'currency']);
         $response->assertRedirect(route('travel-plans.expenses.create', $this->travelPlan->uuid));
-        
+
         // エラーページのリダイレクト先を確認
         $followResponse = $this->followRedirects($response);
         $followResponse->assertSee('費用を追加');
@@ -295,11 +299,11 @@ class ExpenseViewTest extends TestCase
             ->get(route('travel-plans.expenses.index', $this->travelPlan->uuid));
 
         $response->assertStatus(200);
-        
+
         // ナビゲーションリンクの確認
         $backUrl = route('travel-plans.show', $this->travelPlan->uuid);
         $createUrl = route('travel-plans.expenses.create', $this->travelPlan->uuid);
-        
+
         $response->assertSee($backUrl);
         $response->assertSee($createUrl);
     }
@@ -331,20 +335,20 @@ class ExpenseViewTest extends TestCase
                 'is_participating' => true,
                 'amount' => 4000, // カスタム金額
                 'is_confirmed' => false,
-            ]
+            ],
         ]);
 
         $response = $this->actingAs($this->user)
             ->get(route('travel-plans.expenses.show', [$this->travelPlan->uuid, $expense->id]));
 
         $response->assertStatus(200);
-        
+
         // 分割計算の確認
         $response->assertSee('3,000 JPY'); // 等分計算結果
         $response->assertSee('4,000 JPY'); // カスタム金額
         $response->assertSee('確認済み');
         $response->assertSee('未確認');
-        
+
         // 分割計算サマリーの確認
         $response->assertSee('総金額');
         $response->assertSee('6,000 JPY');

@@ -42,6 +42,8 @@
                            name="departure_date" 
                            value="{{ old('departure_date', $travelPlan->departure_date->format('Y-m-d')) }}"
                            required
+                           min="2000-01-01"
+                           max="{{ date('Y-m-d', strtotime('+10 years')) }}"
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     @error('departure_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -57,6 +59,8 @@
                            id="return_date" 
                            name="return_date" 
                            value="{{ old('return_date', $travelPlan->return_date?->format('Y-m-d')) }}"
+                           min="2000-01-01"
+                           max="{{ date('Y-m-d', strtotime('+10 years')) }}"
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     <p class="mt-1 text-sm text-gray-500">未定の場合は空欄にしてください</p>
                     @error('return_date')

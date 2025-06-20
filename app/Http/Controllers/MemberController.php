@@ -97,10 +97,10 @@ class MemberController extends Controller
                 $message = $validated['email'].'に招待を送信しました。';
             } else {
                 // アカウント名招待の場合、account_nameが必須
-                if (empty($validated['account_name']) || !is_string($validated['account_name'])) {
+                if (empty($validated['account_name']) || ! is_string($validated['account_name'])) {
                     throw new \Exception('アカウント名が正しく入力されていません。');
                 }
-                
+
                 $this->memberService->inviteMemberByAccountName(
                     $travelPlan,
                     Auth::user(),

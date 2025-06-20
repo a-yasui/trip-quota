@@ -51,8 +51,8 @@ class TravelPlanController extends Controller
     {
         $validated = $request->validate([
             'plan_name' => 'required|string|max:255',
-            'departure_date' => 'required|date|after_or_equal:today',
-            'return_date' => 'nullable|date|after:departure_date',
+            'departure_date' => 'required|date|after_or_equal:2000-01-01|before_or_equal:'.date('Y-m-d', strtotime('+10 years')),
+            'return_date' => 'nullable|date|after:departure_date|before_or_equal:'.date('Y-m-d', strtotime('+10 years')),
             'timezone' => 'nullable|string|max:50',
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
@@ -118,8 +118,8 @@ class TravelPlanController extends Controller
     {
         $validated = $request->validate([
             'plan_name' => 'required|string|max:255',
-            'departure_date' => 'required|date',
-            'return_date' => 'nullable|date|after:departure_date',
+            'departure_date' => 'required|date|after_or_equal:2000-01-01|before_or_equal:'.date('Y-m-d', strtotime('+10 years')),
+            'return_date' => 'nullable|date|after:departure_date|before_or_equal:'.date('Y-m-d', strtotime('+10 years')),
             'timezone' => 'nullable|string|max:50',
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',

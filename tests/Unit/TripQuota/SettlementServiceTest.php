@@ -2,37 +2,44 @@
 
 namespace Tests\Unit\TripQuota;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Database\Eloquent\Collection;
-use App\Models\TravelPlan;
-use App\Models\User;
-use App\Models\Member;
-use App\Models\Group;
 use App\Models\Expense;
 use App\Models\ExpenseSettlement;
-use TripQuota\Settlement\SettlementService;
-use TripQuota\Settlement\SettlementRepositoryInterface;
+use App\Models\Group;
+use App\Models\Member;
+use App\Models\TravelPlan;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 use TripQuota\Expense\ExpenseRepositoryInterface;
 use TripQuota\Member\MemberRepositoryInterface;
+use TripQuota\Settlement\SettlementRepositoryInterface;
+use TripQuota\Settlement\SettlementService;
 
 class SettlementServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     private SettlementService $service;
+
     private SettlementRepositoryInterface $settlementRepository;
+
     private ExpenseRepositoryInterface $expenseRepository;
+
     private MemberRepositoryInterface $memberRepository;
+
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
+
     private Group $group;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->settlementRepository = $this->createMock(SettlementRepositoryInterface::class);
         $this->expenseRepository = $this->createMock(ExpenseRepositoryInterface::class);
         $this->memberRepository = $this->createMock(MemberRepositoryInterface::class);
@@ -41,7 +48,7 @@ class SettlementServiceTest extends TestCase
             $this->expenseRepository,
             $this->memberRepository
         );
-        
+
         $this->user = User::factory()->create();
         $this->travelPlan = TravelPlan::factory()->create();
         $this->member = Member::factory()->create([
@@ -66,7 +73,7 @@ class SettlementServiceTest extends TestCase
             ->expects($this->once())
             ->method('findByTravelPlan')
             ->with($this->travelPlan)
-            ->willReturn(new Collection());
+            ->willReturn(new Collection);
 
         $result = $this->service->calculateSettlements($this->travelPlan, $this->user);
 
@@ -110,23 +117,25 @@ class SettlementServiceTest extends TestCase
             ->willReturn($expenses);
 
         // 各費用のメンバー関係をモック
-        $expense1->members = function() use ($member1, $member2) {
+        $expense1->members = function () use ($member1, $member2) {
             $query = $this->createMock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
             $query->method('wherePivot')->willReturnSelf();
             $query->method('get')->willReturn(new Collection([
                 $this->createMemberWithPivot($member1, true, null),
                 $this->createMemberWithPivot($member2, true, null),
             ]));
+
             return $query;
         };
 
-        $expense2->members = function() use ($member1, $member2) {
+        $expense2->members = function () use ($member1, $member2) {
             $query = $this->createMock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
             $query->method('wherePivot')->willReturnSelf();
             $query->method('get')->willReturn(new Collection([
                 $this->createMemberWithPivot($member1, true, null),
                 $this->createMemberWithPivot($member2, true, null),
             ]));
+
             return $query;
         };
 
@@ -153,7 +162,7 @@ class SettlementServiceTest extends TestCase
             $this->createMemberWithPivot($member1, true, null),
             $this->createMemberWithPivot($member2, true, null),
         ]));
-        
+
         $expense2Query = $this->createMock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
         $expense2Query->method('wherePivot')->willReturnSelf();
         $expense2Query->method('get')->willReturn(new Collection([
@@ -162,35 +171,49 @@ class SettlementServiceTest extends TestCase
         ]));
 
         // Create mock objects that properly expose properties
-        $expense1 = new class {
+        $expense1 = new class
+        {
             public $paid_by_member_id = 1;
+
             public $amount = 1500;
+
             public $currency = 'JPY';
+
             public $is_split_confirmed = true;
+
             private $membersQuery;
-            
-            public function setMembersQuery($query) {
+
+            public function setMembersQuery($query)
+            {
                 $this->membersQuery = $query;
             }
-            
-            public function members() {
+
+            public function members()
+            {
                 return $this->membersQuery;
             }
         };
         $expense1->setMembersQuery($expense1Query);
 
-        $expense2 = new class {
+        $expense2 = new class
+        {
             public $paid_by_member_id = 2;
+
             public $amount = 500;
+
             public $currency = 'JPY';
+
             public $is_split_confirmed = true;
+
             private $membersQuery;
-            
-            public function setMembersQuery($query) {
+
+            public function setMembersQuery($query)
+            {
                 $this->membersQuery = $query;
             }
-            
-            public function members() {
+
+            public function members()
+            {
                 return $this->membersQuery;
             }
         };
@@ -222,7 +245,7 @@ class SettlementServiceTest extends TestCase
         $this->expenseRepository
             ->expects($this->once())
             ->method('findByTravelPlan')
-            ->willReturn(new Collection());
+            ->willReturn(new Collection);
 
         $this->settlementRepository
             ->expects($this->once())
@@ -317,12 +340,12 @@ class SettlementServiceTest extends TestCase
         $this->assertEquals(3, $result['total_settlements']);
         $this->assertEquals(1, $result['completed_settlements']);
         $this->assertEquals(2, $result['pending_settlements']);
-        
+
         $this->assertArrayHasKey('JPY', $result['by_currency']);
         $this->assertEquals(3000, $result['by_currency']['JPY']['total_amount']);
         $this->assertEquals(2000, $result['by_currency']['JPY']['completed_amount']);
         $this->assertEquals(1000, $result['by_currency']['JPY']['pending_amount']);
-        
+
         $this->assertArrayHasKey('USD', $result['by_currency']);
         $this->assertEquals(50, $result['by_currency']['USD']['total_amount']);
     }
@@ -359,7 +382,7 @@ class SettlementServiceTest extends TestCase
 
     private function createMemberWithPivot($member, $isParticipating, $amount)
     {
-        $pivot = new \stdClass();
+        $pivot = new \stdClass;
         $pivot->is_participating = $isParticipating;
         $pivot->amount = $amount;
 

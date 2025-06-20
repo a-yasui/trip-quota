@@ -4,32 +4,37 @@ Laravel を使ったアプリケーションの作り方のガイドラインで
 
 ## Command
 
-- Cast を作る時は次のコマンドを使う事: `php artisan make:cast <Cast Name>`
-- Command を作る時は次のコマンドを使う事: `php artisan make:command <Command Class Name`
-- Enum を作る時は次のコマンドを使う事: `php artisan make:enum <Enum Name>`
-- Event を作る時は次のコマンドを使う事: `php artisan make:event <Event Class Name>`
-- factory を作る時は次のコマンドを使う事: `php artisan generate:factory <Eloquent Class Name>`
-- Job を作る時は次のコマンドを使う事: `php artisan make:job --phpunit <Job Class Name>`
-- Job Middleware を作る時は次のコマンドを使う事: `php artisan make:job-middleware`
-- Listener Class を作る時は次のコマンドを使う事: `php artisan make:listener -e <Event Class Name> --queued --phpunit <Listener Class Name>`
-- Mail Class を作る時は次のコマンドを使う事: `php artisan make:mail --markdown --phpunit <Mail Class Name>`
-- Middleware を作る時は次のコマンドを使う事: `php artisan make:middleware <Middleware Class Name>`                                            
-- Migration を作る時は次のコマンドを使う事: `php artisan make:migration {--table=<table>} <良い感じの名前>`                                                   
-- Eloquent Model を作る時は次のコマンドを使う事: `php artisan make:model <Eloquent Class Name>`                                             
-- Notification Class を作る時は次のコマンドを使う事: `php artisan make:notification <Notification Class name>`
-- Policy Class を作る時は次のコマンドを使う事: `php artisan make:policy --model=<model> --guard=<guard> <Policy Class Name>`
-- Provider Class を作る時は次のコマンドを使う事: `php artisan make:provider <Class Name>`
-- Request を作る時は次のコマンドを使う事: `php artisan make:request <Request Class Name>`
-- Rule を作る時は次のコマンドを使う事: `php artisan make:rule <Rule Name>`
-- Scope を作る時は次のコマンドを使う事: `php artisan make:scope <scope name>`
-- Seeder を作る時は次のコマンドを使う事: `php artisan make:seeder <seeder name>`
-- UnitTest 等を作る時は次のコマンドを使う事: `php artisan make:test --phpunit <UnitName>`
+目的のコマンドを実行する時は次に従う。
+
+- Cast を作る時: `php artisan make:cast <Cast Name>`
+- Command を作る時: `php artisan make:command <Command Class Name`
+- Enum を作る時: `php artisan make:enum <Enum Name>`
+- Event を作る時: `php artisan make:event <Event Class Name>`
+- factory を作る時: `php artisan generate:factory <Eloquent Class Name>`
+- Job を作る時: `php artisan make:job --phpunit <Job Class Name>`
+- Job Middleware を作る時: `php artisan make:job-middleware`
+- Listener Class を作る時: `php artisan make:listener -e <Event Class Name> --queued --phpunit <Listener Class Name>`
+- Mail Class を作る時: `php artisan make:mail --markdown --phpunit <Mail Class Name>`
+- Middleware を作る時: `php artisan make:middleware <Middleware Class Name>`
+- Migration を作る時: `php artisan make:migration {--table=<table>} <良い感じの名前>`
+- Eloquent Model を作る時: `php artisan make:model <Eloquent Class Name>`
+- Notification Class を作る時: `php artisan make:notification <Notification Class name>`
+- Policy Class を作る時: `php artisan make:policy --model=<model> --guard=<guard> <Policy Class Name>`
+- Provider Class を作る時: `php artisan make:provider <Class Name>`
+- Request を作る時: `php artisan make:request <Request Class Name>`
+- Rule を作る時: `php artisan make:rule <Rule Name>`
+- Scope を作る時: `php artisan make:scope <scope name>`
+- Seeder を作る時: `php artisan make:seeder <seeder name>`
+- UnitTest 等を作る時: `php artisan make:test --phpunit <UnitName>`
+- test を実行する: `php artisan test`
 
 ## Database
 
 - Database で Enum を使う時は、クラスの Enum を作成してから Migration を作り、それをマイグレーションに入れる事。
 - Enum に値の増減がある時は、その都度 Migration を作成する事。
-- JSON 型を使用してはいけない。JSON の値をDBに入れる時は、 `text` 型のカラムを用意しそこに挿入する。挿入するデータは、JSONの値を base64化してからDBに入れるようにし、使う時は `json_decode(base64_decode($value), true)` のように使う事。なおこれは Cast クラスを作成して、そのクラス内で処理し、Eloquentはその Cast を使うようにする。
+- JSON 型を使用してはいけない。JSON の値をDBに入れる時は、 `text` 型のカラムを用意しそこに挿入する。挿入するデータは、JSONの値を
+  base64化してからDBに入れるようにし、使う時は `json_decode(base64_decode($value), true)` のように使う事。なおこれは Cast
+  クラスを作成して、そのクラス内で処理し、Eloquentはその Cast を使うようにする。
 
 ## Cast
 
@@ -46,7 +51,8 @@ Laravel を使ったアプリケーションの作り方のガイドラインで
 ## Eloquent
 
 - JSON の値を保存する時は `base64_encode(json_encode($falue))` を必ず通す事。なお、これは Cast クラスで操作する事。
-- 新しいクラスや、カラムの変更、キャストの修正等がある時は、そのテーブルに対応するEloquentに対して `php artisan ide-helper:model -R <eloquent class path>` を実行する。プロパティにカラム情報を書くのが必須である。
+- 新しいクラスや、カラムの変更、キャストの修正等がある時は、そのテーブルに対応するEloquentに対して
+  `php artisan ide-helper:model -R <eloquent class path>` を実行する。プロパティにカラム情報を書くのが必須である。
 
 ## Exception Class
 
@@ -56,10 +62,11 @@ Laravel を使ったアプリケーションの作り方のガイドラインで
 
 ## Controller
 
-- 極力 Controller 内は Service に対しての入出力や、イベント発生、メール送信（Mail::send）や、Request/Response に注力し、try..catch の例外処理はしない。
+- 極力 Controller 内は Service に対しての入出力や、イベント発生、メール送信（Mail::send）や、Request/Response に注力し、try..catch
+  の例外処理はしない。
 - 例外処理は `bootstrap/app.php` にある withExceptions で取り扱う。
-  - 全ての例外を扱うのは難しくなるので `App\Exception\Exception` の子クラスで振る舞いを切り替える形にする
-  - 例外発生は、ログに warning ないしは error として、Contextにはログインしていれば user_id と url を保存する。
+    - 全ての例外を扱うのは難しくなるので `App\Exception\Exception` の子クラスで振る舞いを切り替える形にする
+    - 例外発生は、ログに warning ないしは error として、Contextにはログインしていれば user_id と url を保存する。
 
 ## Route
 
@@ -68,7 +75,8 @@ Laravel を使ったアプリケーションの作り方のガイドラインで
 
 ## Validation
 
-入力値の確認で、標準のValidation Ruleがない時は、 Rule を作成し、それを使用する。作成したRuleは必ず UnitTest を実行して期待する挙動になるか確証をもたせる。
+入力値の確認で、標準のValidation Ruleがない時は、 Rule を作成し、それを使用する。作成したRuleは必ず UnitTest
+を実行して期待する挙動になるか確証をもたせる。
 
 ## Blade
 

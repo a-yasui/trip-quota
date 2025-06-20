@@ -221,7 +221,7 @@ class InvitationServiceTest extends TestCase
             ->method('findById')
             ->with($this->coreGroup->id)
             ->willReturn($this->coreGroup);
-        
+
         $this->groupRepository
             ->expects($this->once())
             ->method('addMemberToGroup')

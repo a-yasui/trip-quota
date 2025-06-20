@@ -112,7 +112,7 @@ class GroupController extends Controller
             // グループメンバーと旅行プランの全メンバーを取得
             $groupMembers = $this->groupService->getGroupMembers($group, Auth::user());
             $allMembers = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
-            
+
             // 現在のユーザーのメンバー情報と参加状態を取得
             $currentMember = $this->memberService->findMemberByTravelPlanAndUser($travelPlan, Auth::user());
             $isCurrentUserInGroup = $currentMember ? $groupMembers->contains('id', $currentMember->id) : false;

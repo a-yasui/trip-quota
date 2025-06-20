@@ -15,14 +15,17 @@ class ExpenseControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
+
     private Group $group;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->travelPlan = TravelPlan::factory()->create([
             'owner_user_id' => $this->user->id,
@@ -96,15 +99,15 @@ class ExpenseControllerTest extends TestCase
                 [
                     'member_id' => $this->member->id,
                     'is_participating' => true,
-                ]
+                ],
             ],
         ];
 
         $response = $this->actingAs($this->user)
             ->post(route('travel-plans.expenses.store', $this->travelPlan->uuid), $expenseData);
 
-        $response->assertRedirect(route('travel-plans.expenses.index', $this->travelPlan->uuid));
-        $response->assertSessionHas('success', '費用を追加しました。');
+        $response->assertRedirect(route('travel-plans.expenses.create', $this->travelPlan->uuid));
+        $response->assertSessionHas('success', '費用を追加しました。次の費用を追加できます。');
 
         $this->assertDatabaseHas('expenses', [
             'travel_plan_id' => $this->travelPlan->id,

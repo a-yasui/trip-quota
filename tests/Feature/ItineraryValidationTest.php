@@ -16,13 +16,15 @@ class ItineraryValidationTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->travelPlan = TravelPlan::factory()->create([
             'departure_date' => Carbon::now()->addDays(1),

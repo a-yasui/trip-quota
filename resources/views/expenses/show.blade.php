@@ -175,6 +175,77 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 分割金額編集フォーム -->
+                @if(!$expense->is_split_confirmed)
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <h3 class="text-sm font-medium text-blue-900 mb-4">分割金額を調整</h3>
+                        <form method="POST" action="{{ route('travel-plans.expenses.update-splits', [$travelPlan->uuid, $expense->id]) }}">
+                            @csrf
+                            <div class="space-y-3">
+                                @foreach($splitAmounts as $index => $split)
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-sm font-medium text-gray-900">{{ $split['member']->name }}</span>
+                                            @if($split['member']->id === $currentUserMember?->id)
+                                                <span class="text-xs text-blue-600">(あなた)</span>
+                                            @endif
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <input type="hidden" name="splits[{{ $index }}][member_id]" value="{{ $split['member']->id }}">
+                                            <input type="number" 
+                                                   name="splits[{{ $index }}][amount]" 
+                                                   value="{{ $split['amount'] }}"
+                                                   step="0.01"
+                                                   min="0"
+                                                   class="w-24 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                            <span class="text-sm text-gray-500">{{ $expense->currency }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div class="mt-4 flex justify-between items-center">
+                                <div class="text-sm text-gray-600">
+                                    <span id="split-total">{{ number_format($expense->amount) }}</span> / {{ number_format($expense->amount) }} {{ $expense->currency }}
+                                </div>
+                                <button type="submit" 
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md">
+                                    分割金額を更新
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <script>
+                        // 分割金額の合計をリアルタイム計算
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const amountInputs = document.querySelectorAll('input[name*="[amount]"]');
+                            const totalElement = document.getElementById('split-total');
+                            
+                            function updateTotal() {
+                                let total = 0;
+                                amountInputs.forEach(input => {
+                                    total += parseFloat(input.value) || 0;
+                                });
+                                totalElement.textContent = total.toLocaleString();
+                                
+                                // 合計が一致しない場合は色を変える
+                                const expectedTotal = {{ $expense->amount }};
+                                if (Math.abs(total - expectedTotal) > 0.01) {
+                                    totalElement.className = 'text-red-600 font-semibold';
+                                } else {
+                                    totalElement.className = 'text-green-600 font-semibold';
+                                }
+                            }
+                            
+                            amountInputs.forEach(input => {
+                                input.addEventListener('input', updateTotal);
+                            });
+                            
+                            updateTotal();
+                        });
+                    </script>
+                @endif
             </div>
         </div>
 
@@ -182,17 +253,6 @@
         @if(!$expense->is_split_confirmed)
             <div class="mt-6 flex justify-end items-center">
                 <div class="flex items-center space-x-3">
-                    <!-- 現在のユーザーの参加確認 -->
-                    @if($currentUserMember && !$expense->members->where('id', $currentUserMember->id)->first()?->pivot?->is_confirmed)
-                        <form method="POST" action="{{ route('travel-plans.expenses.confirm-participation', [$travelPlan->uuid, $expense->id]) }}" class="inline">
-                            @csrf
-                            <button type="submit" 
-                                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                                参加を確認
-                            </button>
-                        </form>
-                    @endif
-
                     <!-- 費用確定 -->
                     @if(collect($splitAmounts)->every(fn($split) => $split['is_confirmed']))
                         <form method="POST" action="{{ route('travel-plans.expenses.confirm-split', [$travelPlan->uuid, $expense->id]) }}" 

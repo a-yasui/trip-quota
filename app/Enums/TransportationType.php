@@ -86,7 +86,7 @@ enum TransportationType: string
      */
     public static function values(): array
     {
-        return array_map(fn(TransportationType $case) => $case->value, self::cases());
+        return array_map(fn (TransportationType $case) => $case->value, self::cases());
     }
 
     /**
@@ -98,6 +98,7 @@ enum TransportationType: string
         foreach (self::cases() as $case) {
             $options[$case->value] = $case->label();
         }
+
         return $options;
     }
 }

@@ -15,6 +15,7 @@ class ProfileController extends Controller
     public function show()
     {
         $user = Auth::user();
+
         return view('profile.show', compact('user'));
     }
 
@@ -34,7 +35,7 @@ class ProfileController extends Controller
 
         $user = Auth::user();
         $user->update([
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($request->password),
         ]);
 
         return redirect()

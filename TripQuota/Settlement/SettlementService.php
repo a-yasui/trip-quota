@@ -39,7 +39,7 @@ class SettlementService
 
         foreach ($expensesByCurrency as $currency => $currencyExpenses) {
             $settlements = $this->calculateSettlementsForCurrency($travelPlan, $currencyExpenses, $currency);
-            if (!empty($settlements)) {
+            if (! empty($settlements)) {
                 $settlementsByCurrency[$currency] = $settlements;
             }
         }
@@ -53,22 +53,22 @@ class SettlementService
     private function calculateSettlementsForCurrency(TravelPlan $travelPlan, Collection $expenses, string $currency): array
     {
         $memberBalances = [];
-        
+
         // 各メンバーの収支を計算
         foreach ($expenses as $expense) {
             $splitAmounts = $this->calculateExpenseSplitAmounts($expense);
-            
+
             // 支払った人の収支（プラス）
             $payerId = $expense->paid_by_member_id;
-            if (!isset($memberBalances[$payerId])) {
+            if (! isset($memberBalances[$payerId])) {
                 $memberBalances[$payerId] = 0;
             }
             $memberBalances[$payerId] += $expense->amount;
-            
+
             // 分割対象者の収支（マイナス）
             foreach ($splitAmounts as $split) {
                 $memberId = $split['member']->id;
-                if (!isset($memberBalances[$memberId])) {
+                if (! isset($memberBalances[$memberId])) {
                     $memberBalances[$memberId] = 0;
                 }
                 $memberBalances[$memberId] -= $split['amount'];
@@ -114,7 +114,7 @@ class SettlementService
     private function optimizeSettlements(TravelPlan $travelPlan, array $memberBalances, string $currency): array
     {
         // ゼロの残高を除去
-        $memberBalances = array_filter($memberBalances, function($balance) {
+        $memberBalances = array_filter($memberBalances, function ($balance) {
             return abs($balance) >= 0.01; // 1円未満は誤差として無視
         });
 
@@ -136,7 +136,7 @@ class SettlementService
 
         // 精算計算
         $settlements = [];
-        
+
         // 債務者から債権者への精算を計算
         foreach ($debtors as $debtorId => $debtAmount) {
             foreach ($creditors as $creditorId => $creditAmount) {
@@ -145,7 +145,7 @@ class SettlementService
                 }
 
                 $settlementAmount = min($debtAmount, $creditAmount);
-                
+
                 if ($settlementAmount >= 0.01) { // 1円以上の精算のみ記録
                     $settlements[] = [
                         'travel_plan_id' => $travelPlan->id,
@@ -177,10 +177,10 @@ class SettlementService
 
             // 新しい精算計算
             $settlementsByCurrency = $this->calculateSettlements($travelPlan, $user);
-            
+
             $allSettlements = [];
             foreach ($settlementsByCurrency as $currency => $settlements) {
-                if (!empty($settlements)) {
+                if (! empty($settlements)) {
                     $created = $this->settlementRepository->createMultiple($settlements);
                     $allSettlements[$currency] = $created;
                 }
@@ -232,7 +232,7 @@ class SettlementService
         $this->ensureUserCanViewSettlements($travelPlan, $user);
 
         $settlements = $this->settlementRepository->findByTravelPlan($travelPlan);
-        
+
         $statistics = [
             'total_settlements' => $settlements->count(),
             'completed_settlements' => $settlements->whereNotNull('settled_at')->count(),
@@ -266,7 +266,7 @@ class SettlementService
     {
         $member = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
 
-        if (!$member) {
+        if (! $member) {
             throw new \Exception('この旅行プランの精算情報を表示する権限がありません。');
         }
     }
@@ -275,7 +275,7 @@ class SettlementService
     {
         $member = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
 
-        if (!$member || !$member->is_confirmed) {
+        if (! $member || ! $member->is_confirmed) {
             throw new \Exception('精算を管理する権限がありません。');
         }
     }

@@ -108,15 +108,15 @@
             <div class="px-6 py-4">
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     <div class="text-center">
-                        <div class="text-2xl font-bold text-gray-900">-</div>
+                        <div class="text-2xl font-bold text-gray-900">{{ $settlementStats['total_settlements'] }}</div>
                         <div class="text-sm text-gray-500">総精算件数</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-2xl font-bold text-green-600">-</div>
-                        <div class="text-sm text-gray-500">完了済み</div>
+                        <div class="text-2xl font-bold text-green-600">{{ $settlementStats['completed_settlements'] }}</div>
+                        <div class="text-sm text-gray-500">精算済み</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-2xl font-bold text-yellow-600">-</div>
+                        <div class="text-2xl font-bold text-yellow-600">{{ $settlementStats['pending_settlements'] }}</div>
                         <div class="text-sm text-gray-500">未精算</div>
                     </div>
                     <div class="text-center">
@@ -164,9 +164,15 @@
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         確定済み
                                                     </span>
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        精算対象
+                                                    </span>
                                                 @else
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                                         未確定
+                                                    </span>
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                        未精算
                                                     </span>
                                                 @endif
                                             </div>

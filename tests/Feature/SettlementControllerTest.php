@@ -15,19 +15,22 @@ class SettlementControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
+
     private Group $group;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->travelPlan = TravelPlan::factory()->create([
             'owner_user_id' => $this->user->id,
         ]);
-        
+
         $this->member = Member::factory()->create([
             'travel_plan_id' => $this->travelPlan->id,
             'user_id' => $this->user->id,

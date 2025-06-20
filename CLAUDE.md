@@ -219,36 +219,44 @@ Comprehensive expense settlement system with debt optimization:
 - 11 feature tests for SettlementController
 - Database optimization (removed redundant is_settled column)
 
-#### Expense Management System ✅
-Comprehensive expense management with split billing functionality has been implemented:
+#### Expense Management & Settlement System ✅
+Comprehensive expense management with integrated settlement functionality:
 
 **Domain Services:**
 - `TripQuota\Expense\ExpenseRepositoryInterface` - Data access contract
 - `TripQuota\Expense\ExpenseRepository` - Eloquent implementation with pivot table handling
 - `TripQuota\Expense\ExpenseService` - Business logic for expense validation, calculation, and workflows
+- `TripQuota\Settlement\SettlementService` - Integrated settlement calculations and debt optimization
 
 **Controller & Routes:**
-- `ExpenseController` - Full CRUD operations plus confirmation actions
+- `ExpenseController` - Full CRUD operations with automatic participation and settlement integration
+- `SettlementController` - Settlement management integrated with expense workflow
 - Explicit route definitions for all expense operations
-- Special routes for participation and split confirmation
+- Special routes for split management and settlement confirmation
 
 **Views:**
-- `expenses/index.blade.php` - List with statistics and multi-currency support
-- `expenses/create.blade.php` - Creation form with member assignment
-- `expenses/show.blade.php` - Detailed view with split calculation
+- `expenses/index.blade.php` - List with settlement status indicators (settled/unsettled)
+- `expenses/create.blade.php` - Creation form with automatic member participation
+- `expenses/show.blade.php` - Detailed view with integrated split management forms
 - `expenses/edit.blade.php` - Edit form with existing data population
+- `settlements/index.blade.php` - Settlement overview with expense integration
+- `settlements/show.blade.php` - Individual settlement details
 
 **Key Features:**
-- Multi-currency expense tracking (JPY, USD, EUR, KRW, CNY)
-- Split billing with equal division and custom amounts
-- Member participation confirmation workflow
-- Expense confirmation process (prevents editing after confirmation)
-- Currency aggregation and statistics
-- Comprehensive validation and error handling
+- **Integrated Workflow**: Expenses automatically flow into settlement calculations
+- **Auto-participation**: Members automatically participate without manual confirmation
+- **Settlement Status**: Real-time settlement status display (settled/unsettled)
+- **Split Management**: Dedicated forms for modifying expense splits
+- **Multi-currency**: Support for JPY, USD, EUR, KRW, CNY with automatic conversion
+- **Debt Optimization**: Automatic calculation of optimal settlement paths
+- **Unconfirmed Handling**: Unconfirmed expenses treated as unsettled
+- **Streamlined UX**: Continuous expense entry workflow
 
 **Testing:**
 - 14 unit tests for ExpenseService
+- 9 unit tests for SettlementService  
 - 15 feature tests for ExpenseController
+- 11 feature tests for SettlementController
 - 11 view tests for template rendering
 - Error handling and edge case coverage
 

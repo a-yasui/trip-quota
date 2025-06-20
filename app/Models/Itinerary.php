@@ -144,9 +144,11 @@ class Itinerary extends Model
      */
     public function getTransportationDetailsAttribute(): array
     {
-        if (!$this->transportation_type) return [];
+        if (! $this->transportation_type) {
+            return [];
+        }
 
-        return match($this->transportation_type) {
+        return match ($this->transportation_type) {
             TransportationType::AIRPLANE => [
                 'airline' => $this->airline,
                 'flight_number' => $this->flight_number,
@@ -173,11 +175,13 @@ class Itinerary extends Model
      */
     public function getTransportationSummaryAttribute(): ?string
     {
-        if (!$this->transportation_type) return null;
+        if (! $this->transportation_type) {
+            return null;
+        }
 
-        return match($this->transportation_type) {
-            TransportationType::AIRPLANE => $this->airline && $this->flight_number 
-                ? "{$this->airline} {$this->flight_number}" 
+        return match ($this->transportation_type) {
+            TransportationType::AIRPLANE => $this->airline && $this->flight_number
+                ? "{$this->airline} {$this->flight_number}"
                 : null,
             TransportationType::TRAIN => $this->train_line && $this->train_type
                 ? "{$this->train_line}（{$this->train_type}）"
@@ -192,14 +196,14 @@ class Itinerary extends Model
      */
     public function getRouteInfoAttribute(): ?string
     {
-        $departure = match($this->transportation_type) {
+        $departure = match ($this->transportation_type) {
             TransportationType::AIRPLANE => $this->departure_airport,
             TransportationType::TRAIN => $this->departure_station,
             TransportationType::BUS, TransportationType::FERRY => $this->departure_terminal,
             default => $this->departure_location
         };
 
-        $arrival = match($this->transportation_type) {
+        $arrival = match ($this->transportation_type) {
             TransportationType::AIRPLANE => $this->arrival_airport,
             TransportationType::TRAIN => $this->arrival_station,
             TransportationType::BUS, TransportationType::FERRY => $this->arrival_terminal,

@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Account;
 use App\Models\OAuthProvider;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
@@ -40,7 +40,7 @@ class ProfileControllerTest extends TestCase
         $account = Account::factory()->create([
             'user_id' => $this->user->id,
             'account_name' => 'test_account',
-            'display_name' => 'Test Account'
+            'display_name' => 'Test Account',
         ]);
 
         $response = $this->actingAs($this->user)
@@ -57,7 +57,7 @@ class ProfileControllerTest extends TestCase
         OAuthProvider::factory()->create([
             'user_id' => $this->user->id,
             'provider' => 'google',
-            'provider_id' => '123456789'
+            'provider_id' => '123456789',
         ]);
 
         $response = $this->actingAs($this->user)
@@ -73,9 +73,9 @@ class ProfileControllerTest extends TestCase
     {
         $currentPassword = 'current_password';
         $newPassword = 'new_password123!';
-        
+
         $this->user->update([
-            'password' => Hash::make($currentPassword)
+            'password' => Hash::make($currentPassword),
         ]);
 
         $response = $this->actingAs($this->user)
@@ -87,7 +87,7 @@ class ProfileControllerTest extends TestCase
 
         $response->assertRedirect(route('profile.show'));
         $response->assertSessionHas('success', 'パスワードを変更しました。');
-        
+
         // パスワードが変更されたことを確認
         $this->assertTrue(Hash::check($newPassword, $this->user->fresh()->password));
     }
@@ -98,9 +98,9 @@ class ProfileControllerTest extends TestCase
         $currentPassword = 'current_password';
         $wrongPassword = 'wrong_password';
         $newPassword = 'new_password123!';
-        
+
         $this->user->update([
-            'password' => Hash::make($currentPassword)
+            'password' => Hash::make($currentPassword),
         ]);
 
         $response = $this->actingAs($this->user)
@@ -111,7 +111,7 @@ class ProfileControllerTest extends TestCase
             ]);
 
         $response->assertSessionHasErrors(['current_password']);
-        
+
         // パスワードが変更されていないことを確認
         $this->assertTrue(Hash::check($currentPassword, $this->user->fresh()->password));
     }
@@ -121,9 +121,9 @@ class ProfileControllerTest extends TestCase
     {
         $currentPassword = 'current_password';
         $newPassword = 'new_password123!';
-        
+
         $this->user->update([
-            'password' => Hash::make($currentPassword)
+            'password' => Hash::make($currentPassword),
         ]);
 
         $response = $this->actingAs($this->user)
@@ -141,9 +141,9 @@ class ProfileControllerTest extends TestCase
     {
         $currentPassword = 'current_password';
         $weakPassword = '123';
-        
+
         $this->user->update([
-            'password' => Hash::make($currentPassword)
+            'password' => Hash::make($currentPassword),
         ]);
 
         $response = $this->actingAs($this->user)

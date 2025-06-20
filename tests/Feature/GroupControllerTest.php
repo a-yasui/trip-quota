@@ -238,10 +238,10 @@ class GroupControllerTest extends TestCase
             'user_id' => $newUser->id,
             'is_confirmed' => true,
         ]);
-        
+
         // コアグループに参加させる（テストのため）
         $this->coreGroup->members()->attach($newMember->id);
-        
+
         // 新しい班グループを作成
         $branchGroup = Group::factory()->create([
             'travel_plan_id' => $this->travelPlan->id,
@@ -272,10 +272,10 @@ class GroupControllerTest extends TestCase
             'user_id' => $newUser->id,
             'is_confirmed' => true,
         ]);
-        
+
         // コアグループに参加させる
         $this->coreGroup->members()->attach($newMember->id);
-        
+
         // 新しい班グループを作成し、既に参加させておく
         $branchGroup = Group::factory()->create([
             'travel_plan_id' => $this->travelPlan->id,
@@ -296,7 +296,7 @@ class GroupControllerTest extends TestCase
     {
         // 旅行プランのメンバーではないユーザー
         $otherUser = User::factory()->create();
-        
+
         // 新しい班グループを作成
         $branchGroup = Group::factory()->create([
             'travel_plan_id' => $this->travelPlan->id,

@@ -6,12 +6,14 @@ use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use TripQuota\Expense\ExpenseService;
+use TripQuota\Settlement\SettlementService;
 use TripQuota\TravelPlan\TravelPlanService;
 
 class ExpenseController extends Controller
 {
     public function __construct(
         private ExpenseService $expenseService,
+        private SettlementService $settlementService,
         private TravelPlanService $travelPlanService
     ) {}
 
@@ -22,7 +24,7 @@ class ExpenseController extends Controller
     {
         $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-        if (!$travelPlan) {
+        if (! $travelPlan) {
             abort(404);
         }
 
@@ -31,19 +33,31 @@ class ExpenseController extends Controller
         } catch (\Exception $e) {
             abort(403);
         }
-        
+
         // グループ別に費用を集計
         $expensesByGroup = $expenses->groupBy('group.name');
-        
+
         // 総費用を計算
         $totalAmount = $expenses->sum('amount');
-        
+
         // 通貨別集計
         $amountsByCurrency = $expenses->groupBy('currency')->map(function ($expenses) {
             return $expenses->sum('amount');
         });
 
-        return view('expenses.index', compact('travelPlan', 'expenses', 'expensesByGroup', 'totalAmount', 'amountsByCurrency'));
+        // 精算統計情報を取得
+        try {
+            $settlementStats = $this->settlementService->getSettlementStatistics($travelPlan, Auth::user());
+        } catch (\Exception $e) {
+            $settlementStats = [
+                'total_settlements' => 0,
+                'completed_settlements' => 0,
+                'pending_settlements' => 0,
+                'by_currency' => [],
+            ];
+        }
+
+        return view('expenses.index', compact('travelPlan', 'expenses', 'expensesByGroup', 'totalAmount', 'amountsByCurrency', 'settlementStats'));
     }
 
     /**
@@ -53,7 +67,7 @@ class ExpenseController extends Controller
     {
         $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-        if (!$travelPlan) {
+        if (! $travelPlan) {
             abort(404);
         }
 
@@ -61,7 +75,17 @@ class ExpenseController extends Controller
         $members = $travelPlan->members()->where('is_confirmed', true)->get();
         $groups = $travelPlan->groups()->get();
 
-        return view('expenses.create', compact('travelPlan', 'members', 'groups'));
+        // デフォルト選択用データを準備
+        $coreGroup = $groups->where('group_type', 'CORE')->first();
+        $currentUserMember = $members->where('user_id', Auth::id())->first();
+
+        return view('expenses.create', compact(
+            'travelPlan',
+            'members',
+            'groups',
+            'coreGroup',
+            'currentUserMember'
+        ));
     }
 
     /**
@@ -86,15 +110,15 @@ class ExpenseController extends Controller
         try {
             $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-            if (!$travelPlan) {
+            if (! $travelPlan) {
                 abort(404);
             }
 
             $this->expenseService->createExpense($travelPlan, Auth::user(), $validated);
 
             return redirect()
-                ->route('travel-plans.expenses.index', $travelPlan->uuid)
-                ->with('success', '費用を追加しました。');
+                ->route('travel-plans.expenses.create', $travelPlan->uuid)
+                ->with('success', '費用を追加しました。次の費用を追加できます。');
         } catch (\Exception $e) {
             return back()
                 ->withInput()
@@ -109,13 +133,16 @@ class ExpenseController extends Controller
     {
         $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-        if (!$travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+        if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
             abort(404);
         }
 
+        // 現在のユーザーを自動参加させる
+        $this->expenseService->autoParticipateCurrentUser($expense, Auth::user());
+
         // 分割計算結果を取得
         $splitAmounts = $this->expenseService->calculateSplitAmounts($expense);
-        
+
         // 現在のユーザーのメンバー情報を取得
         $currentUserMember = $travelPlan->members()
             ->where('user_id', Auth::id())
@@ -132,7 +159,7 @@ class ExpenseController extends Controller
     {
         $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-        if (!$travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+        if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
             abort(404);
         }
 
@@ -146,7 +173,7 @@ class ExpenseController extends Controller
         // 確認済みメンバーとグループを取得
         $members = $travelPlan->members()->where('is_confirmed', true)->get();
         $groups = $travelPlan->groups()->get();
-        
+
         // 現在の費用メンバー割り当てを取得
         $expense->load(['members']);
 
@@ -175,7 +202,7 @@ class ExpenseController extends Controller
         try {
             $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-            if (!$travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+            if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
                 abort(404);
             }
 
@@ -199,7 +226,7 @@ class ExpenseController extends Controller
         try {
             $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-            if (!$travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+            if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
                 abort(404);
             }
 
@@ -222,7 +249,7 @@ class ExpenseController extends Controller
         try {
             $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-            if (!$travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+            if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
                 abort(404);
             }
 
@@ -245,7 +272,7 @@ class ExpenseController extends Controller
         try {
             $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-            if (!$travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+            if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
                 abort(404);
             }
 
@@ -256,6 +283,36 @@ class ExpenseController extends Controller
                 ->with('success', '費用分割を確定しました。');
         } catch (\Exception $e) {
             return back()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * 分割金額を更新
+     */
+    public function updateSplits(Request $request, string $travelPlanUuid, Expense $expense)
+    {
+        $validated = $request->validate([
+            'splits' => 'required|array',
+            'splits.*.member_id' => 'required|integer|exists:members,id',
+            'splits.*.amount' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
+
+            if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+                abort(404);
+            }
+
+            $this->expenseService->updateExpenseSplits($expense, Auth::user(), $validated['splits']);
+
+            return redirect()
+                ->route('travel-plans.expenses.show', [$travelPlan->uuid, $expense->id])
+                ->with('success', '分割金額を更新しました。');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
                 ->withErrors(['error' => $e->getMessage()]);
         }
     }

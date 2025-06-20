@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\User;
 use App\Models\Account;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -33,22 +33,24 @@ class CreateDeveloperAccount extends Command
         $password = $this->option('password');
 
         // メールアドレスとパスワードの入力チェック
-        if (!$email) {
+        if (! $email) {
             $email = $this->ask('メールアドレスを入力してください');
         }
 
-        if (!$password) {
+        if (! $password) {
             $password = $this->secret('パスワードを入力してください');
         }
 
         // バリデーション
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->error('有効なメールアドレスを入力してください');
+
             return Command::FAILURE;
         }
 
         if (strlen($password) < 8) {
             $this->error('パスワードは8文字以上で入力してください');
+
             return Command::FAILURE;
         }
 
@@ -68,8 +70,8 @@ class CreateDeveloperAccount extends Command
                 ]);
 
                 // デフォルトアカウント名を生成
-                $accountName = 'dev' . $user->id;
-                
+                $accountName = 'dev'.$user->id;
+
                 // アカウント作成
                 $account = Account::create([
                     'user_id' => $user->id,
@@ -80,7 +82,7 @@ class CreateDeveloperAccount extends Command
                 return ['user' => $user, 'account' => $account];
             });
 
-            $this->info("開発者アカウントを作成しました:");
+            $this->info('開発者アカウントを作成しました:');
             $this->info("  メールアドレス: {$result['user']->email}");
             $this->info("  アカウント名: {$result['account']->account_name}");
             $this->info("  作成日時: {$result['user']->created_at}");
@@ -89,6 +91,7 @@ class CreateDeveloperAccount extends Command
 
         } catch (\Exception $e) {
             $this->error("アカウント作成に失敗しました: {$e->getMessage()}");
+
             return Command::FAILURE;
         }
     }

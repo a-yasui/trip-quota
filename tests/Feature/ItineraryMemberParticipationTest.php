@@ -21,7 +21,7 @@ class ItineraryMemberParticipationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new ItineraryService(new ItineraryRepository());
+        $this->service = new ItineraryService(new ItineraryRepository);
     }
 
     public function test_get_member_participation_stats_returns_correct_statistics()
@@ -29,7 +29,7 @@ class ItineraryMemberParticipationTest extends TestCase
         // テストデータの準備
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
-        
+
         // メンバーを作成
         $member1 = Member::factory()->forUser($user)->forTravelPlan($travelPlan)->create(['name' => 'Member 1']);
         $user2 = User::factory()->create();
@@ -98,7 +98,7 @@ class ItineraryMemberParticipationTest extends TestCase
         $this->assertEquals(1, $result['total_members']);
         $this->assertEquals(0, $result['total_itineraries']);
         $this->assertCount(1, $result['member_stats']);
-        
+
         // 旅程がないときは参加率は0%
         $memberStats = $result['member_stats'][0];
         $this->assertEquals(0, $memberStats['participation_count']);
@@ -121,14 +121,14 @@ class ItineraryMemberParticipationTest extends TestCase
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
-        
+
         // グループを作成
         $coreGroup = Group::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'type' => 'CORE',
             'name' => 'Core Group',
         ]);
-        
+
         $branchGroup = Group::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'type' => 'BRANCH',
@@ -160,7 +160,7 @@ class ItineraryMemberParticipationTest extends TestCase
     {
         $user = User::factory()->create();
         $travelPlan = TravelPlan::factory()->create();
-        
+
         $coreGroup = Group::factory()->create([
             'travel_plan_id' => $travelPlan->id,
             'type' => 'CORE',
