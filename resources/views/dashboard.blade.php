@@ -191,7 +191,7 @@
                                                 </p>
                                                 @if($request->message)
                                                     <p class="mt-1 text-sm text-gray-500 italic">
-                                                        "{{ $request->message }}"
+                                                        "{{ Str::limit(strip_tags($request->message), 100) }}"
                                                     </p>
                                                 @endif
                                                 <div class="mt-2 flex items-center text-xs text-gray-500 space-x-4">
@@ -200,14 +200,18 @@
                                                 </div>
                                             </div>
                                             <div class="ml-4 flex space-x-2">
-                                                <form method="POST" action="{{ route('member-link-requests.approve', $request->id) }}" class="inline">
+                                                <form method="POST" action="{{ route('member-link-requests.approve', $request->id) }}" class="inline"
+                                                      onsubmit="return confirm('本当にこの関連付けリクエストを承認しますか？')">
                                                     @csrf
+                                                    <input type="hidden" name="confirmation" value="approve-{{ $request->id }}">
                                                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium">
                                                         承認
                                                     </button>
                                                 </form>
-                                                <form method="POST" action="{{ route('member-link-requests.decline', $request->id) }}" class="inline">
+                                                <form method="POST" action="{{ route('member-link-requests.decline', $request->id) }}" class="inline"
+                                                      onsubmit="return confirm('本当にこの関連付けリクエストを拒否しますか？')">
                                                     @csrf
+                                                    <input type="hidden" name="confirmation" value="decline-{{ $request->id }}">
                                                     <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm font-medium">
                                                         拒否
                                                     </button>

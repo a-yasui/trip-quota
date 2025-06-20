@@ -152,9 +152,20 @@ class MemberController extends Controller
                 ->withInput()
                 ->withErrors($e->errors());
         } catch (\Exception $e) {
+            // ログに詳細なエラーを記録
+            \Log::error('Member creation failed', [
+                'user_id' => Auth::id(),
+                'travel_plan_uuid' => $travelPlanUuid ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ]);
+            
+            // ユーザーには汎用的なメッセージを表示
             return back()
                 ->withInput()
-                ->withErrors(['error' => $e->getMessage()]);
+                ->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
         }
     }
 
@@ -263,9 +274,21 @@ class MemberController extends Controller
                 ->withInput()
                 ->withErrors($e->errors());
         } catch (\Exception $e) {
+            // ログに詳細なエラーを記録
+            \Log::error('Member update failed', [
+                'user_id' => Auth::id(),
+                'travel_plan_uuid' => $travelPlanUuid ?? null,
+                'member_id' => $memberId ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ]);
+            
+            // ユーザーには汎用的なメッセージを表示
             return back()
                 ->withInput()
-                ->withErrors(['error' => $e->getMessage()]);
+                ->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
         }
     }
 
@@ -294,8 +317,20 @@ class MemberController extends Controller
                 ->route('travel-plans.members.index', $travelPlan->uuid)
                 ->with('success', 'メンバーを削除しました。');
         } catch (\Exception $e) {
+            // ログに詳細なエラーを記録
+            \Log::error('Member deletion failed', [
+                'user_id' => Auth::id(),
+                'travel_plan_uuid' => $travelPlanUuid ?? null,
+                'member_id' => $memberId ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ]);
+            
+            // ユーザーには汎用的なメッセージを表示
             return back()
-                ->withErrors(['error' => $e->getMessage()]);
+                ->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
         }
     }
 
@@ -347,9 +382,21 @@ class MemberController extends Controller
                 ->withInput()
                 ->withErrors($e->errors());
         } catch (\Exception $e) {
+            // ログに詳細なエラーを記録
+            \Log::error('Member link request creation failed', [
+                'user_id' => Auth::id(),
+                'travel_plan_uuid' => $travelPlanUuid ?? null,
+                'member_id' => $memberId ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ]);
+            
+            // ユーザーには汎用的なメッセージを表示
             return back()
                 ->withInput()
-                ->withErrors(['error' => $e->getMessage()]);
+                ->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
         }
     }
 
@@ -373,58 +420,134 @@ class MemberController extends Controller
             return back()
                 ->with('success', 'メンバー「'.$member->name.'」を確認済みにしました。');
         } catch (\Exception $e) {
+            // ログに詳細なエラーを記録
+            \Log::error('Member confirmation failed', [
+                'user_id' => Auth::id(),
+                'travel_plan_uuid' => $travelPlanUuid ?? null,
+                'member_id' => $member->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ]);
+            
+            // ユーザーには汎用的なメッセージを表示
             return back()
-                ->withErrors(['error' => $e->getMessage()]);
+                ->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
         }
     }
 
     /**
      * メンバー関連付けリクエストを承認
      */
-    public function approveLinkRequest(\App\Models\MemberLinkRequest $linkRequest)
+    public function approveLinkRequest(\App\Models\MemberLinkRequest $linkRequest, Request $request)
     {
         try {
+            // 1. 基本認証チェック
             if ($linkRequest->target_user_id !== Auth::id()) {
                 abort(403, 'このリクエストを承認する権限がありません。');
+            }
+
+            // 2. 追加のconfirmationトークン検証
+            $request->validate([
+                'confirmation' => 'required|string',
+            ]);
+
+            if ($request->confirmation !== 'approve-' . $linkRequest->id) {
+                abort(422, '無効な確認トークンです。');
+            }
+
+            // 3. Rate limiting
+            $rateLimitKey = 'approve-link:' . Auth::id();
+            if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
+                abort(429, '操作回数が多すぎます。しばらくお待ちください。');
             }
 
             if (!$linkRequest->isPending()) {
                 return back()->withErrors(['error' => 'このリクエストはすでに処理されているか、期限が切れています。']);
             }
 
-            $this->memberService->approveLinkRequest($linkRequest);
+            $this->memberService->approveLinkRequest($linkRequest, Auth::user());
+
+            // Rate limitingヒット
+            \Illuminate\Support\Facades\RateLimiter::hit($rateLimitKey, 300); // 5分間制限
+
+            // セッション再生成
+            $request->session()->regenerate();
 
             return redirect()
                 ->route('dashboard')
                 ->with('success', 'メンバー関連付けリクエストを承認しました。');
         } catch (\Exception $e) {
-            return back()
-                ->withErrors(['error' => $e->getMessage()]);
+            // ログに詳細なエラーを記録
+            \Log::error('Member link request approval failed', [
+                'user_id' => Auth::id(),
+                'link_request_id' => $linkRequest->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ]);
+            
+            // ユーザーには汎用的なメッセージを表示
+            return back()->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
         }
     }
 
     /**
      * メンバー関連付けリクエストを拒否
      */
-    public function declineLinkRequest(\App\Models\MemberLinkRequest $linkRequest)
+    public function declineLinkRequest(\App\Models\MemberLinkRequest $linkRequest, Request $request)
     {
         try {
+            // 1. 基本認証チェック
             if ($linkRequest->target_user_id !== Auth::id()) {
                 abort(403, 'このリクエストを拒否する権限がありません。');
+            }
+
+            // 2. 追加のconfirmationトークン検証
+            $request->validate([
+                'confirmation' => 'required|string',
+            ]);
+
+            if ($request->confirmation !== 'decline-' . $linkRequest->id) {
+                abort(422, '無効な確認トークンです。');
+            }
+
+            // 3. Rate limiting
+            $rateLimitKey = 'decline-link:' . Auth::id();
+            if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
+                abort(429, '操作回数が多すぎます。しばらくお待ちください。');
             }
 
             if (!$linkRequest->isPending()) {
                 return back()->withErrors(['error' => 'このリクエストはすでに処理されているか、期限が切れています。']);
             }
 
-            $this->memberService->declineLinkRequest($linkRequest);
+            $this->memberService->declineLinkRequest($linkRequest, Auth::user());
+
+            // Rate limitingヒット
+            \Illuminate\Support\Facades\RateLimiter::hit($rateLimitKey, 300); // 5分間制限
+
+            // セッション再生成
+            $request->session()->regenerate();
 
             return redirect()
                 ->route('dashboard')
                 ->with('success', 'メンバー関連付けリクエストを拒否しました。');
         } catch (\Exception $e) {
-            return back()
-                ->withErrors(['error' => $e->getMessage()]);
+            // ログに詳細なエラーを記録
+            \Log::error('Member link request decline failed', [
+                'user_id' => Auth::id(),
+                'link_request_id' => $linkRequest->id ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ]);
+            
+            // ユーザーには汎用的なメッセージを表示
+            return back()->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
         }
     }
 }

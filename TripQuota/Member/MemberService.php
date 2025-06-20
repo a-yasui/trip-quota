@@ -297,9 +297,25 @@ class MemberService
             throw new \Exception('この関連付けリクエストは既に処理されているか期限切れです。');
         }
 
-        $linkRequest->decline();
+        return DB::transaction(function () use ($linkRequest) {
+            // Race condition防止のため、関連付けリクエストを排他ロック
+            $lockedLinkRequest = MemberLinkRequest::lockForUpdate()
+                ->where('id', $linkRequest->id)
+                ->first();
 
-        return $linkRequest;
+            if (! $lockedLinkRequest) {
+                throw new \Exception('関連付けリクエストが見つかりません。');
+            }
+
+            // ロック後に再度状態をチェック（他のプロセスで既に処理された可能性）
+            if (! $lockedLinkRequest->isPending()) {
+                throw new \Exception('この関連付けリクエストは既に処理されているか期限切れです。');
+            }
+
+            $lockedLinkRequest->decline();
+
+            return $lockedLinkRequest;
+        });
     }
 
     /**

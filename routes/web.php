@@ -134,6 +134,10 @@ Route::middleware('auth')->group(function () {
 
     // メンバー関連付けリクエスト
     Route::post('travel-plans/{uuid}/members/{member}/link-request', [MemberController::class, 'sendLinkRequest'])->name('travel-plans.members.send-link-request');
-    Route::post('member-link-requests/{linkRequest}/approve', [MemberController::class, 'approveLinkRequest'])->name('member-link-requests.approve');
-    Route::post('member-link-requests/{linkRequest}/decline', [MemberController::class, 'declineLinkRequest'])->name('member-link-requests.decline');
+    
+    // 重要な操作にはRate Limitingを適用
+    Route::middleware(['throttle:5,1'])->group(function () {
+        Route::post('member-link-requests/{linkRequest}/approve', [MemberController::class, 'approveLinkRequest'])->name('member-link-requests.approve');
+        Route::post('member-link-requests/{linkRequest}/decline', [MemberController::class, 'declineLinkRequest'])->name('member-link-requests.decline');
+    });
 });
