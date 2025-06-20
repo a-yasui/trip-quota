@@ -92,6 +92,14 @@ class InvitationService
                 ]);
             }
 
+            // メンバーを招待先のグループに関連付け
+            if ($invitation->group_id) {
+                $group = $this->groupRepository->findById($invitation->group_id);
+                if ($group) {
+                    $this->groupRepository->addMemberToGroup($group, $member);
+                }
+            }
+
             // 招待を受諾状態に更新
             $this->invitationRepository->update($invitation, [
                 'status' => 'accepted',

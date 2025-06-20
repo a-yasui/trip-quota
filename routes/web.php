@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
     // グループメンバー管理
     Route::post('travel-plans/{uuid}/groups/{group}/members', [GroupController::class, 'addMember'])->name('travel-plans.groups.add-member');
     Route::delete('travel-plans/{uuid}/groups/{group}/members/{member}', [GroupController::class, 'removeMember'])->name('travel-plans.groups.remove-member');
+    Route::post('travel-plans/{uuid}/groups/{group}/join', [GroupController::class, 'join'])->name('travel-plans.groups.join');
 
     // メンバー招待（別ルート）
     Route::get('travel-plans/{uuid}/members/invite', [MemberController::class, 'create'])->name('travel-plans.members.create');

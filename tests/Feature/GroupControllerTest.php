@@ -228,4 +228,88 @@ class GroupControllerTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHasErrors(['error']);
     }
+
+    public function test_join_group_successfully()
+    {
+        // 新しいユーザーとメンバーを作成
+        $newUser = User::factory()->create();
+        $newMember = Member::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'user_id' => $newUser->id,
+            'is_confirmed' => true,
+        ]);
+        
+        // コアグループに参加させる（テストのため）
+        $this->coreGroup->members()->attach($newMember->id);
+        
+        // 新しい班グループを作成
+        $branchGroup = Group::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'type' => 'BRANCH',
+            'name' => 'テスト班グループ',
+        ]);
+
+        // 新しいユーザーが班グループに参加する
+        $response = $this->actingAs($newUser)
+            ->post(route('travel-plans.groups.join', [$this->travelPlan->uuid, $branchGroup->id]));
+
+        $response->assertRedirect(route('travel-plans.groups.show', [$this->travelPlan->uuid, $branchGroup->id]));
+        $response->assertSessionHas('success', 'グループに参加しました。');
+
+        // データベースで参加を確認
+        $this->assertDatabaseHas('group_member', [
+            'group_id' => $branchGroup->id,
+            'member_id' => $newMember->id,
+        ]);
+    }
+
+    public function test_join_group_fails_when_already_member()
+    {
+        // 新しいユーザーとメンバーを作成
+        $newUser = User::factory()->create();
+        $newMember = Member::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'user_id' => $newUser->id,
+            'is_confirmed' => true,
+        ]);
+        
+        // コアグループに参加させる
+        $this->coreGroup->members()->attach($newMember->id);
+        
+        // 新しい班グループを作成し、既に参加させておく
+        $branchGroup = Group::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'type' => 'BRANCH',
+            'name' => 'テスト班グループ',
+        ]);
+        $branchGroup->members()->attach($newMember->id);
+
+        // 既に参加しているグループに再度参加しようとする
+        $response = $this->actingAs($newUser)
+            ->post(route('travel-plans.groups.join', [$this->travelPlan->uuid, $branchGroup->id]));
+
+        $response->assertRedirect(route('travel-plans.groups.show', [$this->travelPlan->uuid, $branchGroup->id]));
+        $response->assertSessionHas('info', '既にこのグループに参加しています。');
+    }
+
+    public function test_join_group_fails_when_not_travel_plan_member()
+    {
+        // 旅行プランのメンバーではないユーザー
+        $otherUser = User::factory()->create();
+        
+        // 新しい班グループを作成
+        $branchGroup = Group::factory()->create([
+            'travel_plan_id' => $this->travelPlan->id,
+            'type' => 'BRANCH',
+            'name' => 'テスト班グループ',
+        ]);
+
+        // 非メンバーがグループに参加しようとする
+        $response = $this->actingAs($otherUser)
+            ->post(route('travel-plans.groups.join', [$this->travelPlan->uuid, $branchGroup->id]));
+
+        // TravelPlanServiceで例外が発生し、catchブロックでback()が実行される
+        $response->assertRedirect();
+        $response->assertSessionHasErrors(['error']);
+    }
 }

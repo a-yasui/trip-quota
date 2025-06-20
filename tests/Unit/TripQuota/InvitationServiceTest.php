@@ -183,6 +183,7 @@ class InvitationServiceTest extends TestCase
         $invitation->expires_at = Carbon::now()->addDays(1);
         $invitation->invitee_email = 'invitee@example.com';
         $invitation->travel_plan_id = $this->travelPlan->id;
+        $invitation->group_id = $this->coreGroup->id;
         $invitation->invitee_name = 'Test Invitee';
         $invitation->travelPlan = $this->travelPlan;
 
@@ -213,6 +214,18 @@ class InvitationServiceTest extends TestCase
                 'is_confirmed' => true,
             ])
             ->willReturn($newMember);
+
+        // グループ関連付けのモック設定
+        $this->groupRepository
+            ->expects($this->once())
+            ->method('findById')
+            ->with($this->coreGroup->id)
+            ->willReturn($this->coreGroup);
+        
+        $this->groupRepository
+            ->expects($this->once())
+            ->method('addMemberToGroup')
+            ->with($this->coreGroup, $newMember);
 
         $this->invitationRepository
             ->expects($this->once())

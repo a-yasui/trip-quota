@@ -10,11 +10,13 @@ use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use TripQuota\Group\GroupRepositoryInterface;
 
 class TravelPlanService
 {
     public function __construct(
-        private TravelPlanRepositoryInterface $repository
+        private TravelPlanRepositoryInterface $repository,
+        private GroupRepositoryInterface $groupRepository
     ) {}
 
     public function createTravelPlan(User $user, array $data): TravelPlan
@@ -42,8 +44,8 @@ class TravelPlanService
                 'description' => '全メンバーが参加するメインのグループです',
             ]);
 
-            // 作成者をコアグループに追加
-            Member::create([
+            // 作成者をメンバーとして追加
+            $member = Member::create([
                 'travel_plan_id' => $travelPlan->id,
                 'user_id' => $user->id,
                 'account_id' => null, // TODO: ユーザーのデフォルトアカウントを設定
@@ -51,6 +53,9 @@ class TravelPlanService
                 'email' => $user->email,
                 'is_confirmed' => true,
             ]);
+
+            // 作成者をコアグループに関連付け
+            $this->groupRepository->addMemberToGroup($coreGroup, $member);
 
             return $travelPlan->load(['creator', 'owner', 'groups', 'members']);
         });

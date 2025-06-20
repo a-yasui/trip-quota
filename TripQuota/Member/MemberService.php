@@ -109,6 +109,11 @@ class MemberService
         return $this->memberRepository->findByTravelPlan($travelPlan);
     }
 
+    public function findMemberByTravelPlanAndUser(TravelPlan $travelPlan, User $user): ?Member
+    {
+        return $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
+    }
+
     public function getConfirmedMembers(TravelPlan $travelPlan, User $user): \Illuminate\Database\Eloquent\Collection
     {
         $this->ensureUserCanViewMembers($travelPlan, $user);

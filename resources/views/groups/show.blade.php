@@ -152,6 +152,20 @@
                         <h3 class="text-lg font-medium text-gray-900">アクション</h3>
                     </div>
                     <div class="px-6 py-4 space-y-3">
+                        @if($currentMember && !$isCurrentUserInGroup)
+                            <form action="{{ route('travel-plans.groups.join', [$travelPlan->uuid, $group->id]) }}" method="POST" class="w-full">
+                                @csrf
+                                <button type="submit" 
+                                        class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    このグループに参加する
+                                </button>
+                            </form>
+                        @elseif($currentMember && $isCurrentUserInGroup)
+                            <div class="w-full bg-gray-100 text-gray-600 px-4 py-2 rounded-md text-sm font-medium text-center">
+                                参加中
+                            </div>
+                        @endif
+                        
                         <a href="{{ route('travel-plans.members.create', $travelPlan->uuid) }}" 
                            class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center block">
                             メンバーを招待

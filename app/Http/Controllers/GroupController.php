@@ -112,8 +112,12 @@ class GroupController extends Controller
             // グループメンバーと旅行プランの全メンバーを取得
             $groupMembers = $this->groupService->getGroupMembers($group, Auth::user());
             $allMembers = $this->memberService->getMembersForTravelPlan($travelPlan, Auth::user());
+            
+            // 現在のユーザーのメンバー情報と参加状態を取得
+            $currentMember = $this->memberService->findMemberByTravelPlanAndUser($travelPlan, Auth::user());
+            $isCurrentUserInGroup = $currentMember ? $groupMembers->contains('id', $currentMember->id) : false;
 
-            return view('groups.show', compact('travelPlan', 'group', 'groupMembers', 'allMembers'));
+            return view('groups.show', compact('travelPlan', 'group', 'groupMembers', 'allMembers', 'currentMember', 'isCurrentUserInGroup'));
         } catch (\Exception $e) {
             abort(403);
         }
@@ -286,6 +290,53 @@ class GroupController extends Controller
             return redirect()
                 ->route('travel-plans.groups.show', [$travelPlan->uuid, $group->id])
                 ->with('success', 'メンバーをグループから削除しました。');
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * グループに自分自身で参加する
+     */
+    public function join(string $travelPlanUuid, int $groupId)
+    {
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($travelPlanUuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            $groups = $this->groupService->getGroupsForTravelPlan($travelPlan, Auth::user());
+            $group = $groups->find($groupId);
+
+            if (! $group) {
+                abort(404);
+            }
+
+            // 現在のユーザーのメンバー情報を取得
+            $currentMember = $this->memberService->findMemberByTravelPlanAndUser($travelPlan, Auth::user());
+
+            if (! $currentMember) {
+                abort(403, 'この旅行プランのメンバーではありません。');
+            }
+
+            // 既にグループに参加しているかチェック
+            $groupMembers = $this->groupService->getGroupMembers($group, Auth::user());
+            $isAlreadyMember = $groupMembers->contains('id', $currentMember->id);
+
+            if ($isAlreadyMember) {
+                return redirect()
+                    ->route('travel-plans.groups.show', [$travelPlan->uuid, $group->id])
+                    ->with('info', '既にこのグループに参加しています。');
+            }
+
+            $this->groupService->addMemberToGroup($group, $currentMember, Auth::user());
+
+            return redirect()
+                ->route('travel-plans.groups.show', [$travelPlan->uuid, $group->id])
+                ->with('success', 'グループに参加しました。');
         } catch (\Exception $e) {
             return back()
                 ->withErrors(['error' => $e->getMessage()]);
