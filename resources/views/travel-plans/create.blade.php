@@ -39,7 +39,7 @@
                     <input type="date" 
                            id="departure_date" 
                            name="departure_date" 
-                           value="{{ old('departure_date') }}"
+                           value="{{ old('departure_date', now()->format("Y-m-d")) }}"
                            required
                            min="2000-01-01"
                            max="{{ date('Y-m-d', strtotime('+10 years')) }}"

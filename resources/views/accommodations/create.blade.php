@@ -72,7 +72,7 @@
                         <input type="date" 
                                id="check_out_date" 
                                name="check_out_date" 
-                               value="{{ old('check_out_date') }}"
+                               value="{{ old('check_out_date', $travelPlan->departure_date->addDay()->format('Y-m-d')) }}"
                                min="{{ $travelPlan->departure_date->format('Y-m-d') }}"
                                @if($travelPlan->return_date) max="{{ $travelPlan->return_date->format('Y-m-d') }}" @endif
                                required
