@@ -71,6 +71,7 @@ class Itinerary extends Model
         'title',
         'description',
         'date',
+        'arrival_date',
         'start_time',
         'end_time',
         'timezone',
@@ -96,6 +97,7 @@ class Itinerary extends Model
 
     protected $casts = [
         'date' => 'date',
+        'arrival_date' => 'date',
         'start_time' => 'datetime:H:i',
         'end_time' => 'datetime:H:i',
         'departure_time' => 'datetime',

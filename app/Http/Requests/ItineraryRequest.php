@@ -33,6 +33,12 @@ class ItineraryRequest extends FormRequest
                 'date',
                 $this->validateDateWithinTravelPlan(),
             ],
+            'arrival_date' => [
+                'nullable',
+                'date',
+                'after_or_equal:date',
+                $this->validateArrivalDateWithinTravelPlan(),
+            ],
             'start_time' => [
                 'nullable',
                 'date_format:H:i',
@@ -82,6 +88,8 @@ class ItineraryRequest extends FormRequest
             'description.max' => '説明は2000文字以内で入力してください。',
             'date.required' => '日付は必須です。',
             'date.date' => '有効な日付を入力してください。',
+            'arrival_date.date' => '有効な到着日を入力してください。',
+            'arrival_date.after_or_equal' => '到着日は出発日以降に設定してください。',
             'start_time.date_format' => '開始時刻の形式が正しくありません（HH:MM）。',
             'end_time.date_format' => '終了時刻の形式が正しくありません（HH:MM）。',
             'end_time.after' => '終了時刻は開始時刻より後に設定してください。',
@@ -192,6 +200,39 @@ class ItineraryRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    /**
+     * 到着日が旅行プランの期間内かチェック
+     */
+    private function validateArrivalDateWithinTravelPlan(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail) {
+            if (!$value) {
+                return; // nullableなので空の場合はスキップ
+            }
+            
+            $travelPlan = $this->getTravelPlan();
+            if (! $travelPlan) {
+                return;
+            }
+
+            $arrivalDate = Carbon::parse($value);
+            $startDate = $travelPlan->departure_date;
+            $endDate = $travelPlan->return_date;
+
+            if ($arrivalDate->lt($startDate)) {
+                $fail('到着日は旅行開始日（'.$startDate->format('Y年n月d日').'）以降に設定してください。');
+
+                return;
+            }
+
+            if ($endDate && $arrivalDate->gt($endDate)) {
+                $fail('到着日は旅行終了日（'.$endDate->format('Y年n月d日').'）以前に設定してください。');
+
+                return;
+            }
+        };
     }
 
     /**

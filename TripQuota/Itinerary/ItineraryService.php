@@ -276,6 +276,27 @@ class ItineraryService
             ]);
         }
 
+        // 到着日の妥当性チェック（設定されている場合）
+        if (!empty($data['arrival_date'])) {
+            try {
+                $arrivalDate = Carbon::parse($data['arrival_date']);
+                
+                // 到着日は出発日以降である必要がある
+                if ($arrivalDate->lt($date)) {
+                    throw ValidationException::withMessages([
+                        'arrival_date' => ['到着日は出発日以降である必要があります。'],
+                    ]);
+                }
+            } catch (ValidationException $e) {
+                // 再スロー (到着日の比較エラー)
+                throw $e;
+            } catch (\Exception $e) {
+                throw ValidationException::withMessages([
+                    'arrival_date' => ['有効な到着日を入力してください。'],
+                ]);
+            }
+        }
+
         // 移動手段固有の検証
         if (isset($data['transportation_type'])) {
             $this->validateTransportationSpecificFields($data);

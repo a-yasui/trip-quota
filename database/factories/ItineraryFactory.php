@@ -6,6 +6,7 @@ use App\Models\Group;
 use App\Models\Itinerary;
 use App\Models\Member;
 use App\Models\TravelPlan;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ItineraryFactory extends Factory
@@ -18,6 +19,12 @@ class ItineraryFactory extends Factory
         $startTime = fake()->optional()->time();
         $endTime = $startTime ? fake()->time() : null;
 
+        // arrival_dateは出発日以降の日付を生成
+        $arrivalDate = fake()->optional(0.3)->dateTimeBetween(
+            $date, 
+            Carbon::instance($date)->addDays(3)
+        );
+
         return [
             'travel_plan_id' => TravelPlan::factory(),
             'group_id' => null,
@@ -27,6 +34,7 @@ class ItineraryFactory extends Factory
             'title' => fake()->sentence(4),
             'description' => fake()->optional()->paragraph(),
             'date' => $date,
+            'arrival_date' => $arrivalDate,
             'start_time' => $startTime,
             'end_time' => $endTime,
             'timezone' => fake()->randomElement(['Asia/Tokyo', 'UTC', 'America/New_York', 'Europe/London']),

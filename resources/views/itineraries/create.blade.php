@@ -50,10 +50,10 @@
                         </div>
 
                         <!-- 日付と時刻 -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label for="date" class="block text-sm font-medium text-gray-700">
-                                    日付 <span class="text-red-500">*</span>
+                                    出発日 <span class="text-red-500">*</span>
                                 </label>
                                 <input type="date" 
                                        id="date" 
@@ -64,6 +64,22 @@
                                        required
                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 @error('date')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="arrival_date" class="block text-sm font-medium text-gray-700">
+                                    到着日
+                                    <span class="text-xs text-gray-500">(異なる場合)</span>
+                                </label>
+                                <input type="date" 
+                                       id="arrival_date" 
+                                       name="arrival_date" 
+                                       value="{{ old('arrival_date') }}"
+                                       min="{{ $travelPlan->departure_date->format('Y-m-d') }}"
+                                       @if($travelPlan->return_date) max="{{ $travelPlan->return_date->format('Y-m-d') }}" @endif
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                @error('arrival_date')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>

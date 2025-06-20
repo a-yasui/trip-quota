@@ -428,4 +428,82 @@ class ItineraryValidationTest extends TestCase
 
         $response->assertSessionHasErrors(['description', 'notes']);
     }
+
+    public function test_arrival_date_validation_after_or_equal_departure()
+    {
+        // 到着日が出発日より前の場合はエラー
+        $response = $this->actingAs($this->user)->post(
+            route('travel-plans.itineraries.store', $this->travelPlan->uuid),
+            [
+                'title' => 'Test Itinerary',
+                'date' => $this->travelPlan->departure_date->format('Y-m-d'),
+                'arrival_date' => $this->travelPlan->departure_date->subDay()->format('Y-m-d'),
+            ]
+        );
+
+        $response->assertSessionHasErrors(['arrival_date']);
+    }
+
+    public function test_arrival_date_validation_same_as_departure_is_valid()
+    {
+        // 到着日と出発日が同じ場合は有効
+        $response = $this->actingAs($this->user)->post(
+            route('travel-plans.itineraries.store', $this->travelPlan->uuid),
+            [
+                'title' => 'Test Itinerary',
+                'date' => $this->travelPlan->departure_date->format('Y-m-d'),
+                'arrival_date' => $this->travelPlan->departure_date->format('Y-m-d'),
+            ]
+        );
+
+        $response->assertRedirect();
+        $response->assertSessionDoesntHaveErrors('arrival_date');
+    }
+
+    public function test_arrival_date_validation_after_departure_is_valid()
+    {
+        // 到着日が出発日より後の場合は有効
+        $response = $this->actingAs($this->user)->post(
+            route('travel-plans.itineraries.store', $this->travelPlan->uuid),
+            [
+                'title' => 'Test Itinerary',
+                'date' => $this->travelPlan->departure_date->format('Y-m-d'),
+                'arrival_date' => $this->travelPlan->departure_date->addDay()->format('Y-m-d'),
+            ]
+        );
+
+        $response->assertRedirect();
+        $response->assertSessionDoesntHaveErrors('arrival_date');
+    }
+
+    public function test_arrival_date_within_travel_plan_period()
+    {
+        // 到着日が旅行期間外の場合はエラー
+        $response = $this->actingAs($this->user)->post(
+            route('travel-plans.itineraries.store', $this->travelPlan->uuid),
+            [
+                'title' => 'Test Itinerary',
+                'date' => $this->travelPlan->departure_date->format('Y-m-d'),
+                'arrival_date' => $this->travelPlan->return_date->addDay()->format('Y-m-d'),
+            ]
+        );
+
+        $response->assertSessionHasErrors(['arrival_date']);
+    }
+
+    public function test_arrival_date_is_optional()
+    {
+        // 到着日が設定されていない場合は有効
+        $response = $this->actingAs($this->user)->post(
+            route('travel-plans.itineraries.store', $this->travelPlan->uuid),
+            [
+                'title' => 'Test Itinerary',
+                'date' => $this->travelPlan->departure_date->format('Y-m-d'),
+                // arrival_date は設定しない
+            ]
+        );
+
+        $response->assertRedirect();
+        $response->assertSessionDoesntHaveErrors();
+    }
 }

@@ -248,6 +248,45 @@ class ItineraryServiceTest extends TestCase
         $this->service->updateItinerary($itinerary, $user, ['title' => 'Updated']);
     }
 
+    public function test_create_itinerary_validates_arrival_date_after_departure()
+    {
+        $user = User::factory()->create();
+        $travelPlan = TravelPlan::factory()->create([
+            'departure_date' => '2024-01-10',
+            'return_date' => '2024-01-20',
+        ]);
+        Member::factory()->forUser($user)->forTravelPlan($travelPlan)->create();
+
+        $invalidData = [
+            'title' => 'Test Itinerary',
+            'date' => '2024-01-15',
+            'arrival_date' => '2024-01-14', // 出発日より前
+        ];
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('到着日は出発日以降である必要があります。');
+
+        $this->service->createItinerary($travelPlan, $user, $invalidData);
+    }
+
+    public function test_create_itinerary_allows_arrival_date_same_as_departure()
+    {
+        // これらの詳細なテストは統合テスト（Feature tests）で実装されます
+        $this->markTestSkipped('このテストは統合テストで実装されます');
+    }
+
+    public function test_create_itinerary_allows_arrival_date_after_departure()
+    {
+        // これらの詳細なテストは統合テスト（Feature tests）で実装されます
+        $this->markTestSkipped('このテストは統合テストで実装されます');
+    }
+
+    public function test_create_itinerary_allows_null_arrival_date()
+    {
+        // これらの詳細なテストは統合テスト（Feature tests）で実装されます
+        $this->markTestSkipped('このテストは統合テストで実装されます');
+    }
+
     public function test_delete_itinerary_validates_user_permissions()
     {
         $user = User::factory()->create();
