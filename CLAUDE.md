@@ -28,17 +28,26 @@ TripQuota is a multi-traveler trip management web application built with Laravel
 # Run all tests
 php artisan test
 
-# Run specific test
+# Run specific test class
 php artisan test --filter=ExpenseTest
 
-# Start development server with queue and logs
-composer dev
+# Run specific test method
+php artisan test --filter=testCanCreateExpense
 
 # Database migrations
 php artisan migrate
 
+# Generate factory for model
+php artisan generate:factory ModelName
+
+# Update model properties after schema changes
+php artisan ide-helper:model ModelName
+
 # Code formatting
 php artisan pint
+
+# Start development server (if composer dev script exists)
+php artisan serve
 ```
 
 ### Frontend (Vue.js/Vite)
@@ -49,11 +58,8 @@ npm run dev
 # Build for production  
 npm run build
 
-# Run frontend tests
-npm run test
-
-# Watch mode for tests
-npm run test:watch
+# Note: Frontend testing setup needs to be configured
+# Vue component tests would use Vitest when properly set up
 ```
 
 ## Architecture Overview
@@ -63,6 +69,15 @@ npm run test:watch
 - Domains are accessed through `<DomainName>Service` classes
 - Domains are self-contained and don't directly use other domain classes (except through Services)
 - Repository pattern abstracts Eloquent models for testing
+- Service classes use Repository interfaces for data access
+- Mapping classes in `App\Mapping\<Domain>\` convert between Eloquent models and Repository interfaces
+
+### Technology Stack
+- **Backend**: PHP 8.3, Laravel 11
+- **Frontend**: Vue.js 3, Vite, Tailwind CSS
+- **Database**: SQLite (testing), with support for multiple currencies
+- **Testing**: PHPUnit for backend, Vitest planned for frontend
+- **Code Quality**: Laravel Pint for formatting, IDE Helper for model properties
 
 ### Key Directories
 - `app/` - Laravel application (Controllers, Models, Enums)
@@ -87,10 +102,11 @@ npm run test:watch
 - Unit tests for domain services with repository mocking
 
 ### Frontend Tests
-- Vitest with Vue Test Utils
+- Frontend testing framework needs to be configured
+- When set up, should use Vitest with Vue Test Utils
 - Mock child components when testing parent components
 - Test user interactions and component state changes
-- Located in `resources/js/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}`
+- Test files should be located in `resources/js/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}`
 
 ## Development Guidelines
 
@@ -124,6 +140,19 @@ npm run test:watch
 ### Template Testing
 - Always create display tests for new Blade templates
 - Ensure tests pass before considering implementation complete
+
+### Exception Handling
+- All custom exceptions must extend `App\Exception\Exception`
+- Never use `\Exception` directly
+- Exception handling is centralized in `bootstrap/app.php` withExceptions
+- Controllers should not contain try-catch blocks; exceptions flow to global handler
+
+### JSON Data Handling
+- Never use JSON column type in database
+- Use `text` column with base64-encoded JSON data
+- Create readonly classes in `app/Models/JSON/` for structured data
+- Implement Cast classes to handle encoding/decoding
+- Required methods: `toBase64JSON(): string` and `static fromBase64JSON(string): self`
 
 ## Recent Implementation Status
 
