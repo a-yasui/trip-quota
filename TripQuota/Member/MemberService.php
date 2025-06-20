@@ -215,24 +215,45 @@ class MemberService
         }
 
         return DB::transaction(function () use ($linkRequest, $user) {
-            $member = $linkRequest->member;
+            // Race condition防止のため、関連付けリクエストとメンバーを排他ロック
+            $lockedLinkRequest = MemberLinkRequest::lockForUpdate()
+                ->where('id', $linkRequest->id)
+                ->first();
 
-            // 既に他のユーザーと関連付けられているかチェック
-            if ($member->user_id) {
+            if (! $lockedLinkRequest) {
+                throw new \Exception('関連付けリクエストが見つかりません。');
+            }
+
+            // ロック後に再度状態をチェック（他のプロセスで既に処理された可能性）
+            if (! $lockedLinkRequest->isPending()) {
+                throw new \Exception('この関連付けリクエストは既に処理されているか期限切れです。');
+            }
+
+            // メンバーも排他ロックで取得
+            $lockedMember = Member::lockForUpdate()
+                ->where('id', $lockedLinkRequest->member_id)
+                ->first();
+
+            if (! $lockedMember) {
+                throw new \Exception('関連付け対象のメンバーが見つかりません。');
+            }
+
+            // ロック後に再度チェック（他のプロセスで既に関連付けられた可能性）
+            if ($lockedMember->user_id) {
                 throw new \Exception('このメンバーは既に他のユーザーと関連付けられています。');
             }
 
             // ユーザーの適切なアカウントを取得（優先順位: 指定されたアカウント名 > デフォルトアカウント > 最初のアカウント）
             $account = null;
-            if ($linkRequest->target_account_name) {
-                $account = $user->accounts()->where('account_name', $linkRequest->target_account_name)->first();
+            if ($lockedLinkRequest->target_account_name) {
+                $account = $user->accounts()->where('account_name', $lockedLinkRequest->target_account_name)->first();
             }
             if (! $account) {
                 $account = $user->accounts()->first();
             }
 
             // メンバーを更新
-            $updatedMember = $this->memberRepository->update($member, [
+            $updatedMember = $this->memberRepository->update($lockedMember, [
                 'user_id' => $user->id,
                 'account_id' => $account?->id,
                 'email' => $user->email,
@@ -240,7 +261,7 @@ class MemberService
             ]);
 
             // 関連付けリクエストを承認状態に更新
-            $linkRequest->approve();
+            $lockedLinkRequest->approve();
 
             return $updatedMember;
         });
