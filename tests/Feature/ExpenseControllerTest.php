@@ -180,7 +180,6 @@ class ExpenseControllerTest extends TestCase
         $response->assertSee('編集用費用');
     }
 
-
     public function test_update_modifies_expense_successfully()
     {
         $expense = Expense::factory()->create([
@@ -232,8 +231,6 @@ class ExpenseControllerTest extends TestCase
             'id' => $expense->id,
         ]);
     }
-
-
 
     public function test_unauthorized_user_cannot_access_expenses()
     {

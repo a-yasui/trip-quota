@@ -277,10 +277,10 @@ class ItineraryService
         }
 
         // 到着日の妥当性チェック（設定されている場合）
-        if (!empty($data['arrival_date'])) {
+        if (! empty($data['arrival_date'])) {
             try {
                 $arrivalDate = Carbon::parse($data['arrival_date']);
-                
+
                 // 到着日は出発日以降である必要がある
                 if ($arrivalDate->lt($date)) {
                     throw ValidationException::withMessages([
@@ -309,9 +309,9 @@ class ItineraryService
             // 日付が指定されている場合は日時として比較
             if ($departureDate) {
                 $arrivalDateToUse = $arrivalDate ?: $departureDate;
-                
-                $departureDateTime = Carbon::createFromFormat('Y-m-d H:i', $departureDate . ' ' . $startTime);
-                $arrivalDateTime = Carbon::createFromFormat('Y-m-d H:i', $arrivalDateToUse . ' ' . $endTime);
+
+                $departureDateTime = Carbon::createFromFormat('Y-m-d H:i', $departureDate.' '.$startTime);
+                $arrivalDateTime = Carbon::createFromFormat('Y-m-d H:i', $arrivalDateToUse.' '.$endTime);
 
                 // 同じ日時は許可しない
                 if ($arrivalDateTime->eq($departureDateTime)) {

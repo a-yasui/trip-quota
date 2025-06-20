@@ -207,10 +207,10 @@ class ItineraryRequest extends FormRequest
     private function validateArrivalDateWithinTravelPlan(): \Closure
     {
         return function (string $attribute, mixed $value, \Closure $fail) {
-            if (!$value) {
+            if (! $value) {
                 return; // nullableなので空の場合はスキップ
             }
-            
+
             $travelPlan = $this->getTravelPlan();
             if (! $travelPlan) {
                 return;
@@ -298,18 +298,20 @@ class ItineraryRequest extends FormRequest
             }
 
             // 出発日時と到着日時を作成
-            $departureDateTime = Carbon::createFromFormat('Y-m-d H:i', $departureDate . ' ' . $startTime);
-            $arrivalDateTime = Carbon::createFromFormat('Y-m-d H:i', $arrivalDate . ' ' . $endTime);
+            $departureDateTime = Carbon::createFromFormat('Y-m-d H:i', $departureDate.' '.$startTime);
+            $arrivalDateTime = Carbon::createFromFormat('Y-m-d H:i', $arrivalDate.' '.$endTime);
 
             // 同じ日時は許可しない
             if ($arrivalDateTime->eq($departureDateTime)) {
                 $fail('到着時刻は出発時刻と異なる時刻に設定してください。');
+
                 return;
             }
 
             // 到着日時が出発日時より前の場合はエラー
             if ($arrivalDateTime->lt($departureDateTime)) {
                 $fail('到着日時は出発日時より後に設定してください。');
+
                 return;
             }
 
@@ -394,12 +396,14 @@ class ItineraryRequest extends FormRequest
             // 同じ日時は許可しない
             if ($arrivalTime->eq($departureTime)) {
                 $fail('到着時刻は出発時刻と異なる時刻に設定してください。');
+
                 return;
             }
 
             // 到着日時が出発日時より前の場合はエラー
             if ($arrivalTime->lt($departureTime)) {
                 $fail('到着時刻は出発時刻より後に設定してください。');
+
                 return;
             }
         };

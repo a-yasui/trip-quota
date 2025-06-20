@@ -163,7 +163,6 @@ class ExpenseController extends Controller
             abort(404);
         }
 
-
         // 確認済みメンバーとグループを取得
         $members = $travelPlan->members()->where('is_confirmed', true)->get();
         $groups = $travelPlan->groups()->get();
@@ -234,7 +233,6 @@ class ExpenseController extends Controller
                 ->withErrors(['error' => $e->getMessage()]);
         }
     }
-
 
     /**
      * 分割金額を更新

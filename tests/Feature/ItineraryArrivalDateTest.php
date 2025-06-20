@@ -14,7 +14,9 @@ class ItineraryArrivalDateTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TravelPlan $travelPlan;
+
     private Member $member;
 
     protected function setUp(): void
@@ -45,8 +47,8 @@ class ItineraryArrivalDateTest extends TestCase
 
         $this->assertDatabaseHas('itineraries', [
             'title' => 'Test Itinerary',
-            'date' => $this->travelPlan->departure_date->format('Y-m-d') . ' 00:00:00',
-            'arrival_date' => $this->travelPlan->departure_date->format('Y-m-d') . ' 00:00:00',
+            'date' => $this->travelPlan->departure_date->format('Y-m-d').' 00:00:00',
+            'arrival_date' => $this->travelPlan->departure_date->format('Y-m-d').' 00:00:00',
         ]);
     }
 
@@ -68,8 +70,8 @@ class ItineraryArrivalDateTest extends TestCase
 
         $this->assertDatabaseHas('itineraries', [
             'title' => 'Multi-day Itinerary',
-            'date' => $this->travelPlan->departure_date->format('Y-m-d') . ' 00:00:00',
-            'arrival_date' => $arrivalDate->format('Y-m-d') . ' 00:00:00',
+            'date' => $this->travelPlan->departure_date->format('Y-m-d').' 00:00:00',
+            'arrival_date' => $arrivalDate->format('Y-m-d').' 00:00:00',
         ]);
     }
 
@@ -89,7 +91,7 @@ class ItineraryArrivalDateTest extends TestCase
 
         $this->assertDatabaseHas('itineraries', [
             'title' => 'Same Day Itinerary',
-            'date' => $this->travelPlan->departure_date->format('Y-m-d') . ' 00:00:00',
+            'date' => $this->travelPlan->departure_date->format('Y-m-d').' 00:00:00',
             'arrival_date' => null,
         ]);
     }
@@ -120,8 +122,8 @@ class ItineraryArrivalDateTest extends TestCase
         $this->assertDatabaseHas('itineraries', [
             'id' => $itinerary->id,
             'title' => 'Updated Itinerary',
-            'date' => $this->travelPlan->departure_date->format('Y-m-d') . ' 00:00:00',
-            'arrival_date' => $newArrivalDate->format('Y-m-d') . ' 00:00:00',
+            'date' => $this->travelPlan->departure_date->format('Y-m-d').' 00:00:00',
+            'arrival_date' => $newArrivalDate->format('Y-m-d').' 00:00:00',
         ]);
     }
 
@@ -148,7 +150,7 @@ class ItineraryArrivalDateTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('name="arrival_date"', false);
-        $response->assertSee('value="' . $arrivalDate->format('Y-m-d') . '"', false);
+        $response->assertSee('value="'.$arrivalDate->format('Y-m-d').'"', false);
     }
 
     public function test_create_form_shows_arrival_date_field()

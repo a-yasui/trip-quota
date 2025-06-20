@@ -159,9 +159,9 @@ class MemberController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent()
+                'user_agent' => request()->userAgent(),
             ]);
-            
+
             // ユーザーには汎用的なメッセージを表示
             return back()
                 ->withInput()
@@ -282,9 +282,9 @@ class MemberController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent()
+                'user_agent' => request()->userAgent(),
             ]);
-            
+
             // ユーザーには汎用的なメッセージを表示
             return back()
                 ->withInput()
@@ -325,9 +325,9 @@ class MemberController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent()
+                'user_agent' => request()->userAgent(),
             ]);
-            
+
             // ユーザーには汎用的なメッセージを表示
             return back()
                 ->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
@@ -390,9 +390,9 @@ class MemberController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent()
+                'user_agent' => request()->userAgent(),
             ]);
-            
+
             // ユーザーには汎用的なメッセージを表示
             return back()
                 ->withInput()
@@ -428,9 +428,9 @@ class MemberController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent()
+                'user_agent' => request()->userAgent(),
             ]);
-            
+
             // ユーザーには汎用的なメッセージを表示
             return back()
                 ->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
@@ -453,17 +453,17 @@ class MemberController extends Controller
                 'confirmation' => 'required|string',
             ]);
 
-            if ($request->confirmation !== 'approve-' . $linkRequest->id) {
+            if ($request->confirmation !== 'approve-'.$linkRequest->id) {
                 abort(422, '無効な確認トークンです。');
             }
 
             // 3. Rate limiting
-            $rateLimitKey = 'approve-link:' . Auth::id();
+            $rateLimitKey = 'approve-link:'.Auth::id();
             if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
                 abort(429, '操作回数が多すぎます。しばらくお待ちください。');
             }
 
-            if (!$linkRequest->isPending()) {
+            if (! $linkRequest->isPending()) {
                 return back()->withErrors(['error' => 'このリクエストはすでに処理されているか、期限が切れています。']);
             }
 
@@ -486,9 +486,9 @@ class MemberController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent()
+                'user_agent' => request()->userAgent(),
             ]);
-            
+
             // ユーザーには汎用的なメッセージを表示
             return back()->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
         }
@@ -510,17 +510,17 @@ class MemberController extends Controller
                 'confirmation' => 'required|string',
             ]);
 
-            if ($request->confirmation !== 'decline-' . $linkRequest->id) {
+            if ($request->confirmation !== 'decline-'.$linkRequest->id) {
                 abort(422, '無効な確認トークンです。');
             }
 
             // 3. Rate limiting
-            $rateLimitKey = 'decline-link:' . Auth::id();
+            $rateLimitKey = 'decline-link:'.Auth::id();
             if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
                 abort(429, '操作回数が多すぎます。しばらくお待ちください。');
             }
 
-            if (!$linkRequest->isPending()) {
+            if (! $linkRequest->isPending()) {
                 return back()->withErrors(['error' => 'このリクエストはすでに処理されているか、期限が切れています。']);
             }
 
@@ -543,9 +543,9 @@ class MemberController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent()
+                'user_agent' => request()->userAgent(),
             ]);
-            
+
             // ユーザーには汎用的なメッセージを表示
             return back()->withErrors(['error' => '処理中にエラーが発生しました。しばらくしてからもう一度お試しください。']);
         }

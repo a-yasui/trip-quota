@@ -26,8 +26,7 @@ class SettlementService
         $this->ensureUserCanViewSettlements($travelPlan, $user);
 
         // 全ての費用を対象
-        $expenses = $this->expenseRepository->findByTravelPlan($travelPlan)
-    ;
+        $expenses = $this->expenseRepository->findByTravelPlan($travelPlan);
 
         if ($expenses->isEmpty()) {
             return [];

@@ -21,7 +21,7 @@ class ItineraryFactory extends Factory
 
         // arrival_dateは出発日以降の日付を生成
         $arrivalDate = fake()->optional(0.3)->dateTimeBetween(
-            $date, 
+            $date,
             Carbon::instance($date)->addDays(3)
         );
 

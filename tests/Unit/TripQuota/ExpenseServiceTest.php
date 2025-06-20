@@ -178,7 +178,6 @@ class ExpenseServiceTest extends TestCase
         $this->assertEquals($expectedExpense, $result);
     }
 
-
     public function test_delete_expense_successfully()
     {
         $expense = Expense::factory()->make([
@@ -202,7 +201,6 @@ class ExpenseServiceTest extends TestCase
 
         $this->assertTrue($result);
     }
-
 
     public function test_get_expenses_for_travel_plan()
     {
@@ -228,7 +226,6 @@ class ExpenseServiceTest extends TestCase
 
         $this->assertEquals($expectedExpenses, $result);
     }
-
 
     public function test_calculate_split_amounts()
     {

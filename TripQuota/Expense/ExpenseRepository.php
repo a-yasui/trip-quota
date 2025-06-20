@@ -76,7 +76,6 @@ class ExpenseRepository implements ExpenseRepositoryInterface
         $expense->members()->sync($syncData);
     }
 
-
     public function findByMember(int $memberId): Collection
     {
         return Expense::whereHas('members', function ($query) use ($memberId) {

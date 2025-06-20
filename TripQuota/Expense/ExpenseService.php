@@ -54,7 +54,6 @@ class ExpenseService
     {
         $this->ensureUserCanEditExpense($expense, $user);
 
-
         $this->validateExpenseData($data, $expense->travelPlan);
 
         return DB::transaction(function () use ($expense, $data) {
@@ -81,7 +80,6 @@ class ExpenseService
     {
         $this->ensureUserCanEditExpense($expense, $user);
 
-
         return $this->expenseRepository->delete($expense);
     }
 
@@ -98,8 +96,6 @@ class ExpenseService
 
         return $this->expenseRepository->findByGroup($group);
     }
-
-
 
     public function autoParticipateCurrentUser(Expense $expense, User $user): void
     {

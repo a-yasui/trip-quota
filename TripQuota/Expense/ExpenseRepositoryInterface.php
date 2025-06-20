@@ -49,7 +49,6 @@ interface ExpenseRepositoryInterface
      */
     public function assignMembers(Expense $expense, array $memberAssignments): void;
 
-
     /**
      * メンバーが参加している費用一覧を取得
      */
