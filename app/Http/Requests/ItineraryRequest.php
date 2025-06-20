@@ -314,7 +314,7 @@ class ItineraryRequest extends FormRequest
             }
 
             // 移動時間が48時間を超える場合は警告
-            $duration = $arrivalDateTime->diffInHours($departureDateTime);
+            $duration = abs($arrivalDateTime->diffInHours($departureDateTime));
             if ($duration > 48) {
                 $fail('移動時間が48時間を超えています。到着日時を確認してください。');
             }

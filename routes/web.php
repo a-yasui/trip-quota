@@ -84,17 +84,14 @@ Route::middleware('auth')->group(function () {
     Route::get('travel-plans/{uuid}/itineraries/timeline', [ItineraryController::class, 'timeline'])->name('travel-plans.itineraries.timeline');
 
     // 旅程管理（旅行プラン配下）
-    Route::resource('travel-plans.itineraries', ItineraryController::class)->parameters([
-        'travel-plans' => 'uuid',
-    ])->names([
-        'index' => 'travel-plans.itineraries.index',
-        'create' => 'travel-plans.itineraries.create',
-        'store' => 'travel-plans.itineraries.store',
-        'show' => 'travel-plans.itineraries.show',
-        'edit' => 'travel-plans.itineraries.edit',
-        'update' => 'travel-plans.itineraries.update',
-        'destroy' => 'travel-plans.itineraries.destroy',
-    ]);
+    Route::get('travel-plans/{uuid}/itineraries', [ItineraryController::class, 'index'])->name('travel-plans.itineraries.index');
+    Route::get('travel-plans/{uuid}/itineraries/create', [ItineraryController::class, 'create'])->name('travel-plans.itineraries.create');
+    Route::post('travel-plans/{uuid}/itineraries', [ItineraryController::class, 'store'])->name('travel-plans.itineraries.store');
+    Route::get('travel-plans/{uuid}/itineraries/{itinerary}', [ItineraryController::class, 'show'])->name('travel-plans.itineraries.show');
+    Route::get('travel-plans/{uuid}/itineraries/{itinerary}/edit', [ItineraryController::class, 'edit'])->name('travel-plans.itineraries.edit');
+    Route::put('travel-plans/{uuid}/itineraries/{itinerary}', [ItineraryController::class, 'update'])->name('travel-plans.itineraries.update');
+    Route::patch('travel-plans/{uuid}/itineraries/{itinerary}', [ItineraryController::class, 'update'])->name('travel-plans.itineraries.update');
+    Route::delete('travel-plans/{uuid}/itineraries/{itinerary}', [ItineraryController::class, 'destroy'])->name('travel-plans.itineraries.destroy');
 
     // 宿泊施設管理（旅行プラン配下）
     Route::get('travel-plans/{uuid}/accommodations', [AccommodationController::class, 'index'])->name('travel-plans.accommodations.index');
