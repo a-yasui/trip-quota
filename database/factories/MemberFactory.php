@@ -20,7 +20,18 @@ class MemberFactory extends Factory
             'travel_plan_id' => TravelPlan::factory(),
             'user_id' => $user,
             'account_id' => function (array $attributes) {
-                return Account::factory()->for(User::find($attributes['user_id']))->create()->id;
+                if (! $attributes['user_id']) {
+                    return null;
+                }
+                $userId = $attributes['user_id'];
+                if ($userId instanceof \Illuminate\Database\Eloquent\Factories\Factory) {
+                    // Factoryインスタンスの場合は先に作成
+                    $user = $userId->create();
+
+                    return Account::factory()->for($user)->create()->id;
+                }
+
+                return Account::factory()->for(User::find($userId))->create()->id;
             },
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),

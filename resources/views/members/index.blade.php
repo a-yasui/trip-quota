@@ -92,10 +92,28 @@
                                             </div>
                                             <div class="ml-3">
                                                 <p class="text-sm font-medium text-gray-900">{{ $member->name }}</p>
-                                                <p class="text-sm text-gray-500">{{ $member->email }}</p>
+                                                <p class="text-sm text-gray-500">{{ $member->email ?: '（メールアドレス未登録）' }}</p>
                                             </div>
                                         </div>
-                                        <span class="text-xs text-yellow-600">確認待ち</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-xs text-yellow-600">確認待ち</span>
+                                            @if($travelPlan->created_by === Auth::id())
+                                                <form method="POST" action="{{ route('travel-plans.members.confirm', [$travelPlan->uuid, $member->id]) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                                        確認済みにする
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ route('travel-plans.members.destroy', [$travelPlan->uuid, $member->id]) }}" 
+                                                      onsubmit="return confirm('本当に削除しますか？')" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                                        削除
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>

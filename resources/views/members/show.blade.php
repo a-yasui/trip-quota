@@ -263,10 +263,6 @@
                                 <dt class="text-sm text-gray-500">所属グループ数</dt>
                                 <dd class="text-sm font-medium text-gray-900">{{ $member->groups->count() }}個</dd>
                             </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-gray-500">参加からの日数</dt>
-                                <dd class="text-sm font-medium text-gray-900">{{ $member->created_at->diffInDays(now()) }}日</dd>
-                            </div>
                         </dl>
                     </div>
                 </div>

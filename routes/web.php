@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
     Route::put('travel-plans/{uuid}/members/{member}', [MemberController::class, 'update'])->name('travel-plans.members.update');
     Route::patch('travel-plans/{uuid}/members/{member}', [MemberController::class, 'update'])->name('travel-plans.members.update');
     Route::delete('travel-plans/{uuid}/members/{member}', [MemberController::class, 'destroy'])->name('travel-plans.members.destroy');
+    Route::post('travel-plans/{uuid}/members/{member}/confirm', [MemberController::class, 'confirmMember'])->name('travel-plans.members.confirm');
 
     // 旅程タイムライン表示（resourceルートより先に定義）
     Route::get('travel-plans/{uuid}/itineraries/timeline', [ItineraryController::class, 'timeline'])->name('travel-plans.itineraries.timeline');
@@ -130,4 +131,9 @@ Route::middleware('auth')->group(function () {
     Route::get('invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
     Route::post('invitations/{token}/accept', [InvitationController::class, 'accept'])->name('invitations.accept');
     Route::post('invitations/{token}/decline', [InvitationController::class, 'decline'])->name('invitations.decline');
+
+    // メンバー関連付けリクエスト
+    Route::post('travel-plans/{uuid}/members/{member}/link-request', [MemberController::class, 'sendLinkRequest'])->name('travel-plans.members.send-link-request');
+    Route::post('member-link-requests/{linkRequest}/approve', [MemberController::class, 'approveLinkRequest'])->name('member-link-requests.approve');
+    Route::post('member-link-requests/{linkRequest}/decline', [MemberController::class, 'declineLinkRequest'])->name('member-link-requests.decline');
 });

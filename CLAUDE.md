@@ -44,7 +44,7 @@ php artisan generate:factory ModelName
 php artisan ide-helper:model ModelName
 
 # Code formatting
-php artisan pint
+./vendor/bin/pint
 
 # Start development server (if composer dev script exists)
 php artisan serve

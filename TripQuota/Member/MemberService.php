@@ -4,6 +4,7 @@ namespace TripQuota\Member;
 
 use App\Models\Account;
 use App\Models\Member;
+use App\Models\MemberLinkRequest;
 use App\Models\TravelPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -98,6 +99,7 @@ class MemberService
 
         return $this->memberRepository->update($member, [
             'name' => $data['name'] ?? $member->name,
+            'email' => array_key_exists('email', $data) ? $data['email'] : $member->email,
             'account_id' => $data['account_id'] ?? $member->account_id,
         ]);
     }
@@ -133,6 +135,163 @@ class MemberService
         return $this->memberRepository->countByTravelPlan($travelPlan);
     }
 
+    /**
+     * 表示名のみでメンバーを追加（招待なし）
+     */
+    public function createMemberByNameOnly(TravelPlan $travelPlan, User $creator, string $name): Member
+    {
+        $this->ensureUserCanInviteMembers($travelPlan, $creator);
+
+        return DB::transaction(function () use ($travelPlan, $name) {
+            return $this->memberRepository->create([
+                'travel_plan_id' => $travelPlan->id,
+                'user_id' => null,
+                'account_id' => null,
+                'name' => $name,
+                'email' => null,
+                'is_confirmed' => true, // 表示名のみメンバーは即座に確認済み
+            ]);
+        });
+    }
+
+    /**
+     * メンバーの関連付けリクエストを作成
+     */
+    public function createLinkRequest(Member $member, User $requester, ?string $targetEmail = null, ?string $targetAccountName = null): MemberLinkRequest
+    {
+        $this->ensureUserCanInviteMembers($member->travelPlan, $requester);
+
+        // 対象ユーザーを特定
+        $targetUser = null;
+
+        if ($targetEmail) {
+            $targetUser = User::where('email', $targetEmail)->first();
+        } elseif ($targetAccountName) {
+            $account = Account::findByAccountNameIgnoreCase($targetAccountName);
+            $targetUser = $account?->user;
+        }
+
+        if (! $targetUser) {
+            throw new \Exception('指定されたユーザーが見つかりません。');
+        }
+
+        // 既に関連付けされているかチェック
+        if ($member->user_id === $targetUser->id) {
+            throw new \Exception('このメンバーは既に指定されたユーザーと関連付けされています。');
+        }
+
+        // 既存の関連付けリクエストをチェック
+        $existingRequest = MemberLinkRequest::where('member_id', $member->id)
+            ->where('target_user_id', $targetUser->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingRequest) {
+            throw new \Exception('このユーザーに対する関連付けリクエストが既に送信されています。');
+        }
+
+        return MemberLinkRequest::create([
+            'member_id' => $member->id,
+            'requested_by_user_id' => $requester->id,
+            'target_user_id' => $targetUser->id,
+            'target_email' => $targetEmail,
+            'target_account_name' => $targetAccountName,
+            'status' => 'pending',
+            'expires_at' => now()->addDays(7),
+        ]);
+    }
+
+    /**
+     * 関連付けリクエストを承認
+     */
+    public function approveLinkRequest(MemberLinkRequest $linkRequest, User $user): Member
+    {
+        if ($linkRequest->target_user_id !== $user->id) {
+            throw new \Exception('この関連付けリクエストを承認する権限がありません。');
+        }
+
+        if (! $linkRequest->isPending()) {
+            throw new \Exception('この関連付けリクエストは既に処理されているか期限切れです。');
+        }
+
+        return DB::transaction(function () use ($linkRequest, $user) {
+            $member = $linkRequest->member;
+
+            // 既に他のユーザーと関連付けられているかチェック
+            if ($member->user_id) {
+                throw new \Exception('このメンバーは既に他のユーザーと関連付けられています。');
+            }
+
+            // ユーザーの適切なアカウントを取得（優先順位: 指定されたアカウント名 > デフォルトアカウント > 最初のアカウント）
+            $account = null;
+            if ($linkRequest->target_account_name) {
+                $account = $user->accounts()->where('account_name', $linkRequest->target_account_name)->first();
+            }
+            if (! $account) {
+                $account = $user->accounts()->first();
+            }
+
+            // メンバーを更新
+            $updatedMember = $this->memberRepository->update($member, [
+                'user_id' => $user->id,
+                'account_id' => $account?->id,
+                'email' => $user->email,
+                'is_confirmed' => true,
+            ]);
+
+            // 関連付けリクエストを承認状態に更新
+            $linkRequest->approve();
+
+            return $updatedMember;
+        });
+    }
+
+    /**
+     * メンバーの確認状態を変更（旅行プラン作成者のみ）
+     */
+    public function confirmMember(Member $member, User $user): Member
+    {
+        $travelPlan = $member->travelPlan;
+
+        // 旅行プラン作成者のみ変更可能
+        if ($travelPlan->creator_user_id !== $user->id) {
+            throw new \Exception('メンバーの状態を変更する権限がありません。');
+        }
+
+        return $this->memberRepository->update($member, [
+            'is_confirmed' => true,
+        ]);
+    }
+
+    /**
+     * 関連付けリクエストを拒否
+     */
+    public function declineLinkRequest(MemberLinkRequest $linkRequest, User $user): MemberLinkRequest
+    {
+        if ($linkRequest->target_user_id !== $user->id) {
+            throw new \Exception('この関連付けリクエストを拒否する権限がありません。');
+        }
+
+        if (! $linkRequest->isPending()) {
+            throw new \Exception('この関連付けリクエストは既に処理されているか期限切れです。');
+        }
+
+        $linkRequest->decline();
+
+        return $linkRequest;
+    }
+
+    /**
+     * ユーザー宛ての関連付けリクエスト一覧を取得
+     */
+    public function getPendingLinkRequestsForUser(User $user): \Illuminate\Database\Eloquent\Collection
+    {
+        return MemberLinkRequest::pending()
+            ->forUser($user)
+            ->with(['member.travelPlan', 'requestedByUser'])
+            ->get();
+    }
+
     private function ensureUserCanViewMembers(TravelPlan $travelPlan, User $user): void
     {
         $member = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
@@ -153,6 +312,11 @@ class MemberService
 
     private function ensureUserCanRemoveMembers(TravelPlan $travelPlan, User $user): void
     {
+        // 旅行プラン作成者は常に削除可能
+        if ($travelPlan->creator_user_id === $user->id) {
+            return;
+        }
+
         $member = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
 
         if (! $member || ! $member->is_confirmed) {

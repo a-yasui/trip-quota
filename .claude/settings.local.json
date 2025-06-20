@@ -1,9 +1,11 @@
 {
   "permissions": {
     "allow": [
+      "Read(**)",
       "Bash(php artisan *)",
       "Bash(php artisan serve:*)",
-      "Read(**)",
+      "Bash(php artisan test:*)",
+      "Bash(./vendor/bin/pint)",
       "Bash(jq:*)",
       "Bash(pwd)",
       "Bash(mkdir:*)",
@@ -32,6 +34,7 @@
       "Bash(python3:*)",
       "Bash(uv:*)",
       "Bash(bun:*)",
+      "Bash(git add *)",
       "Edit(./**)",
       "Edit(!.git/**)",
       "Edit(!node_modules/**)",
@@ -43,8 +46,7 @@
       "Edit(!dist/**)",
       "Edit(!build/**)",
       "Edit(!.next/**)",
-      "Edit(!coverage/**)",
-      "Bash(php artisan test:*)"
+      "Edit(!coverage/**)"
     ],
     "deny": [
       "Bash(rm -rf /)",
