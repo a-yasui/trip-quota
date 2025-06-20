@@ -34,7 +34,7 @@
       "Bash(python3:*)",
       "Bash(uv:*)",
       "Bash(bun:*)",
-      "Bash(git add *)",
+      "Bash(git add:*)",
       "Edit(./**)",
       "Edit(!.git/**)",
       "Edit(!node_modules/**)",
