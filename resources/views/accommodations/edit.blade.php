@@ -115,6 +115,26 @@
                     </div>
                 </div>
 
+                <!-- タイムゾーン -->
+                <div>
+                    <label for="timezone" class="block text-sm font-medium text-gray-700">
+                        タイムゾーン
+                        <span class="text-xs text-gray-500">(任意)</span>
+                    </label>
+                    <select name="timezone" id="timezone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="">選択してください</option>
+                        @foreach(\App\Enums\TimezoneEnum::options() as $value => $label)
+                            <option value="{{ $value }}" {{ old('timezone', $accommodation->timezone) === $value ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('timezone')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                    <p class="mt-1 text-xs text-gray-500">宿泊施設のタイムゾーンを選択してください。未選択の場合、日本時間として扱われます。</p>
+                </div>
+
                 <!-- 料金と通貨 -->
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
                     <div class="sm:col-span-2">

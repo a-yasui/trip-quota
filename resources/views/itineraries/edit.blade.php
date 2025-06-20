@@ -51,7 +51,7 @@
                         </div>
 
                         <!-- 日付と時刻 -->
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                             <div>
                                 <label for="date" class="block text-sm font-medium text-gray-700">
                                     出発日 <span class="text-red-500">*</span>
@@ -107,6 +107,40 @@
                                        value="{{ old('end_time', $itinerary->end_time?->format('H:i')) }}"
                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 @error('end_time')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="departure_timezone" class="block text-sm font-medium text-gray-700">
+                                    出発タイムゾーン
+                                    <span class="text-xs text-gray-500">(任意)</span>
+                                </label>
+                                <select name="departure_timezone" id="departure_timezone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <option value="">選択してください</option>
+                                    @foreach(\App\Enums\TimezoneEnum::options() as $value => $label)
+                                        <option value="{{ $value }}" {{ old('departure_timezone', $itinerary->departure_timezone) === $value ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('departure_timezone')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="arrival_timezone" class="block text-sm font-medium text-gray-700">
+                                    到着タイムゾーン
+                                    <span class="text-xs text-gray-500">(任意)</span>
+                                </label>
+                                <select name="arrival_timezone" id="arrival_timezone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <option value="">選択してください</option>
+                                    @foreach(\App\Enums\TimezoneEnum::options() as $value => $label)
+                                        <option value="{{ $value }}" {{ old('arrival_timezone', $itinerary->arrival_timezone) === $value ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('arrival_timezone')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>

@@ -242,7 +242,7 @@
                                         @endif
                                         <div>
                                             <p class="text-sm font-medium text-gray-900">{{ $account->display_name }}</p>
-                                            <p class="text-sm text-gray-500">@{{ $account->account_name }}</p>
+                                            <p class="text-sm text-gray-500">@ {{ $account->account_name }}</p>
                                         </div>
                                     </div>
                                 @endforeach
