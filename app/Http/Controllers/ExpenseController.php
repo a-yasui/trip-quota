@@ -2,244 +2,265 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Currency;
-use App\Http\Requests\ExpenseRequest;
 use App\Models\Expense;
-use App\Models\Member;
-use App\Models\TravelPlan;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use TripQuota\Expense\ExpenseService;
+use TripQuota\Settlement\SettlementService;
+use TripQuota\TravelPlan\TravelPlanService;
 
 class ExpenseController extends Controller
 {
-    /**
-     * 経費一覧を表示
-     */
-    public function index()
-    {
-        $expenses = Expense::with(['payerMember', 'members', 'travelPlan'])
-            ->orderBy('is_settled', 'asc')
-            ->orderBy('expense_date', 'desc')
-            ->paginate(5);
-
-        return view('expenses.index', compact('expenses'));
-    }
+    public function __construct(
+        private ExpenseService $expenseService,
+        private SettlementService $settlementService,
+        private TravelPlanService $travelPlanService
+    ) {}
 
     /**
-     * 経費作成フォームを表示
+     * 費用一覧表示
      */
-    public function create(TravelPlan $travelPlan)
+    public function index(string $travelPlanUuid)
     {
-        $coreGroup = $travelPlan->groups()->core()->first();
-        $branchGroups = $travelPlan->groups()->branch()->with('members')->get();
-        $members = $coreGroup->members;
+        $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-        $currencies = Currency::options();
+        if (! $travelPlan) {
+            abort(404);
+        }
 
-        return view('expenses.create', compact('travelPlan', 'branchGroups', 'members', 'currencies'));
-    }
+        try {
+            $expenses = $this->expenseService->getExpensesForTravelPlan($travelPlan, Auth::user());
+        } catch (\Exception $e) {
+            abort(403);
+        }
 
-    /**
-     * 経費を保存
-     */
-    public function store(ExpenseRequest $request, TravelPlan $travelPlan)
-    {
-        $validated = $request->validated();
+        // グループ別に費用を集計
+        $expensesByGroup = $expenses->groupBy('group.name');
 
-        $expense = DB::transaction(function () use ($validated, $request, $travelPlan) {
-            $expense = Expense::create([
-                'travel_plan_id' => $travelPlan->id,
-                'payer_member_id' => $validated['payer_member_id'],
-                'amount' => $validated['amount'],
-                'currency' => $validated['currency'],
-                'description' => $validated['description'],
-                'expense_date' => $validated['expense_date'],
-                'category' => $validated['category'] ?? null,
-                'notes' => $validated['notes'] ?? null,
-                'is_settled' => false,
-            ]);
+        // 総費用を計算
+        $totalAmount = $expenses->sum('amount');
 
-            // 参加メンバーを追加
-            $memberCount = count($validated['member_ids']);
-            $defaultShareAmount = $validated['amount'] / $memberCount;
-
-            // カスタム分配金額があれば使用、なければ均等に分配
-            $memberShareAmounts = $request->input('member_share_amounts', []);
-
-            // 支払い状態を取得
-            $memberPaidStatus = $request->input('member_paid_status', []);
-
-            // 全メンバーが支払い済みかどうかを確認するためのフラグ
-            $allMembersPaid = true;
-
-            foreach ($validated['member_ids'] as $memberId) {
-                $shareAmount = isset($memberShareAmounts[$memberId]) && is_numeric($memberShareAmounts[$memberId])
-                    ? $memberShareAmounts[$memberId]
-                    : $defaultShareAmount;
-
-                // 支払者は常に支払い済み、それ以外はフォームの値を使用
-                $isPaid = $memberId == $validated['payer_member_id']
-                    ? true
-                    : (isset($memberPaidStatus[$memberId]) && $memberPaidStatus[$memberId]);
-
-                // 未払いのメンバーがいれば、全員支払い済みフラグをfalseに
-                if (! $isPaid) {
-                    $allMembersPaid = false;
-                }
-
-                $expense->members()->attach($memberId, [
-                    'share_amount' => $shareAmount,
-                    'is_paid' => $isPaid,
-                ]);
-            }
-
-            // 全メンバーが支払い済みの場合、経費全体を精算済みに設定
-            if ($allMembersPaid) {
-                $expense->update(['is_settled' => true]);
-            }
-
-            return $expense;
+        // 通貨別集計
+        $amountsByCurrency = $expenses->groupBy('currency')->map(function ($expenses) {
+            return $expenses->sum('amount');
         });
 
-        return redirect()->route('expenses.show', $expense)
-            ->with('success', '経費を登録しました。');
+        // 精算統計情報を取得
+        try {
+            $settlementStats = $this->settlementService->getSettlementStatistics($travelPlan, Auth::user());
+        } catch (\Exception $e) {
+            $settlementStats = [
+                'total_settlements' => 0,
+                'completed_settlements' => 0,
+                'pending_settlements' => 0,
+                'by_currency' => [],
+            ];
+        }
+
+        return view('expenses.index', compact('travelPlan', 'expenses', 'expensesByGroup', 'totalAmount', 'amountsByCurrency', 'settlementStats'));
     }
 
     /**
-     * 経費詳細を表示
+     * 費用作成フォーム表示
      */
-    public function show(Expense $expense)
+    public function create(string $travelPlanUuid)
     {
-        $expense->load(['payerMember', 'members', 'travelPlan']);
+        $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
 
-        return view('expenses.show', compact('expense'));
+        if (! $travelPlan) {
+            abort(404);
+        }
+
+        // 確認済みメンバーとグループを取得
+        $members = $travelPlan->members()->where('is_confirmed', true)->get();
+        $groups = $travelPlan->groups()->get();
+
+        // デフォルト選択用データを準備
+        $coreGroup = $groups->where('group_type', 'CORE')->first();
+        $currentUserMember = $members->where('user_id', Auth::id())->first();
+
+        return view('expenses.create', compact(
+            'travelPlan',
+            'members',
+            'groups',
+            'coreGroup',
+            'currentUserMember'
+        ));
     }
 
     /**
-     * 経費編集フォームを表示
+     * 費用作成処理
      */
-    public function edit(Expense $expense)
+    public function store(Request $request, string $travelPlanUuid)
     {
-        $expense->load(['payerMember', 'members', 'travelPlan']);
-
-        $travelPlan = $expense->travelPlan;
-        $coreGroup = $travelPlan->groups()->core()->first();
-        $branchGroups = $travelPlan->groups()->branch()->with('members')->get();
-        $members = $coreGroup->members;
-        $selectedMemberIds = $expense->members->pluck('id')->toArray();
-
-        $currencies = Currency::options();
-
-        return view('expenses.edit', compact('expense', 'travelPlan', 'branchGroups', 'members', 'selectedMemberIds', 'currencies'));
-    }
-
-    /**
-     * 経費を更新
-     */
-    public function update(ExpenseRequest $request, Expense $expense)
-    {
-        $validated = $request->validated();
-
-        DB::transaction(function () use ($validated, $request, $expense) {
-            $expense->update([
-                'payer_member_id' => $validated['payer_member_id'],
-                'amount' => $validated['amount'],
-                'currency' => $validated['currency'],
-                'description' => $validated['description'],
-                'expense_date' => $validated['expense_date'],
-                'category' => $validated['category'] ?? null,
-                'notes' => $validated['notes'] ?? null,
-            ]);
-
-            // 参加メンバーを更新
-            $expense->members()->detach();
-
-            $memberCount = count($validated['member_ids']);
-            $defaultShareAmount = $validated['amount'] / $memberCount;
-
-            // カスタム分配金額があれば使用、なければ均等に分配
-            $memberShareAmounts = $request->input('member_share_amounts', []);
-
-            // 支払い状態を取得
-            $memberPaidStatus = $request->input('member_paid_status', []);
-
-            // 全メンバーが支払い済みかどうかを確認するためのフラグ
-            $allMembersPaid = true;
-
-            foreach ($validated['member_ids'] as $memberId) {
-                $shareAmount = isset($memberShareAmounts[$memberId]) && is_numeric($memberShareAmounts[$memberId])
-                    ? $memberShareAmounts[$memberId]
-                    : $defaultShareAmount;
-
-                // 支払者は常に支払い済み、それ以外はフォームの値を使用
-                $isPaid = $memberId == $validated['payer_member_id']
-                    ? true
-                    : (isset($memberPaidStatus[$memberId]) && $memberPaidStatus[$memberId]);
-
-                // 未払いのメンバーがいれば、全員支払い済みフラグをfalseに
-                if (! $isPaid) {
-                    $allMembersPaid = false;
-                }
-
-                $expense->members()->attach($memberId, [
-                    'share_amount' => $shareAmount,
-                    'is_paid' => $isPaid,
-                ]);
-            }
-
-            // 全メンバーが支払い済みの場合、経費全体を精算済みに設定
-            if ($allMembersPaid) {
-                $expense->update(['is_settled' => true]);
-            } else {
-                $expense->update(['is_settled' => false]);
-            }
-        });
-
-        return redirect()->route('expenses.show', $expense)
-            ->with('success', '経費を更新しました。');
-    }
-
-    /**
-     * 経費を削除
-     */
-    public function destroy(Expense $expense)
-    {
-        $expense->delete();
-
-        return redirect()->route('expenses.index')
-            ->with('success', '経費を削除しました。');
-    }
-
-    /**
-     * メンバーの支払い状態を切り替える
-     */
-    public function togglePaymentStatus(Expense $expense, Member $member)
-    {
-        // 現在の支払い状態を取得
-        $expenseMember = $expense->members()->where('member_id', $member->id)->first()->pivot;
-        $currentStatus = $expenseMember->is_paid;
-
-        // 支払い状態を反転
-        $newStatus = ! $currentStatus;
-
-        DB::transaction(function () use ($expense, $member, $newStatus) {
-            // 支払い状態を更新
-            $expense->members()->updateExistingPivot($member->id, [
-                'is_paid' => $newStatus,
-            ]);
-
-            // 全メンバーが支払い済みかどうかを確認
-            $allPaid = $expense->members()->wherePivot('is_paid', false)->count() === 0;
-
-            // 経費全体の精算状態を更新
-            $expense->update([
-                'is_settled' => $allPaid,
-            ]);
-        });
-
-        return response()->json([
-            'success' => true,
-            'is_paid' => $newStatus,
-            'is_settled' => $expense->fresh()->is_settled,
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => 'required|string|max:3',
+            'expense_date' => 'required|date',
+            'group_id' => 'required|integer|exists:groups,id',
+            'paid_by_member_id' => 'required|integer|exists:members,id',
+            'member_assignments' => 'nullable|array',
+            'member_assignments.*.member_id' => 'required|integer|exists:members,id',
+            'member_assignments.*.is_participating' => 'boolean',
+            'member_assignments.*.amount' => 'nullable|numeric|min:0',
         ]);
+
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            $this->expenseService->createExpense($travelPlan, Auth::user(), $validated);
+
+            return redirect()
+                ->route('travel-plans.expenses.create', $travelPlan->uuid)
+                ->with('success', '費用を追加しました。次の費用を追加できます。');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * 費用詳細表示
+     */
+    public function show(string $travelPlanUuid, Expense $expense)
+    {
+        $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
+
+        if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+            abort(404);
+        }
+
+        // 現在のユーザーを自動参加させる
+        $this->expenseService->autoParticipateCurrentUser($expense, Auth::user());
+
+        // 分割計算結果を取得
+        $splitAmounts = $this->expenseService->calculateSplitAmounts($expense);
+
+        // 現在のユーザーのメンバー情報を取得
+        $currentUserMember = $travelPlan->members()
+            ->where('user_id', Auth::id())
+            ->where('is_confirmed', true)
+            ->first();
+
+        return view('expenses.show', compact('travelPlan', 'expense', 'splitAmounts', 'currentUserMember'));
+    }
+
+    /**
+     * 費用編集フォーム表示
+     */
+    public function edit(string $travelPlanUuid, Expense $expense)
+    {
+        $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
+
+        if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+            abort(404);
+        }
+
+        // 確認済みメンバーとグループを取得
+        $members = $travelPlan->members()->where('is_confirmed', true)->get();
+        $groups = $travelPlan->groups()->get();
+
+        // 現在の費用メンバー割り当てを取得
+        $expense->load(['members']);
+
+        return view('expenses.edit', compact('travelPlan', 'expense', 'members', 'groups'));
+    }
+
+    /**
+     * 費用更新処理
+     */
+    public function update(Request $request, string $travelPlanUuid, Expense $expense)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => 'required|string|max:3',
+            'expense_date' => 'required|date',
+            'group_id' => 'required|integer|exists:groups,id',
+            'paid_by_member_id' => 'required|integer|exists:members,id',
+            'member_assignments' => 'nullable|array',
+            'member_assignments.*.member_id' => 'required|integer|exists:members,id',
+            'member_assignments.*.is_participating' => 'boolean',
+            'member_assignments.*.amount' => 'nullable|numeric|min:0',
+        ]);
+
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
+
+            if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+                abort(404);
+            }
+
+            $this->expenseService->updateExpense($expense, Auth::user(), $validated);
+
+            return redirect()
+                ->route('travel-plans.expenses.show', [$travelPlan->uuid, $expense->id])
+                ->with('success', '費用を更新しました。');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * 費用削除処理
+     */
+    public function destroy(string $travelPlanUuid, Expense $expense)
+    {
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
+
+            if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+                abort(404);
+            }
+
+            $this->expenseService->deleteExpense($expense, Auth::user());
+
+            return redirect()
+                ->route('travel-plans.expenses.index', $travelPlan->uuid)
+                ->with('success', '費用を削除しました。');
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * 分割金額を更新
+     */
+    public function updateSplits(Request $request, string $travelPlanUuid, Expense $expense)
+    {
+        $validated = $request->validate([
+            'splits' => 'required|array',
+            'splits.*.member_id' => 'required|integer|exists:members,id',
+            'splits.*.amount' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
+
+            if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
+                abort(404);
+            }
+
+            $this->expenseService->updateExpenseSplits($expense, Auth::user(), $validated['splits']);
+
+            return redirect()
+                ->route('travel-plans.expenses.show', [$travelPlan->uuid, $expense->id])
+                ->with('success', '分割金額を更新しました。');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
     }
 }

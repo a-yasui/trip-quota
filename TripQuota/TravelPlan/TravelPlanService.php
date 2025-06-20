@@ -2,165 +2,182 @@
 
 namespace TripQuota\TravelPlan;
 
-use App\Enums\GroupType;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\TravelPlan;
-use App\Models\ExpenseSettlement;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use TripQuota\Group\GroupService;
-use TripQuota\User\UserService;
+use Illuminate\Validation\ValidationException;
+use TripQuota\Group\GroupRepositoryInterface;
 
-/**
- * 旅行計画に関するドメインサービス
- */
 class TravelPlanService
 {
-    /**
-     * 旅行計画を作成する
-     *
-     * @param CreateRequest $request 旅行計画作成リクエスト
-     * @return GroupCreateResult 作成された旅行計画とコアグループ
-     */
-    public function create(CreateRequest $request): GroupCreateResult
+    public function __construct(
+        private TravelPlanRepositoryInterface $repository,
+        private GroupRepositoryInterface $groupRepository
+    ) {}
+
+    public function createTravelPlan(User $user, array $data): TravelPlan
     {
-        return DB::transaction(function () use ($request) {
-            // 旅行計画を作成
-            $plan = new TravelPlan();
-            $plan->title = $request->plan_name;
-            $plan->creator_id = $request->creator->id;
-            $plan->deletion_permission_holder_id = $request->creator->id;
-            $plan->departure_date = $request->departure_date;
-            $plan->timezone = $request->timezone;
-            $plan->return_date = $request->return_date;
-            $plan->is_active = $request->is_active;
-            $plan->save();
+        $this->validateTravelPlanData($data);
 
-            // コアグループを作成
-            $coreGroup = new Group();
-            $coreGroup->name = $request->plan_name . 'のメンバー';
-            $coreGroup->type = GroupType::CORE;
-            $coreGroup->travel_plan_id = $plan->id;
-            $coreGroup->save();
+        return DB::transaction(function () use ($user, $data) {
+            // 旅行プラン作成
+            $travelPlan = $this->repository->create([
+                'plan_name' => $data['plan_name'],
+                'creator_user_id' => $user->id,
+                'owner_user_id' => $data['owner_user_id'] ?? $user->id,
+                'departure_date' => $data['departure_date'],
+                'return_date' => $data['return_date'] ?? null,
+                'timezone' => $data['timezone'] ?? 'Asia/Tokyo',
+                'is_active' => $data['is_active'] ?? true,
+                'description' => $data['description'] ?? null,
+            ]);
 
-            // UserService を利用して作成者をメンバーとして追加
-            $userService = new UserService();
-            $userService->createMember($plan, $request->creator->name, $request->creator->email);
+            // コアグループを自動作成
+            $coreGroup = Group::create([
+                'travel_plan_id' => $travelPlan->id,
+                'type' => 'CORE',
+                'name' => 'コアグループ',
+                'description' => '全メンバーが参加するメインのグループです',
+            ]);
 
-            return new GroupCreateResult($plan, $coreGroup);
+            // 作成者をメンバーとして追加
+            $member = Member::create([
+                'travel_plan_id' => $travelPlan->id,
+                'user_id' => $user->id,
+                'account_id' => null, // TODO: ユーザーのデフォルトアカウントを設定
+                'name' => $user->email, // TODO: アカウントの表示名を使用
+                'email' => $user->email,
+                'is_confirmed' => true,
+            ]);
+
+            // 作成者をコアグループに関連付け
+            $this->groupRepository->addMemberToGroup($coreGroup, $member);
+
+            return $travelPlan->load(['creator', 'owner', 'groups', 'members']);
         });
     }
 
-    /**
-     * 旅行計画に対して班グループを作成する
-     *
-     * @param TravelPlan $plan 旅行計画
-     * @param string $branch_name 班グループ名
-     * @return Group 作成された班グループ
-     */
-    public function addBranchGroup(TravelPlan $plan, string $branch_name): Group
+    public function updateTravelPlan(TravelPlan $travelPlan, User $user, array $data): TravelPlan
     {
-        // コアグループの存在確認
-        $coreGroup = $plan->groups()->core()->firstOrFail();
+        $this->ensureUserCanEdit($travelPlan, $user);
+        $this->validateTravelPlanData($data, $travelPlan);
 
-        // 班グループを作成
-        $branchGroup = new Group();
-        $branchGroup->name = $branch_name;
-        $branchGroup->type = GroupType::BRANCH;
-        $branchGroup->travel_plan_id = $plan->id;
-        $branchGroup->parent_group_id = $coreGroup->id;
-        $branchGroup->save();
-
-        return $branchGroup;
+        return $this->repository->update($travelPlan, [
+            'plan_name' => $data['plan_name'],
+            'owner_user_id' => $data['owner_user_id'] ?? $travelPlan->owner_user_id,
+            'departure_date' => $data['departure_date'],
+            'return_date' => $data['return_date'] ?? null,
+            'timezone' => $data['timezone'] ?? $travelPlan->timezone,
+            'is_active' => $data['is_active'] ?? $travelPlan->is_active,
+            'description' => $data['description'] ?? null,
+        ]);
     }
 
-    /**
-     * 班グループを削除する
-     *
-     * @param Group $group 班グループ
-     * @throws \Exception 精算情報がある場合やコアグループの場合
-     */
-    public function removeBranchGroup(Group $group): void
+    public function deleteTravelPlan(TravelPlan $travelPlan, User $user): bool
     {
-        // グループが班グループであることを確認
-        if ($group->type !== GroupType::BRANCH) {
-            throw new \InvalidArgumentException('指定されたグループはコアグループであるため削除できません。');
+        $this->ensureUserCanDelete($travelPlan, $user);
+        $this->ensureCanDelete($travelPlan);
+
+        return $this->repository->delete($travelPlan);
+    }
+
+    public function getTravelPlan(string $uuid, User $user): ?TravelPlan
+    {
+        $travelPlan = $this->repository->findByUuid($uuid);
+
+        if (! $travelPlan) {
+            return null;
         }
 
-        // 精算情報の存在チェック
-        $branchMembers = $group->members()->pluck('members.id')->toArray();
+        $this->ensureUserCanView($travelPlan, $user);
 
-        if (count($branchMembers) > 0) {
-            $hasSettlements = ExpenseSettlement::where(function ($query) use ($branchMembers) {
-                $query->whereIn('payer_member_id', $branchMembers)
-                      ->orWhereIn('receiver_member_id', $branchMembers);
-            })->exists();
+        return $travelPlan->load(['creator', 'owner', 'groups', 'members']);
+    }
 
-            if ($hasSettlements) {
-                throw new \Exception('グループのメンバーに精算データがあるため削除できません。');
+    public function getTravelPlanByUuid(string $uuid): ?TravelPlan
+    {
+        return $this->repository->findByUuid($uuid);
+    }
+
+    public function getUserTravelPlans(User $user, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->repository->findByUser($user, $perPage);
+    }
+
+    public function getActiveTravelPlans(User $user, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->repository->findActiveByUser($user, $perPage);
+    }
+
+    public function getUpcomingTravelPlans(User $user, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->repository->findUpcoming($user, $perPage);
+    }
+
+    public function getPastTravelPlans(User $user, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->repository->findPast($user, $perPage);
+    }
+
+    public function searchTravelPlans(User $user, string $searchTerm, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->repository->searchByName($user, $searchTerm, $perPage);
+    }
+
+    private function validateTravelPlanData(array $data, ?TravelPlan $existingPlan = null): void
+    {
+        // 出発日の妥当性チェック
+        $departureDate = Carbon::parse($data['departure_date']);
+
+        // 帰国日が設定されている場合、出発日より後であることをチェック
+        if (! empty($data['return_date'])) {
+            $returnDate = Carbon::parse($data['return_date']);
+            if ($returnDate->lte($departureDate)) {
+                throw ValidationException::withMessages([
+                    'return_date' => ['帰国日は出発日より後の日付を指定してください。'],
+                ]);
             }
         }
 
-        // 関連データの削除
-        DB::transaction(function () use ($group) {
-            // メンバー関連をデタッチ
-            $group->members()->detach();
-
-            // 班グループ接続を削除
-            $group->sourceBranchGroupConnections()->delete();
-            $group->targetBranchGroupConnections()->delete();
-
-            // システム班グループキーを削除
-            if ($group->systemBranchGroupKey) {
-                $group->systemBranchGroupKey->delete();
-            }
-
-            // グループを削除
-            $group->delete();
-        });
+        // 計画名の重複チェック（同一ユーザー内）
+        // TODO: 必要に応じて実装
     }
 
-    /**
-     * 旅行計画を削除する
-     *
-     * @param TravelPlan $plan 旅行計画
-     */
-    public function removeTravelPlan(TravelPlan $plan): void
+    private function ensureUserCanView(TravelPlan $travelPlan, User $user): void
     {
-        DB::transaction(function () use ($plan) {
-            // 関連するすべてのグループを取得
-            $groups = $plan->groups;
+        $isMember = $travelPlan->members()->where('user_id', $user->id)->exists();
 
-            foreach ($groups as $group) {
-                // コアグループのメンバーを非アクティブに
-                if ($group->type === GroupType::CORE) {
-                    foreach ($group->coreMembers as $member) {
-                        $member->is_active = false;
-                        $member->save();
-                    }
-                }
+        if (! $isMember) {
+            throw new \Exception('この旅行プランにアクセスする権限がありません。');
+        }
+    }
 
-                // 班グループのメンバー関連をデタッチ
-                if ($group->type === GroupType::BRANCH) {
-                    $group->members()->detach();
+    private function ensureUserCanEdit(TravelPlan $travelPlan, User $user): void
+    {
+        $isMember = $travelPlan->members()->where('user_id', $user->id)->exists();
 
-                    // 班グループ接続を削除
-                    $group->sourceBranchGroupConnections()->delete();
-                    $group->targetBranchGroupConnections()->delete();
+        if (! $isMember) {
+            throw new \Exception('この旅行プランを編集する権限がありません。');
+        }
+    }
 
-                    // システム班グループキーを削除
-                    if ($group->systemBranchGroupKey) {
-                        $group->systemBranchGroupKey->delete();
-                    }
-                }
+    private function ensureUserCanDelete(TravelPlan $travelPlan, User $user): void
+    {
+        if ($travelPlan->owner_user_id !== $user->id) {
+            throw new \Exception('この旅行プランを削除する権限がありません。所有者のみが削除できます。');
+        }
+    }
 
-                // グループを削除
-                $group->delete();
-            }
-
-            // 旅行計画を削除
-            $plan->delete();
-        });
+    private function ensureCanDelete(TravelPlan $travelPlan): void
+    {
+        // 旅行開始後は削除できない
+        $departureDate = Carbon::parse($travelPlan->departure_date);
+        if ($departureDate->isPast()) {
+            throw new \Exception('旅行開始後の計画は削除できません。');
+        }
     }
 }

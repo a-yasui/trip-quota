@@ -1,23 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Models\BranchGroupConnection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\BranchGroupConnection>
+ * @extends Factory<\App\Models\BranchGroupConnection>
  */
-class BranchGroupConnectionFactory extends Factory
+final class BranchGroupConnectionFactory extends Factory
 {
     /**
-     * Define the model's default state.
+     * The name of the factory's corresponding model.
      *
-     * @return array<string, mixed>
+     * @var string
+     */
+    protected $model = BranchGroupConnection::class;
+
+    /**
+     * Define the model's default state.
      */
     public function definition(): array
     {
         return [
-            //
         ];
     }
 }

@@ -2,55 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\GroupType;
-use App\Http\Requests\TravelPlanRequest;
-use App\Models\ActivityLog;
-use App\Models\Group;
-use App\Models\Member;
-use App\Models\TravelPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use TripQuota\TravelPlan\TravelPlanService;
-use TripQuota\TravelPlan\CreateRequest;
 
 class TravelPlanController extends Controller
 {
-    /**
-     * @var TravelPlanService
-     */
-    protected TravelPlanService $travelPlanService;
+    public function __construct(
+        private TravelPlanService $travelPlanService
+    ) {}
 
     /**
-     * コンストラクタ
+     * 旅行プラン一覧表示
      */
-    public function __construct(TravelPlanService $travelPlanService)
+    public function index(Request $request)
     {
-        $this->travelPlanService = $travelPlanService;
-    }
-
-    /**
-     * Display a listing of the travel plans.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function index()
-    {
-        // ログインユーザーが参加している旅行計画を取得
         $user = Auth::user();
-        $travelPlans = TravelPlan::whereHas('groups.members', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->orWhere('creator_id', $user->id)
-            ->orderBy('departure_date', 'asc')
-            ->get();
+        $search = $request->get('search');
+        $filter = $request->get('filter', 'all'); // all, active, upcoming, past
 
-        return view('travel-plans.index', compact('travelPlans'));
+        if ($search) {
+            $travelPlans = $this->travelPlanService->searchTravelPlans($user, $search);
+        } else {
+            $travelPlans = match ($filter) {
+                'active' => $this->travelPlanService->getActiveTravelPlans($user),
+                'upcoming' => $this->travelPlanService->getUpcomingTravelPlans($user),
+                'past' => $this->travelPlanService->getPastTravelPlans($user),
+                default => $this->travelPlanService->getUserTravelPlans($user),
+            };
+        }
+
+        return view('travel-plans.index', compact('travelPlans', 'search', 'filter'));
     }
 
     /**
-     * Show the form for creating a new travel plan.
-     *
-     * @return \Illuminate\View\View
+     * 旅行プラン作成フォーム表示
      */
     public function create()
     {
@@ -58,168 +45,129 @@ class TravelPlanController extends Controller
     }
 
     /**
-     * Store a newly created travel plan in storage.
-     *
-     * @return \Illuminate\Http\RedirectResponse
+     * 旅行プラン作成処理
      */
-    public function store(TravelPlanRequest $request)
+    public function store(Request $request)
     {
+        $validated = $request->validate([
+            'plan_name' => 'required|string|max:255',
+            'departure_date' => 'required|date|after_or_equal:2000-01-01|before_or_equal:'.date('Y-m-d', strtotime('+10 years')),
+            'return_date' => 'nullable|date|after:departure_date|before_or_equal:'.date('Y-m-d', strtotime('+10 years')),
+            'timezone' => 'nullable|string|max:50',
+            'description' => 'nullable|string|max:1000',
+            'is_active' => 'boolean',
+        ]);
+
         try {
-            return DB::transaction(function () use ($request) {
-                $user = Auth::user();
+            $travelPlan = $this->travelPlanService->createTravelPlan(Auth::user(), $validated);
 
-                // CreateRequestオブジェクトを作成
-                $createRequest = new CreateRequest(
-                    plan_name: $request->title,
-                    creator: $user,
-                    departure_date: new \Carbon\Carbon($request->departure_date),
-                    timezone: \App\Enums\Timezone::tryFrom($request->timezone),
-                    return_date: $request->return_date ? new \Carbon\Carbon($request->return_date) : null,
-                    is_active: true
-                );
-
-                // TravelPlanServiceを使用して旅行計画とコアグループを作成
-                $result = $this->travelPlanService->create($createRequest);
-                $travelPlan = $result->plan;
-
-                return redirect()->route('travel-plans.show', $travelPlan)
-                    ->with('success', '旅行計画「'.$travelPlan->title.'」を作成しました。');
-            });
-        } catch (\Exception $e) {
-            return redirect()->back()
+            return redirect()
+                ->route('travel-plans.show', $travelPlan->uuid)
+                ->with('success', '旅行プランを作成しました。');
+        } catch (ValidationException $e) {
+            return back()
                 ->withInput()
-                ->with('error', '旅行計画の作成に失敗しました。'.$e->getMessage());
+                ->withErrors($e->errors());
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['error' => '旅行プランの作成中にエラーが発生しました。']);
         }
     }
 
     /**
-     * Display the specified travel plan.
-     *
-     * @return \Illuminate\View\View
+     * 旅行プラン詳細表示
      */
-    public function show(TravelPlan $travelPlan)
+    public function show(string $uuid)
     {
-        // コアグループを取得
-        $coreGroup = $travelPlan->groups()->where('type', GroupType::CORE)->first();
-
-        // メンバー一覧を取得
-        $members = $coreGroup ? $coreGroup->members : collect();
-
-        return view('travel-plans.show', compact('travelPlan', 'coreGroup', 'members'));
-    }
-
-    /**
-     * Show the form for editing the specified travel plan.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function edit(TravelPlan $travelPlan)
-    {
-        // 権限チェック
-        $user = Auth::user();
-        if ($user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
-            abort(403, '旅行計画を編集する権限がありません。');
-        }
-
-        return view('travel-plans.edit', compact('travelPlan'));
-    }
-
-    /**
-     * Update the specified travel plan in storage.
-     *
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(TravelPlanRequest $request, TravelPlan $travelPlan)
-    {
-        // 権限チェック
-        $user = Auth::user();
-        if ($user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
-            abort(403, '旅行計画を編集する権限がありません。');
-        }
-
         try {
-            DB::beginTransaction();
+            $travelPlan = $this->travelPlanService->getTravelPlan($uuid, Auth::user());
 
-            // 出発日前日かどうかチェック
-            $isBeforeDeparture = now()->startOfDay()->lt($travelPlan->departure_date);
-
-            // 出発日前日の場合は全ての項目を更新可能
-            if ($isBeforeDeparture) {
-                $travelPlan->title = $request->title;
-                $travelPlan->departure_date = $request->departure_date;
-                $travelPlan->timezone = $request->timezone;
-
-                // 帰宅日も更新
-                if ($request->has('return_date')) {
-                    $travelPlan->return_date = $request->return_date;
-                }
-            } else {
-                // 出発日以降は帰宅日のみ更新可能（未記入の場合のみ）
-                if ($travelPlan->return_date === null && $request->has('return_date')) {
-                    $travelPlan->return_date = $request->return_date;
-                }
+            if (! $travelPlan) {
+                abort(404);
             }
 
-            $travelPlan->save();
-
-            // コアグループの名前も更新（旅行計画名と同期）
-            if ($isBeforeDeparture) {
-                $coreGroup = $travelPlan->groups()->where('type', GroupType::CORE)->first();
-                if ($coreGroup) {
-                    $coreGroup->name = $travelPlan->title;
-                    $coreGroup->save();
-                }
-            }
-
-            DB::commit();
-
-            return redirect()->route('travel-plans.show', $travelPlan)
-                ->with('success', '旅行計画「'.$travelPlan->title.'」を更新しました。');
-
+            return view('travel-plans.show', compact('travelPlan'));
         } catch (\Exception $e) {
-            DB::rollBack();
-
-            return redirect()->back()
-                ->withInput()
-                ->with('error', '旅行計画の更新に失敗しました。'.$e->getMessage());
+            abort(403);
         }
     }
 
     /**
-     * 旅行計画を削除
-     *
-     * @param  TravelPlan $travelPlan
-     * @return \Illuminate\Http\RedirectResponse
+     * 旅行プラン編集フォーム表示
      */
-    public function destroy(TravelPlan $travelPlan)
+    public function edit(string $uuid)
     {
-        // 権限チェック
-        $user = Auth::user();
-        if ($user->id !== $travelPlan->creator_id && $user->id !== $travelPlan->deletion_permission_holder_id) {
-            abort(403, '旅行計画を削除する権限がありません。');
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($uuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            return view('travel-plans.edit', compact('travelPlan'));
+        } catch (\Exception $e) {
+            abort(403);
         }
+    }
+
+    /**
+     * 旅行プラン更新処理
+     */
+    public function update(Request $request, string $uuid)
+    {
+        $validated = $request->validate([
+            'plan_name' => 'required|string|max:255',
+            'departure_date' => 'required|date|after_or_equal:2000-01-01|before_or_equal:'.date('Y-m-d', strtotime('+10 years')),
+            'return_date' => 'nullable|date|after:departure_date|before_or_equal:'.date('Y-m-d', strtotime('+10 years')),
+            'timezone' => 'nullable|string|max:50',
+            'description' => 'nullable|string|max:1000',
+            'is_active' => 'boolean',
+        ]);
 
         try {
-            $planName = $travelPlan->title;
+            $travelPlan = $this->travelPlanService->getTravelPlan($uuid, Auth::user());
 
-            // TravelPlanServiceを使用して旅行計画を削除
-            $this->travelPlanService->removeTravelPlan($travelPlan);
+            if (! $travelPlan) {
+                abort(404);
+            }
 
-            // 活動ログを記録
-            $activityLog = new ActivityLog;
-            $activityLog->user_id = Auth::id();
-            $activityLog->subject_type = 'travel_plan_deleted';
-            $activityLog->subject_id = null;
-            $activityLog->action = 'travel_plan_deleted';
-            $activityLog->description = Auth::user()->name.'さんが旅行計画「'.$planName.'」を削除しました';
-            $activityLog->save();
+            $updatedPlan = $this->travelPlanService->updateTravelPlan($travelPlan, Auth::user(), $validated);
 
-            return redirect()->route('travel-plans.index')
-                ->with('success', '旅行計画「'.$planName.'」を削除しました。');
-
+            return redirect()
+                ->route('travel-plans.show', $updatedPlan->uuid)
+                ->with('success', '旅行プランを更新しました。');
+        } catch (ValidationException $e) {
+            return back()
+                ->withInput()
+                ->withErrors($e->errors());
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', '旅行計画の削除に失敗しました。'.$e->getMessage());
+            return back()
+                ->withInput()
+                ->withErrors(['error' => '旅行プランの更新中にエラーが発生しました。']);
+        }
+    }
+
+    /**
+     * 旅行プラン削除処理
+     */
+    public function destroy(string $uuid)
+    {
+        try {
+            $travelPlan = $this->travelPlanService->getTravelPlan($uuid, Auth::user());
+
+            if (! $travelPlan) {
+                abort(404);
+            }
+
+            $this->travelPlanService->deleteTravelPlan($travelPlan, Auth::user());
+
+            return redirect()
+                ->route('travel-plans.index')
+                ->with('success', '旅行プランを削除しました。');
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors(['error' => $e->getMessage()]);
         }
     }
 }

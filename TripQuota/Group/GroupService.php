@@ -2,203 +2,174 @@
 
 namespace TripQuota\Group;
 
-use App\Enums\GroupType;
-use App\Models\BranchGroupConnection;
-use App\Models\ExpenseSettlement;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\TravelPlan;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use TripQuota\Member\MemberRepositoryInterface;
 
-/**
- * グループに関するドメインサービス
- */
 class GroupService
 {
-    /**
-     * メンバーをコアグループに追加する
-     * コアグループが存在しない場合は新規作成する
-     *
-     * @param TravelPlan $trip 旅行計画
-     * @param Member $member メンバー
-     * @return Group コアグループ
-     */
-    public function addCoreMember(TravelPlan $trip, Member $member): Group
+    public function __construct(
+        private GroupRepositoryInterface $groupRepository,
+        private MemberRepositoryInterface $memberRepository
+    ) {}
+
+    public function createBranchGroup(TravelPlan $travelPlan, User $user, array $data): Group
     {
-        // コアグループを取得、無ければ作成
-        $coreGroup = $trip->groups()->core()->first();
-        if (!$coreGroup) {
-            $coreGroup = new Group();
-            $coreGroup->name = $trip->title . 'のメンバー';
-            $coreGroup->type = GroupType::CORE;
-            $coreGroup->travel_plan_id = $trip->id;
-            $coreGroup->save();
-        }
+        $this->ensureUserCanManageGroups($travelPlan, $user);
 
-        // メンバーが既にコアグループに所属している場合は何もしない
-        if ($member->group_id === $coreGroup->id) {
-            return $coreGroup;
-        }
+        return DB::transaction(function () use ($travelPlan, $data) {
+            $branchKey = $this->groupRepository->generateUniqueBranchKey();
 
-        // メンバーのコアグループを更新
-        $member->group_id = $coreGroup->id;
-        $member->save();
-
-        // 中間テーブルに保持させる
-        \DB::table('group_member')
-            ->insert([
-                'group_id' => $coreGroup->id,
-                'member_id' => $member->id,
+            return $this->groupRepository->create([
+                'travel_plan_id' => $travelPlan->id,
+                'type' => 'BRANCH',
+                'name' => $data['name'],
+                'branch_key' => $branchKey,
+                'description' => $data['description'] ?? null,
             ]);
-
-        return $coreGroup;
-    }
-
-    /**
-     * メンバーをコアグループから削除する
-     *
-     * @param TravelPlan $trip 旅行計画
-     * @param Member $member メンバー
-     * @return Group コアグループ
-     * @throws \Exception メンバーが最後の一人の場合や精算データがある場合
-     */
-    public function removeCoreMember(TravelPlan $trip, Member $member): Group
-    {
-        // コアグループを取得
-        $coreGroup = $trip->groups()->core()->firstOrFail();
-
-        // メンバーがコアグループのメンバーであることを確認
-        if ($member->group_id !== $coreGroup->id) {
-            throw new ModelNotFoundException('メンバーはこのコアグループに所属していません。');
-        }
-
-        // コアグループのメンバー数をカウント
-        $memberCount = $coreGroup->coreMembers()->count();
-
-        // メンバーが最後の一人の場合は削除できない
-        if ($memberCount <= 1) {
-            throw new \Exception('コアグループの最後のメンバーは削除できません。');
-        }
-
-        DB::transaction(function () use ($coreGroup, $member) {
-            // メンバーが所属している班グループを取得して削除
-            $branchGroups = $member->branchGroups;
-            foreach ($branchGroups as $branchGroup) {
-                $this->removeBranchMember($branchGroup, $member);
-            }
-
-            // メンバーを削除（DBからは削除せず非アクティブにする）
-            $member->is_active = false;
-            $member->save();
         });
-
-        return $coreGroup;
     }
 
-    /**
-     * 班グループを作成し、メンバーを追加する
-     *
-     * @param TravelPlan $trip 旅行計画
-     * @param string $branchGroupName 班グループ名
-     * @param Member $member メンバー
-     * @return Group 班グループ
-     */
-    public function createBranchMember(TravelPlan $trip, string $branchGroupName, Member $member): Group
+    public function updateGroup(Group $group, User $user, array $data): Group
     {
-        // コアグループを取得
-        $coreGroup = $trip->groups()->core()->firstOrFail();
+        $this->ensureUserCanManageGroups($group->travelPlan, $user);
+        $this->ensureGroupCanBeEdited($group);
 
-        // メンバーがコアグループに所属していることを確認
-        if ($member->group_id !== $coreGroup->id) {
-            throw new ModelNotFoundException('メンバーはこの旅行のコアグループに所属していません。');
-        }
-
-        // 班グループを作成
-        $branchGroup = new Group();
-        $branchGroup->name = $branchGroupName;
-        $branchGroup->type = GroupType::BRANCH;
-        $branchGroup->travel_plan_id = $trip->id;
-        $branchGroup->parent_group_id = $coreGroup->id;
-        $branchGroup->save();
-
-        // メンバーを班グループに追加
-        $branchGroup->members()->attach($member->id);
-
-        return $branchGroup;
+        return $this->groupRepository->update($group, [
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+        ]);
     }
 
-    /**
-     * メンバーを班グループに追加する
-     *
-     * @param Group $group 班グループ
-     * @param Member $member メンバー
-     * @return Group 班グループ
-     */
-    public function addBranchMember(Group $group, Member $member): Group
+    public function deleteGroup(Group $group, User $user): bool
     {
-        // グループが班グループであることを確認
-        if ($group->type !== GroupType::BRANCH) {
-            throw new \InvalidArgumentException('指定されたグループは班グループではありません。');
-        }
+        $this->ensureUserCanManageGroups($group->travelPlan, $user);
+        $this->ensureGroupCanBeDeleted($group);
 
-        // コアグループを取得
-        $coreGroup = $group->parentGroup;
+        return DB::transaction(function () use ($group) {
+            // グループに関連するデータの削除
+            // TODO: 宿泊施設、行程、費用などの関連データの処理
 
-        // メンバーがコアグループに所属していることを確認
-        if ($member->group_id !== $coreGroup->id) {
-            throw new ModelNotFoundException('メンバーはこの旅行のコアグループに所属していません。');
-        }
-
-        // メンバーが既に班グループに所属している場合は何もしない
-        if ($group->members()->where('members.id', $member->id)->exists()) {
-            return $group;
-        }
-
-        // メンバーを班グループに追加
-        $group->members()->attach($member->id);
-
-        return $group;
+            return $this->groupRepository->delete($group);
+        });
     }
 
-    /**
-     * メンバーを班グループから削除する
-     *
-     * @param Group $group 班グループ
-     * @param Member $member メンバー
-     * @return Group 班グループ
-     * @throws \Exception 精算データがある場合
-     */
-    public function removeBranchMember(Group $group, Member $member): Group
+    public function getGroupsForTravelPlan(TravelPlan $travelPlan, User $user): \Illuminate\Database\Eloquent\Collection
     {
-        // グループが班グループであることを確認
-        if ($group->type !== GroupType::BRANCH) {
-            throw new \InvalidArgumentException('指定されたグループは班グループではありません。');
+        $this->ensureUserCanViewGroups($travelPlan, $user);
+
+        return $this->groupRepository->findByTravelPlan($travelPlan);
+    }
+
+    public function getCoreGroup(TravelPlan $travelPlan, User $user): ?Group
+    {
+        $this->ensureUserCanViewGroups($travelPlan, $user);
+
+        return $this->groupRepository->findCoreGroup($travelPlan);
+    }
+
+    public function getBranchGroups(TravelPlan $travelPlan, User $user): \Illuminate\Database\Eloquent\Collection
+    {
+        $this->ensureUserCanViewGroups($travelPlan, $user);
+
+        return $this->groupRepository->findBranchGroups($travelPlan);
+    }
+
+    public function findGroupByBranchKey(string $branchKey): ?Group
+    {
+        return $this->groupRepository->findByBranchKey($branchKey);
+    }
+
+    private function ensureUserCanViewGroups(TravelPlan $travelPlan, User $user): void
+    {
+        $member = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
+
+        if (! $member) {
+            throw new \Exception('この旅行プランのグループを表示する権限がありません。');
+        }
+    }
+
+    private function ensureUserCanManageGroups(TravelPlan $travelPlan, User $user): void
+    {
+        $member = $this->memberRepository->findByTravelPlanAndUser($travelPlan, $user);
+
+        if (! $member || ! $member->is_confirmed) {
+            throw new \Exception('グループを管理する権限がありません。');
+        }
+    }
+
+    private function ensureGroupCanBeEdited(Group $group): void
+    {
+        if ($group->type === 'CORE') {
+            throw new \Exception('コアグループは編集できません。');
+        }
+    }
+
+    public function addMemberToGroup(Group $group, Member $member, User $user): void
+    {
+        $this->ensureUserCanManageGroups($group->travelPlan, $user);
+        $this->ensureMemberCanBeAddedToGroup($group, $member);
+
+        $this->groupRepository->addMemberToGroup($group, $member);
+    }
+
+    public function removeMemberFromGroup(Group $group, Member $member, User $user): void
+    {
+        $this->ensureUserCanManageGroups($group->travelPlan, $user);
+        $this->ensureMemberCanBeRemovedFromGroup($group, $member);
+
+        $this->groupRepository->removeMemberFromGroup($group, $member);
+    }
+
+    public function getGroupMembers(Group $group, User $user): \Illuminate\Database\Eloquent\Collection
+    {
+        $this->ensureUserCanViewGroups($group->travelPlan, $user);
+
+        return $this->groupRepository->getGroupMembers($group);
+    }
+
+    public function duplicateGroupMembers(Group $sourceGroup, Group $targetGroup, User $user): void
+    {
+        $this->ensureUserCanManageGroups($sourceGroup->travelPlan, $user);
+        $this->ensureUserCanManageGroups($targetGroup->travelPlan, $user);
+
+        $members = $this->groupRepository->getGroupMembers($sourceGroup);
+
+        foreach ($members as $member) {
+            $this->groupRepository->addMemberToGroup($targetGroup, $member);
+        }
+    }
+
+    private function ensureGroupCanBeDeleted(Group $group): void
+    {
+        if ($group->type === 'CORE') {
+            throw new \Exception('コアグループは削除できません。');
         }
 
-        // メンバーが班グループに所属していることを確認
-        if (!$group->members()->where('members.id', $member->id)->exists()) {
-            throw new ModelNotFoundException('メンバーはこの班グループに所属していません。');
+        // メンバーが存在する場合は削除不可
+        if (! $this->groupRepository->isGroupEmpty($group)) {
+            throw new \Exception('メンバーが所属しているグループは削除できません。');
+        }
+    }
+
+    private function ensureMemberCanBeAddedToGroup(Group $group, Member $member): void
+    {
+        if ($group->travel_plan_id !== $member->travel_plan_id) {
+            throw new \Exception('異なる旅行プランのメンバーをグループに追加することはできません。');
         }
 
-        // 精算データの存在チェック
-        $hasSettlements = ExpenseSettlement::where(function ($query) use ($member) {
-            $query->where('payer_member_id', $member->id)
-                  ->orWhere('receiver_member_id', $member->id);
-        })->exists();
-
-        if ($hasSettlements) {
-            throw new \Exception('メンバーに精算データがあるため削除できません。');
+        if (! $member->is_confirmed) {
+            throw new \Exception('未確認のメンバーをグループに追加することはできません。');
         }
+    }
 
-        // メンバーを班グループから削除
-        $group->members()->detach($member->id);
-
-        // 班グループにメンバーが一人もいなくなった場合は削除
-        if ($group->members()->count() === 0) {
-            $group->delete();
+    private function ensureMemberCanBeRemovedFromGroup(Group $group, Member $member): void
+    {
+        if ($group->type === 'CORE') {
+            throw new \Exception('コアグループからメンバーを削除することはできません。');
         }
-
-        return $group;
     }
 }

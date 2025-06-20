@@ -1,157 +1,129 @@
-@extends('layouts.app')
+@extends('layouts.master')
 
-@section('title', '旅行計画一覧')
-
-@section('header')
-    <div class="flex justify-between items-center">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            旅行計画一覧
-        </h2>
-        <div>
-            <a href="{{ route('travel-plans.create') }}" class="inline-flex items-center px-4 py-2 bg-lime-500 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-lime-400 active:bg-lime-600 focus:outline-none focus:border-lime-600 focus:ring ring-lime-300 disabled:opacity-25 transition ease-in-out duration-150">
-                <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                新規旅行計画
-            </a>
-        </div>
-    </div>
-@endsection
+@section('title', '旅行プラン一覧')
 
 @section('content')
-    @if (session('success'))
-        <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-            <span class="block sm:inline">{{ session('success') }}</span>
-        </div>
-    @endif
+    @component('components.container', ['class' => 'max-w-7xl'])
+        @component('components.page-header', ['title' => '旅行プラン一覧', 'subtitle' => 'あなたの旅行プランを管理します。'])
+            <a href="{{ route('travel-plans.create') }}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                新しい旅行プランを作成
+            </a>
+        @endcomponent
 
-    @if (session('error'))
-        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-            <span class="block sm:inline">{{ session('error') }}</span>
-        </div>
-    @endif
+        @include('components.alerts')
 
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-            <div class="flex flex-col">
-                <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                    <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                        <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            旅行名
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            期間
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            メンバー数
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            ステータス
-                                        </th>
-                                        <th scope="col" class="relative px-6 py-3">
-                                            <span class="sr-only">編集</span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @forelse($travelPlans as $travelPlan)
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-lime-100 text-lime-500">
-                                                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                                                        </svg>
-                                                    </div>
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium text-gray-900">
-                                                            {{ $travelPlan->title }}
-                                                        </div>
-                                                        <div class="text-sm text-gray-500">
-                                                            作成者: {{ $travelPlan->creator->name }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900">
-                                                    {{ $travelPlan->departure_date->format('Y/m/d') }}
-                                                    @if($travelPlan->return_date)
-                                                        - {{ $travelPlan->return_date->format('Y/m/d') }}
-                                                    @else
-                                                        - 未定
-                                                    @endif
-                                                </div>
-                                                <div class="text-sm text-gray-500">
-                                                    @if($travelPlan->return_date)
-                                                        {{ $travelPlan->departure_date->diffInDays($travelPlan->return_date) }}泊{{ $travelPlan->departure_date->diffInDays($travelPlan->return_date) + 1 }}日
-                                                    @else
-                                                        期間未定
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900">
-                                                    @php
-                                                        $memberCount = 0;
-                                                        foreach ($travelPlan->groups as $group) {
-                                                            if ($group->type === 'core') {
-                                                                $memberCount = $group->members->count();
-                                                                break;
-                                                            }
-                                                        }
-                                                    @endphp
-                                                    {{ $memberCount }}人
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                @php
-                                                    $now = now();
-                                                    $status = '';
-                                                    $statusClass = '';
-                                                    
-                                                    if (!$travelPlan->is_active) {
-                                                        $status = '非アクティブ';
-                                                        $statusClass = 'bg-gray-100 text-gray-800';
-                                                    } elseif ($travelPlan->departure_date->isPast() && (!$travelPlan->return_date || $travelPlan->return_date->isFuture())) {
-                                                        $status = '旅行中';
-                                                        $statusClass = 'bg-blue-100 text-blue-800';
-                                                    } elseif ($travelPlan->departure_date->isPast() && $travelPlan->return_date && $travelPlan->return_date->isPast()) {
-                                                        $status = '完了';
-                                                        $statusClass = 'bg-purple-100 text-purple-800';
-                                                    } elseif ($travelPlan->departure_date->isFuture() && $travelPlan->departure_date->diffInDays($now) <= 7) {
-                                                        $status = '間もなく出発';
-                                                        $statusClass = 'bg-yellow-100 text-yellow-800';
-                                                    } else {
-                                                        $status = '準備中';
-                                                        $statusClass = 'bg-green-100 text-green-800';
-                                                    }
-                                                @endphp
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
-                                                    {{ $status }}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <a href="{{ route('travel-plans.show', $travelPlan) }}" class="text-lime-600 hover:text-lime-900">詳細</a>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
-                                                旅行計画がありません。新しい旅行計画を作成しましょう！
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+        <!-- 検索・フィルタ -->
+        <div class="mb-6 flex flex-col sm:flex-row gap-4">
+            <form method="GET" class="flex-1">
+                <input type="hidden" name="filter" value="{{ $filter }}">
+                <div class="relative">
+                    <input type="text" 
+                           name="search" 
+                           value="{{ $search }}"
+                           placeholder="旅行プラン名で検索..."
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
                     </div>
                 </div>
+            </form>
+            
+            <div class="flex gap-2">
+                <a href="{{ route('travel-plans.index', ['filter' => 'all']) }}" 
+                   class="px-3 py-2 text-sm rounded-md {{ $filter === 'all' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900' }}">
+                    すべて
+                </a>
+                <a href="{{ route('travel-plans.index', ['filter' => 'upcoming']) }}" 
+                   class="px-3 py-2 text-sm rounded-md {{ $filter === 'upcoming' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900' }}">
+                    今後の旅行
+                </a>
+                <a href="{{ route('travel-plans.index', ['filter' => 'active']) }}" 
+                   class="px-3 py-2 text-sm rounded-md {{ $filter === 'active' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900' }}">
+                    有効
+                </a>
+                <a href="{{ route('travel-plans.index', ['filter' => 'past']) }}" 
+                   class="px-3 py-2 text-sm rounded-md {{ $filter === 'past' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900' }}">
+                    過去の旅行
+                </a>
             </div>
         </div>
-    </div>
+
+        <!-- 旅行プラン一覧 -->
+        @if($travelPlans->count() > 0)
+            <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                <ul class="divide-y divide-gray-200">
+                    @foreach($travelPlans as $plan)
+                        <li>
+                            <a href="{{ route('travel-plans.show', $plan->uuid) }}" class="block hover:bg-gray-50">
+                                <div class="px-4 py-4 sm:px-6">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <p class="text-lg font-medium text-blue-600 truncate">
+                                                {{ $plan->plan_name }}
+                                            </p>
+                                            <div class="mt-2 flex items-center text-sm text-gray-500">
+                                                <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                <span>
+                                                    {{ $plan->departure_date->format('Y年m月d日') }}
+                                                    @if($plan->return_date)
+                                                        〜 {{ $plan->return_date->format('Y年m月d日') }}
+                                                    @endif
+                                                </span>
+                                            </div>
+                                            @if($plan->description)
+                                                <p class="mt-2 text-sm text-gray-600 line-clamp-2">
+                                                    {{ $plan->description }}
+                                                </p>
+                                            @endif
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            @if(!$plan->is_active)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                    無効
+                                                </span>
+                                            @endif
+                                            <span class="text-sm text-gray-500">
+                                                {{ $plan->members_count ?? $plan->members->count() }}人参加
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <!-- ページネーション -->
+            <div class="mt-6">
+                {{ $travelPlans->links() }}
+            </div>
+        @else
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">旅行プランがありません</h3>
+                <p class="mt-1 text-sm text-gray-500">新しい旅行プランを作成して始めましょう。</p>
+                <div class="mt-6">
+                    <a href="{{ route('travel-plans.create') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        新しい旅行プランを作成
+                    </a>
+                </div>
+            </div>
+        @endif
+
+        <!-- ナビゲーション -->
+        <div class="mt-8 flex justify-center">
+            <a href="{{ route('dashboard') }}" class="text-blue-600 hover:text-blue-800">
+                ← ダッシュボードに戻る
+            </a>
+        </div>
+    @endcomponent
 @endsection

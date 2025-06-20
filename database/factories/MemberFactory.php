@@ -2,90 +2,75 @@
 
 namespace Database\Factories;
 
-use App\Models\Group;
+use App\Models\Account;
+use App\Models\Member;
+use App\Models\TravelPlan;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Member>
- */
 class MemberFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Member::class;
+
     public function definition(): array
     {
-        $user = User::factory()->create();
-        $group = Group::factory()->create();
-        $travelPlan = $group->travelPlan;
+        $user = User::factory();
 
         return [
-            'name' => $this->faker->name(),
-            'email' => $this->faker->unique()->safeEmail(),
-            'user_id' => $user->id,
-            'group_id' => $group->id,
-            'arrival_date' => $travelPlan->departure_date,
-            'departure_date' => $travelPlan->return_date,
-            'is_active' => true,
+            'travel_plan_id' => TravelPlan::factory(),
+            'user_id' => $user,
+            'account_id' => function (array $attributes) {
+                if (! $attributes['user_id']) {
+                    return null;
+                }
+                $userId = $attributes['user_id'];
+                if ($userId instanceof \Illuminate\Database\Eloquent\Factories\Factory) {
+                    // Factoryインスタンスの場合は先に作成
+                    $user = $userId->create();
+
+                    return Account::factory()->for($user)->create()->id;
+                }
+
+                return Account::factory()->for(User::find($userId))->create()->id;
+            },
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
+            'is_confirmed' => true,
         ];
     }
 
-    /**
-     * Indicate that the member is registered.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
-     */
-    public function registered()
+    public function unconfirmed(): static
     {
-        return $this->state(function (array $attributes) {
-            $user = User::factory()->create();
+        return $this->state(fn (array $attributes) => [
+            'is_confirmed' => false,
+        ]);
+    }
+
+    public function withoutUser(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'user_id' => null,
+            'account_id' => null,
+        ]);
+    }
+
+    public function forTravelPlan(TravelPlan $travelPlan): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'travel_plan_id' => $travelPlan->id,
+        ]);
+    }
+
+    public function forUser(User $user): static
+    {
+        return $this->state(function (array $attributes) use ($user) {
+            $account = Account::factory()->for($user)->create();
+
             return [
                 'user_id' => $user->id,
-            ];
-        });
-    }
-
-    /**
-     * Indicate that the member is not registered.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
-     */
-    public function unregistered()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'user_id' => null,
-            ];
-        });
-    }
-
-    /**
-     * Indicate that the member is active.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
-     */
-    public function active()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'is_active' => true,
-            ];
-        });
-    }
-
-    /**
-     * Indicate that the member is inactive.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
-     */
-    public function inactive()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'is_active' => false,
+                'account_id' => $account->id,
+                'name' => $user->accounts->first()->display_name ?? fake()->name(),
+                'email' => $user->email,
             ];
         });
     }

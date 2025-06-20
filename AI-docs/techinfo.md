@@ -3,7 +3,7 @@
 使用しているソフトウェアは下記の通りです。
 
 - PHP8.3
-- Laravel 11
+- Laravel 12
 
 ## プロジェクト
 
@@ -64,16 +64,12 @@ Laravel Eloquent は一度 Repository といわれる抽象型に扱われ、Ser
 ```php
 class MemberController extends Controller {
     public function store (Request $request) {
-        try {
-            $$member  = \DB::transaction(function()use($request){
-                $member = new Member();
-                $member->name = $request->name ?? '';
-                $member->save();
-                return $m
-            });
-        } catch (\Throwable $e){
-            return response()->back()->withError($e->getMessage());
-        }
+        $member  = \DB::transaction(function()use($request){
+            $member = new Member();
+            $member->name = $request->name ?? '';
+            $member->save();
+            return $m
+        });
         return response()->back()->with('success', "メンバー「".e($member->name)."」さんを追加しました");
     }
 }
