@@ -76,7 +76,7 @@ class ItineraryService
 
             // 時刻の妥当性チェック
             if (isset($data['start_time']) && isset($data['end_time'])) {
-                $this->validateTimeRange($data['start_time'], $data['end_time']);
+                $this->validateTimeRange($data['start_time'], $data['end_time'], $data['date'], $data['arrival_date'] ?? null);
             }
 
             // 旅程を作成
@@ -108,7 +108,7 @@ class ItineraryService
 
             // 時刻の妥当性チェック
             if (isset($data['start_time']) && isset($data['end_time'])) {
-                $this->validateTimeRange($data['start_time'], $data['end_time']);
+                $this->validateTimeRange($data['start_time'], $data['end_time'], $data['date'], $data['arrival_date'] ?? null);
             }
 
             // 旅程を更新
@@ -303,16 +303,47 @@ class ItineraryService
         }
     }
 
-    private function validateTimeRange(?string $startTime, ?string $endTime): void
+    private function validateTimeRange(?string $startTime, ?string $endTime, ?string $departureDate = null, ?string $arrivalDate = null): void
     {
         if ($startTime && $endTime) {
-            $start = Carbon::parse($startTime);
-            $end = Carbon::parse($endTime);
+            // 日付が指定されている場合は日時として比較
+            if ($departureDate) {
+                $arrivalDateToUse = $arrivalDate ?: $departureDate;
+                
+                $departureDateTime = Carbon::createFromFormat('Y-m-d H:i', $departureDate . ' ' . $startTime);
+                $arrivalDateTime = Carbon::createFromFormat('Y-m-d H:i', $arrivalDateToUse . ' ' . $endTime);
 
-            if ($end->lte($start)) {
-                throw ValidationException::withMessages([
-                    'end_time' => ['終了時刻は開始時刻より後である必要があります。'],
-                ]);
+                // 同じ日時は許可しない
+                if ($arrivalDateTime->eq($departureDateTime)) {
+                    throw ValidationException::withMessages([
+                        'end_time' => ['到着時刻は出発時刻と異なる時刻に設定してください。'],
+                    ]);
+                }
+
+                // 到着日時が出発日時より前の場合はエラー
+                if ($arrivalDateTime->lt($departureDateTime)) {
+                    throw ValidationException::withMessages([
+                        'end_time' => ['到着日時は出発日時より後に設定してください。'],
+                    ]);
+                }
+
+                // 移動時間が48時間を超える場合は警告
+                $duration = $arrivalDateTime->diffInHours($departureDateTime);
+                if ($duration > 48) {
+                    throw ValidationException::withMessages([
+                        'end_time' => ['移動時間が48時間を超えています。到着日時を確認してください。'],
+                    ]);
+                }
+            } else {
+                // 旧来の時刻のみの比較（後方互換性）
+                $start = Carbon::parse($startTime);
+                $end = Carbon::parse($endTime);
+
+                if ($end->lte($start)) {
+                    throw ValidationException::withMessages([
+                        'end_time' => ['終了時刻は開始時刻より後である必要があります。'],
+                    ]);
+                }
             }
         }
     }

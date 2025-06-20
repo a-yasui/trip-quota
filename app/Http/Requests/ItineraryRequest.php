@@ -47,7 +47,6 @@ class ItineraryRequest extends FormRequest
             'end_time' => [
                 'nullable',
                 'date_format:H:i',
-                'after:start_time',
                 $this->validateEndTimeAfterStart(),
             ],
             'timezone' => 'nullable|string|max:50',
@@ -94,7 +93,6 @@ class ItineraryRequest extends FormRequest
             'arrival_date.after_or_equal' => '到着日は出発日以降に設定してください。',
             'start_time.date_format' => '開始時刻の形式が正しくありません（HH:MM）。',
             'end_time.date_format' => '終了時刻の形式が正しくありません（HH:MM）。',
-            'end_time.after' => '終了時刻は開始時刻より後に設定してください。',
             'group_id.exists' => '選択されたグループが見つかりません。',
             'transportation_type.in' => '無効な交通手段が選択されています。',
             'member_ids.array' => '参加者の選択形式が正しくありません。',
@@ -103,7 +101,6 @@ class ItineraryRequest extends FormRequest
             'flight_number.required_if' => '飛行機を選択した場合、便名は必須です。',
             'train_line.required_if' => '電車を選択した場合、路線名は必須です。',
             'departure_time.after_or_equal' => '出発時刻は現在時刻以降に設定してください。',
-            'arrival_time.after' => '到着時刻は出発時刻より後に設定してください。',
         ];
     }
 
@@ -131,7 +128,7 @@ class ItineraryRequest extends FormRequest
                         'arrival_time' => [
                             'nullable',
                             'date',
-                            'after:departure_time',
+                            $this->validateArrivalTimeAfterDeparture(),
                             $this->validateFlightDuration(),
                         ],
                     ]);
@@ -147,7 +144,7 @@ class ItineraryRequest extends FormRequest
                         'arrival_time' => [
                             'nullable',
                             'date',
-                            'after:departure_time',
+                            $this->validateArrivalTimeAfterDeparture(),
                         ],
                     ]);
                     break;
@@ -162,7 +159,7 @@ class ItineraryRequest extends FormRequest
                         'arrival_time' => [
                             'nullable',
                             'date',
-                            'after:departure_time',
+                            $this->validateArrivalTimeAfterDeparture(),
                         ],
                     ]);
                     break;
@@ -173,7 +170,7 @@ class ItineraryRequest extends FormRequest
                         'arrival_time' => [
                             'nullable',
                             'date',
-                            'after:departure_time',
+                            $this->validateArrivalTimeAfterDeparture(),
                         ],
                     ]);
                     break;
@@ -291,23 +288,35 @@ class ItineraryRequest extends FormRequest
                 return;
             }
 
-            $startTime = Carbon::createFromFormat('H:i', $this->input('start_time'));
-            $endTime = Carbon::createFromFormat('H:i', $value);
+            $departureDate = $this->input('date');
+            $arrivalDate = $this->input('arrival_date') ?: $departureDate;
+            $startTime = $this->input('start_time');
+            $endTime = $value;
 
-            // 同じ時刻は許可しない
-            if ($endTime->eq($startTime)) {
-                $fail('終了時刻は開始時刻と異なる時刻に設定してください。');
-
+            if (! $departureDate) {
                 return;
             }
 
-            // 日跨ぎを考慮した時間チェック
-            if ($endTime->lt($startTime)) {
-                // 日跨ぎの場合、最大24時間以内
-                $timeDiff = $endTime->addDay()->diffInHours($startTime);
-                if ($timeDiff > 24) {
-                    $fail('終了時刻は開始時刻から24時間以内に設定してください。');
-                }
+            // 出発日時と到着日時を作成
+            $departureDateTime = Carbon::createFromFormat('Y-m-d H:i', $departureDate . ' ' . $startTime);
+            $arrivalDateTime = Carbon::createFromFormat('Y-m-d H:i', $arrivalDate . ' ' . $endTime);
+
+            // 同じ日時は許可しない
+            if ($arrivalDateTime->eq($departureDateTime)) {
+                $fail('到着時刻は出発時刻と異なる時刻に設定してください。');
+                return;
+            }
+
+            // 到着日時が出発日時より前の場合はエラー
+            if ($arrivalDateTime->lt($departureDateTime)) {
+                $fail('到着日時は出発日時より後に設定してください。');
+                return;
+            }
+
+            // 移動時間が48時間を超える場合は警告
+            $duration = $arrivalDateTime->diffInHours($departureDateTime);
+            if ($duration > 48) {
+                $fail('移動時間が48時間を超えています。到着日時を確認してください。');
             }
         };
     }
@@ -365,6 +374,33 @@ class ItineraryRequest extends FormRequest
             $dateTime = Carbon::parse($value);
             if ($dateTime->isPast()) {
                 $fail('出発時刻は現在時刻より後に設定してください。');
+            }
+        };
+    }
+
+    /**
+     * 交通手段用の到着時刻バリデーション（departure_time > arrival_time）
+     */
+    private function validateArrivalTimeAfterDeparture(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail) {
+            if (! $value || ! $this->input('departure_time')) {
+                return;
+            }
+
+            $departureTime = Carbon::parse($this->input('departure_time'));
+            $arrivalTime = Carbon::parse($value);
+
+            // 同じ日時は許可しない
+            if ($arrivalTime->eq($departureTime)) {
+                $fail('到着時刻は出発時刻と異なる時刻に設定してください。');
+                return;
+            }
+
+            // 到着日時が出発日時より前の場合はエラー
+            if ($arrivalTime->lt($departureTime)) {
+                $fail('到着時刻は出発時刻より後に設定してください。');
+                return;
             }
         };
     }
