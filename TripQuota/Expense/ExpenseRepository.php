@@ -76,22 +76,6 @@ class ExpenseRepository implements ExpenseRepositoryInterface
         $expense->members()->sync($syncData);
     }
 
-    public function confirmSplit(Expense $expense): Expense
-    {
-        $expense->update(['is_split_confirmed' => true]);
-
-        return $expense->fresh();
-    }
-
-    public function findUnconfirmedByTravelPlan(TravelPlan $travelPlan): Collection
-    {
-        return Expense::where('travel_plan_id', $travelPlan->id)
-            ->where('is_split_confirmed', false)
-            ->with(['group', 'paidBy', 'members'])
-            ->orderBy('expense_date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->get();
-    }
 
     public function findByMember(int $memberId): Collection
     {

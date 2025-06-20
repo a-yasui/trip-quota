@@ -49,15 +49,6 @@ interface ExpenseRepositoryInterface
      */
     public function assignMembers(Expense $expense, array $memberAssignments): void;
 
-    /**
-     * 費用の分割計算を確定
-     */
-    public function confirmSplit(Expense $expense): Expense;
-
-    /**
-     * 未確定の費用一覧を取得
-     */
-    public function findUnconfirmedByTravelPlan(TravelPlan $travelPlan): Collection;
 
     /**
      * メンバーが参加している費用一覧を取得

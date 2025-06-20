@@ -91,7 +91,6 @@ class SettlementServiceTest extends TestCase
             'paid_by_member_id' => 1,
             'amount' => 1000,
             'currency' => 'JPY',
-            'is_split_confirmed' => true,
         ]);
 
         $expense2 = Expense::factory()->make([
@@ -99,7 +98,6 @@ class SettlementServiceTest extends TestCase
             'paid_by_member_id' => 2,
             'amount' => 1000,
             'currency' => 'JPY',
-            'is_split_confirmed' => true,
         ]);
 
         // モック設定
@@ -179,8 +177,6 @@ class SettlementServiceTest extends TestCase
 
             public $currency = 'JPY';
 
-            public $is_split_confirmed = true;
-
             private $membersQuery;
 
             public function setMembersQuery($query)
@@ -202,8 +198,6 @@ class SettlementServiceTest extends TestCase
             public $amount = 500;
 
             public $currency = 'JPY';
-
-            public $is_split_confirmed = true;
 
             private $membersQuery;
 

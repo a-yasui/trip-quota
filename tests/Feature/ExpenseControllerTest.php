@@ -170,7 +170,6 @@ class ExpenseControllerTest extends TestCase
             'group_id' => $this->group->id,
             'paid_by_member_id' => $this->member->id,
             'title' => '編集用費用',
-            'is_split_confirmed' => false,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -181,21 +180,6 @@ class ExpenseControllerTest extends TestCase
         $response->assertSee('編集用費用');
     }
 
-    public function test_edit_redirects_when_expense_confirmed()
-    {
-        $expense = Expense::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
-            'group_id' => $this->group->id,
-            'paid_by_member_id' => $this->member->id,
-            'is_split_confirmed' => true, // 確定済み
-        ]);
-
-        $response = $this->actingAs($this->user)
-            ->get(route('travel-plans.expenses.edit', [$this->travelPlan->uuid, $expense->id]));
-
-        $response->assertRedirect(route('travel-plans.expenses.show', [$this->travelPlan->uuid, $expense->id]));
-        $response->assertSessionHasErrors(['error' => '確定済みの費用は編集できません。']);
-    }
 
     public function test_update_modifies_expense_successfully()
     {
@@ -204,7 +188,6 @@ class ExpenseControllerTest extends TestCase
             'group_id' => $this->group->id,
             'paid_by_member_id' => $this->member->id,
             'title' => '元のタイトル',
-            'is_split_confirmed' => false,
         ]);
 
         $updateData = [
@@ -237,7 +220,6 @@ class ExpenseControllerTest extends TestCase
             'travel_plan_id' => $this->travelPlan->id,
             'group_id' => $this->group->id,
             'paid_by_member_id' => $this->member->id,
-            'is_split_confirmed' => false,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -251,59 +233,7 @@ class ExpenseControllerTest extends TestCase
         ]);
     }
 
-    public function test_confirm_participation_updates_member_status()
-    {
-        $expense = Expense::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
-            'group_id' => $this->group->id,
-            'paid_by_member_id' => $this->member->id,
-        ]);
 
-        // メンバーを費用に関連付け（未確認状態）
-        $expense->members()->attach($this->member->id, [
-            'is_participating' => true,
-            'is_confirmed' => false,
-        ]);
-
-        $response = $this->actingAs($this->user)
-            ->post(route('travel-plans.expenses.confirm-participation', [$this->travelPlan->uuid, $expense->id]));
-
-        $response->assertRedirect(route('travel-plans.expenses.show', [$this->travelPlan->uuid, $expense->id]));
-        $response->assertSessionHas('success', '参加を確認しました。');
-
-        $this->assertDatabaseHas('expense_member', [
-            'expense_id' => $expense->id,
-            'member_id' => $this->member->id,
-            'is_confirmed' => true,
-        ]);
-    }
-
-    public function test_confirm_split_confirms_expense()
-    {
-        $expense = Expense::factory()->create([
-            'travel_plan_id' => $this->travelPlan->id,
-            'group_id' => $this->group->id,
-            'paid_by_member_id' => $this->member->id,
-            'is_split_confirmed' => false,
-        ]);
-
-        // メンバーを費用に関連付け（確認済み状態）
-        $expense->members()->attach($this->member->id, [
-            'is_participating' => true,
-            'is_confirmed' => true,
-        ]);
-
-        $response = $this->actingAs($this->user)
-            ->post(route('travel-plans.expenses.confirm-split', [$this->travelPlan->uuid, $expense->id]));
-
-        $response->assertRedirect(route('travel-plans.expenses.show', [$this->travelPlan->uuid, $expense->id]));
-        $response->assertSessionHas('success', '費用分割を確定しました。');
-
-        $this->assertDatabaseHas('expenses', [
-            'id' => $expense->id,
-            'is_split_confirmed' => true,
-        ]);
-    }
 
     public function test_unauthorized_user_cannot_access_expenses()
     {

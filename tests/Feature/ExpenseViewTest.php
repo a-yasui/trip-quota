@@ -109,7 +109,6 @@ class ExpenseViewTest extends TestCase
             'amount' => 5000,
             'currency' => 'JPY',
             'expense_date' => \Carbon\Carbon::parse('2024-07-02'),
-            'is_split_confirmed' => false,
         ]);
 
         $expense->members()->attach($this->member->id, [
@@ -133,14 +132,12 @@ class ExpenseViewTest extends TestCase
         $response->assertSee('2024年7月02日');
         $response->assertSee('テストグループ');
         $response->assertSee('テストメンバー');
-        $response->assertSee('未確定');
 
         // 分割詳細の確認
         $response->assertSee('分割詳細');
-        $response->assertSee('確認済み'); // 自動参加により確認済みになる
         $response->assertSee('分割金額を調整'); // 分割編集フォームが表示される
 
-        // 編集・削除ボタンの確認（未確定の場合）
+        // 編集・削除ボタンの確認
         $response->assertSee('編集');
         $response->assertSee('削除');
     }
@@ -154,7 +151,6 @@ class ExpenseViewTest extends TestCase
             'title' => '確定済み費用',
             'amount' => 3000,
             'currency' => 'JPY',
-            'is_split_confirmed' => true, // 確定済み
         ]);
 
         $response = $this->actingAs($this->user)
@@ -162,12 +158,11 @@ class ExpenseViewTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('確定済み費用');
-        $response->assertSee('確定済み');
 
-        // 確定済みなので編集・削除ボタンと分割編集フォームは表示されない
-        $response->assertDontSee('class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium">');
-        $response->assertDontSee('class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">');
-        $response->assertDontSee('分割金額を調整');
+        // 編集・削除ボタンと分割編集フォームの確認
+        $response->assertSee('編集');
+        $response->assertSee('削除');
+        $response->assertSee('分割金額を調整');
     }
 
     public function test_expense_edit_view_renders_correctly()
@@ -180,7 +175,6 @@ class ExpenseViewTest extends TestCase
             'description' => '編集前の説明',
             'amount' => 2000,
             'currency' => 'USD',
-            'is_split_confirmed' => false,
         ]);
 
         $expense->members()->attach($this->member->id, [
@@ -227,7 +221,6 @@ class ExpenseViewTest extends TestCase
             'paid_by_member_id' => $this->member->id,
             'amount' => 1000,
             'currency' => 'JPY',
-            'is_split_confirmed' => false,
         ]);
 
         Expense::factory()->create([
@@ -236,7 +229,6 @@ class ExpenseViewTest extends TestCase
             'paid_by_member_id' => $this->member->id,
             'amount' => 2000,
             'currency' => 'JPY',
-            'is_split_confirmed' => true,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -249,8 +241,6 @@ class ExpenseViewTest extends TestCase
         $response->assertSee('3,000 JPY');
         $response->assertSee('費用件数');
         $response->assertSee('2件');
-        $response->assertSee('確定済み');
-        $response->assertSee('1件');
     }
 
     public function test_expense_create_form_defaults()
@@ -346,8 +336,6 @@ class ExpenseViewTest extends TestCase
         // 分割計算の確認
         $response->assertSee('3,000 JPY'); // 等分計算結果
         $response->assertSee('4,000 JPY'); // カスタム金額
-        $response->assertSee('確認済み');
-        $response->assertSee('未確認');
 
         // 分割計算サマリーの確認
         $response->assertSee('総金額');

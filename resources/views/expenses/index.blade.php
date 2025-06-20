@@ -55,24 +55,6 @@
                 </div>
             </div>
 
-            <!-- 確定済み費用 -->
-            <div class="bg-white overflow-hidden shadow rounded-lg">
-                <div class="p-5">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div class="ml-5 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 truncate">確定済み</dt>
-                                <dd class="text-lg font-medium text-gray-900">{{ $expenses->where('is_split_confirmed', true)->count() }}件</dd>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- 通貨別集計 -->
@@ -160,21 +142,9 @@
                                         <div class="flex-1">
                                             <div class="flex items-center space-x-2">
                                                 <h3 class="text-sm font-medium text-gray-900">{{ $expense->title }}</h3>
-                                                @if($expense->is_split_confirmed)
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        確定済み
-                                                    </span>
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                        精算対象
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                        未確定
-                                                    </span>
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                        未精算
-                                                    </span>
-                                                @endif
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    精算対象
+                                                </span>
                                             </div>
                                             <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
                                                 <span>{{ $expense->expense_date->format('Y/m/d') }}</span>
@@ -200,12 +170,10 @@
                                        class="text-blue-600 hover:text-blue-800 text-sm font-medium">
                                         詳細
                                     </a>
-                                    @if(!$expense->is_split_confirmed)
-                                        <a href="{{ route('travel-plans.expenses.edit', [$travelPlan->uuid, $expense->id]) }}" 
-                                           class="text-gray-600 hover:text-gray-800 text-sm font-medium">
-                                            編集
-                                        </a>
-                                    @endif
+                                    <a href="{{ route('travel-plans.expenses.edit', [$travelPlan->uuid, $expense->id]) }}" 
+                                       class="text-gray-600 hover:text-gray-800 text-sm font-medium">
+                                        編集
+                                    </a>
                                 </div>
                             </div>
                         </div>

@@ -39,7 +39,6 @@ class ExpenseService
                 'amount' => $data['amount'],
                 'currency' => $data['currency'] ?? 'JPY',
                 'expense_date' => $data['expense_date'],
-                'is_split_confirmed' => false,
             ]);
 
             // メンバーを費用に割り当て
@@ -55,10 +54,6 @@ class ExpenseService
     {
         $this->ensureUserCanEditExpense($expense, $user);
 
-        // 確定済みの費用は編集不可
-        if ($expense->is_split_confirmed) {
-            throw new \Exception('確定済みの費用は編集できません。');
-        }
 
         $this->validateExpenseData($data, $expense->travelPlan);
 
@@ -86,10 +81,6 @@ class ExpenseService
     {
         $this->ensureUserCanEditExpense($expense, $user);
 
-        // 確定済みの費用は削除不可
-        if ($expense->is_split_confirmed) {
-            throw new \Exception('確定済みの費用は削除できません。');
-        }
 
         return $this->expenseRepository->delete($expense);
     }
@@ -108,47 +99,10 @@ class ExpenseService
         return $this->expenseRepository->findByGroup($group);
     }
 
-    public function confirmExpenseSplit(Expense $expense, User $user): Expense
-    {
-        $this->ensureUserCanEditExpense($expense, $user);
 
-        if ($expense->is_split_confirmed) {
-            throw new \Exception('この費用は既に確定済みです。');
-        }
-
-        // 全メンバーが確認済みかチェック
-        $unconfirmedMembers = $expense->members()->wherePivot('is_confirmed', false)->count();
-        if ($unconfirmedMembers > 0) {
-            throw new \Exception('全メンバーの確認が完了していません。');
-        }
-
-        return $this->expenseRepository->confirmSplit($expense);
-    }
-
-    public function confirmMemberParticipation(Expense $expense, User $user): void
-    {
-        $member = $this->memberRepository->findByTravelPlanAndUser($expense->travelPlan, $user);
-
-        if (! $member) {
-            throw new \Exception('この旅行プランのメンバーではありません。');
-        }
-
-        // メンバーが費用に参加しているかチェック
-        $expenseMember = $expense->members()->where('member_id', $member->id)->first();
-        if (! $expenseMember) {
-            throw new \Exception('この費用に参加していません。');
-        }
-
-        // 確認状態を更新
-        $expense->members()->updateExistingPivot($member->id, ['is_confirmed' => true]);
-    }
 
     public function autoParticipateCurrentUser(Expense $expense, User $user): void
     {
-        // 費用が確定済みの場合は何もしない
-        if ($expense->is_split_confirmed) {
-            return;
-        }
 
         // ユーザーのメンバー情報を取得
         $member = $this->memberRepository->findByTravelPlanAndUser(
@@ -246,10 +200,6 @@ class ExpenseService
 
     public function updateExpenseSplits(Expense $expense, User $user, array $splits): void
     {
-        // 費用が確定済みの場合はエラー
-        if ($expense->is_split_confirmed) {
-            throw new \Exception('確定済みの費用の分割金額は変更できません。');
-        }
 
         // ユーザーが管理権限を持つかチェック
         $this->ensureUserCanManageExpenses($expense->travelPlan, $user);

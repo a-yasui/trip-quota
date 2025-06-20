@@ -1,11 +1,20 @@
 <?php
 
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
+// @formatter:off
+// phpcs:ignoreFile
 /**
+ * A helper file for your Eloquent Models
+ * Copy the phpDocs from this file to the correct Model,
+ * And remove them from this file, to prevent double declarations.
+ *
+ * @author Barry vd. Heuvel <barryvdh@gmail.com>
+ */
+
+
+namespace App\Models{
+/**
+ * 
+ *
  * @property int $id
  * @property int $travel_plan_id
  * @property int $group_id
@@ -22,7 +31,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int|null $members_count
  * @property-read \App\Models\Member $paidBy
  * @property-read \App\Models\TravelPlan $travelPlan
- *
  * @method static \Database\Factories\ExpenseFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Expense newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Expense newQuery()
@@ -38,46 +46,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Expense whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Expense whereTravelPlanId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Expense whereUpdatedAt($value)
- *
- * @mixin \Eloquent
  */
-class Expense extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'travel_plan_id',
-        'group_id',
-        'paid_by_member_id',
-        'title',
-        'description',
-        'amount',
-        'currency',
-        'expense_date',
-    ];
-
-    protected $casts = [
-        'amount' => 'decimal:2',
-        'expense_date' => 'date',
-    ];
-
-    public function travelPlan()
-    {
-        return $this->belongsTo(TravelPlan::class);
-    }
-
-    public function group()
-    {
-        return $this->belongsTo(Group::class);
-    }
-
-    public function paidBy()
-    {
-        return $this->belongsTo(Member::class, 'paid_by_member_id');
-    }
-
-    public function members()
-    {
-        return $this->belongsToMany(Member::class)->withPivot('is_participating', 'amount', 'is_confirmed')->withTimestamps();
-    }
+	class Expense extends \Eloquent {}
 }
+

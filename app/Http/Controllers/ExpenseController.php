@@ -163,12 +163,6 @@ class ExpenseController extends Controller
             abort(404);
         }
 
-        // 確定済みの費用は編集不可
-        if ($expense->is_split_confirmed) {
-            return redirect()
-                ->route('travel-plans.expenses.show', [$travelPlan->uuid, $expense->id])
-                ->withErrors(['error' => '確定済みの費用は編集できません。']);
-        }
 
         // 確認済みメンバーとグループを取得
         $members = $travelPlan->members()->where('is_confirmed', true)->get();
@@ -241,51 +235,6 @@ class ExpenseController extends Controller
         }
     }
 
-    /**
-     * メンバーの参加確認
-     */
-    public function confirmParticipation(string $travelPlanUuid, Expense $expense)
-    {
-        try {
-            $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
-
-            if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
-                abort(404);
-            }
-
-            $this->expenseService->confirmMemberParticipation($expense, Auth::user());
-
-            return redirect()
-                ->route('travel-plans.expenses.show', [$travelPlan->uuid, $expense->id])
-                ->with('success', '参加を確認しました。');
-        } catch (\Exception $e) {
-            return back()
-                ->withErrors(['error' => $e->getMessage()]);
-        }
-    }
-
-    /**
-     * 費用分割確定
-     */
-    public function confirmSplit(string $travelPlanUuid, Expense $expense)
-    {
-        try {
-            $travelPlan = $this->travelPlanService->getTravelPlanByUuid($travelPlanUuid);
-
-            if (! $travelPlan || $expense->travel_plan_id !== $travelPlan->id) {
-                abort(404);
-            }
-
-            $this->expenseService->confirmExpenseSplit($expense, Auth::user());
-
-            return redirect()
-                ->route('travel-plans.expenses.show', [$travelPlan->uuid, $expense->id])
-                ->with('success', '費用分割を確定しました。');
-        } catch (\Exception $e) {
-            return back()
-                ->withErrors(['error' => $e->getMessage()]);
-        }
-    }
 
     /**
      * 分割金額を更新

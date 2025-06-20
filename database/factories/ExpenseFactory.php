@@ -33,7 +33,6 @@ final class ExpenseFactory extends Factory
             'amount' => fake()->randomFloat(2, 10, 10000),
             'currency' => fake()->randomElement(['JPY', 'USD', 'EUR', 'KRW', 'CNY']),
             'expense_date' => fake()->date(),
-            'is_split_confirmed' => fake()->boolean(),
         ];
     }
 }

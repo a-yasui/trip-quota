@@ -25,9 +25,9 @@ class SettlementService
     {
         $this->ensureUserCanViewSettlements($travelPlan, $user);
 
-        // 確定済みの費用のみを対象
+        // 全ての費用を対象
         $expenses = $this->expenseRepository->findByTravelPlan($travelPlan)
-            ->where('is_split_confirmed', true);
+    ;
 
         if ($expenses->isEmpty()) {
             return [];

@@ -135,7 +135,6 @@ class ExpenseServiceTest extends TestCase
     {
         $expense = Expense::factory()->make([
             'id' => 1,
-            'is_split_confirmed' => false,
         ]);
         $expense->travelPlan = $this->travelPlan;
 
@@ -179,36 +178,11 @@ class ExpenseServiceTest extends TestCase
         $this->assertEquals($expectedExpense, $result);
     }
 
-    public function test_update_expense_fails_when_confirmed()
-    {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('確定済みの費用は編集できません。');
-
-        $expense = Expense::factory()->make([
-            'is_split_confirmed' => true, // 確定済み
-        ]);
-
-        $this->memberRepository
-            ->expects($this->once())
-            ->method('findByTravelPlanAndUser')
-            ->willReturn($this->member);
-
-        $updateData = [
-            'title' => '更新された費用',
-            'amount' => 3000,
-            'expense_date' => '2024-07-03',
-            'group_id' => $this->group->id,
-            'paid_by_member_id' => $this->member->id,
-        ];
-
-        $this->service->updateExpense($expense, $this->user, $updateData);
-    }
 
     public function test_delete_expense_successfully()
     {
         $expense = Expense::factory()->make([
             'id' => 1,
-            'is_split_confirmed' => false,
         ]);
         $expense->travelPlan = $this->travelPlan;
 
@@ -229,22 +203,6 @@ class ExpenseServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function test_delete_expense_fails_when_confirmed()
-    {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('確定済みの費用は削除できません。');
-
-        $expense = Expense::factory()->make([
-            'is_split_confirmed' => true, // 確定済み
-        ]);
-
-        $this->memberRepository
-            ->expects($this->once())
-            ->method('findByTravelPlanAndUser')
-            ->willReturn($this->member);
-
-        $this->service->deleteExpense($expense, $this->user);
-    }
 
     public function test_get_expenses_for_travel_plan()
     {
@@ -271,47 +229,6 @@ class ExpenseServiceTest extends TestCase
         $this->assertEquals($expectedExpenses, $result);
     }
 
-    public function test_confirm_expense_split_successfully()
-    {
-        $expense = Expense::factory()->make([
-            'id' => 1,
-            'is_split_confirmed' => false,
-        ]);
-
-        // 全メンバーが確認済みの状態をモック
-        $confirmedMember = new \stdClass;
-        $confirmedMember->pivot = new \stdClass;
-        $confirmedMember->pivot->is_confirmed = true;
-
-        $membersCollection = collect([$confirmedMember]);
-        $expense->members = function () {
-            $query = $this->createMock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
-            $query->method('wherePivot')->willReturnSelf();
-            $query->method('count')->willReturn(0); // 未確認メンバー0人
-
-            return $query;
-        };
-
-        $expectedExpense = Expense::factory()->make([
-            'id' => 1,
-            'is_split_confirmed' => true,
-        ]);
-
-        $this->memberRepository
-            ->expects($this->once())
-            ->method('findByTravelPlanAndUser')
-            ->willReturn($this->member);
-
-        $this->expenseRepository
-            ->expects($this->once())
-            ->method('confirmSplit')
-            ->with($expense)
-            ->willReturn($expectedExpense);
-
-        $result = $this->service->confirmExpenseSplit($expense, $this->user);
-
-        $this->assertEquals($expectedExpense, $result);
-    }
 
     public function test_calculate_split_amounts()
     {

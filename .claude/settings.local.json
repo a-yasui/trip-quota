@@ -46,7 +46,10 @@
       "Edit(!dist/**)",
       "Edit(!build/**)",
       "Edit(!.next/**)",
-      "Edit(!coverage/**)"
+      "Edit(!coverage/**)",
+      "Bash(find:*)",
+      "Bash(php artisan make:migration:*)",
+      "Bash(php artisan:*)"
     ],
     "deny": [
       "Bash(rm -rf /)",
