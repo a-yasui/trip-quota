@@ -252,6 +252,70 @@
                     </div>
                 </div>
 
+                <!-- ユーザー関連付け -->
+                @if(!$member->user_id)
+                    <div class="bg-white shadow-sm rounded-lg">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">ユーザー関連付け</h3>
+                        </div>
+                        <div class="px-6 py-4">
+                            <p class="text-sm text-gray-600 mb-4">
+                                このメンバーはまだユーザーと関連付けされていません。既存のユーザーとの関連付けリクエストを送信できます。
+                            </p>
+                            
+                            <!-- 関連付けリクエスト送信フォーム -->
+                            <form id="linkRequestForm" method="POST" action="{{ route('travel-plans.members.send-link-request', [$travelPlan->uuid, $member->id]) }}" class="space-y-4">
+                                @csrf
+                                
+                                <!-- 関連付け方法選択 -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">関連付け方法</label>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center">
+                                            <input id="link_type_email" name="link_type" type="radio" value="email" checked
+                                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                            <label for="link_type_email" class="ml-2 block text-sm text-gray-900">
+                                                メールアドレスで関連付け
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input id="link_type_account" name="link_type" type="radio" value="account"
+                                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                            <label for="link_type_account" class="ml-2 block text-sm text-gray-900">
+                                                アカウント名で関連付け
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- メールアドレス入力 -->
+                                <div id="email_section">
+                                    <label for="email" class="block text-sm font-medium text-gray-700">メールアドレス</label>
+                                    <input type="email" id="email" name="email" 
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                           placeholder="user@example.com">
+                                </div>
+
+                                <!-- アカウント名入力 -->
+                                <div id="account_section" style="display: none;">
+                                    <label for="account_name" class="block text-sm font-medium text-gray-700">アカウント名</label>
+                                    <div class="mt-1 flex rounded-md shadow-sm">
+                                        <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">@</span>
+                                        <input type="text" id="account_name" name="account_name"
+                                               class="flex-1 block w-full min-w-0 rounded-none rounded-r-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                               placeholder="username">
+                                    </div>
+                                </div>
+
+                                <button type="submit" 
+                                        class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    関連付けリクエストを送信
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- 統計情報 -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="px-6 py-4 border-b border-gray-200">
@@ -279,4 +343,37 @@
             </a>
         </div>
     @endcomponent
+
+    @if(!$member->user_id)
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const linkTypeRadios = document.querySelectorAll('input[name="link_type"]');
+                const emailSection = document.getElementById('email_section');
+                const accountSection = document.getElementById('account_section');
+
+                function toggleSections() {
+                    const linkType = document.querySelector('input[name="link_type"]:checked').value;
+                    
+                    if (linkType === 'email') {
+                        emailSection.style.display = 'block';
+                        accountSection.style.display = 'none';
+                        document.getElementById('email').required = true;
+                        document.getElementById('account_name').required = false;
+                    } else {
+                        emailSection.style.display = 'none';
+                        accountSection.style.display = 'block';
+                        document.getElementById('email').required = false;
+                        document.getElementById('account_name').required = true;
+                    }
+                }
+
+                linkTypeRadios.forEach(radio => {
+                    radio.addEventListener('change', toggleSections);
+                });
+
+                // 初期状態を設定
+                toggleSections();
+            });
+        </script>
+    @endif
 @endsection

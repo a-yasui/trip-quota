@@ -161,6 +161,65 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- メンバー関連付けリクエスト -->
+                @if($pendingLinkRequests->count() > 0)
+                    <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-medium text-gray-900">メンバー関連付けリクエスト</h3>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                    {{ $pendingLinkRequests->count() }}件
+                                </span>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                @foreach($pendingLinkRequests as $request)
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2">
+                                                    <h4 class="text-sm font-medium text-gray-900">
+                                                        {{ $request->member->name }}
+                                                    </h4>
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        {{ $request->member->travelPlan->plan_name }}
+                                                    </span>
+                                                </div>
+                                                <p class="mt-1 text-sm text-gray-600">
+                                                    {{ $request->requestedByUser->email }} からの関連付けリクエスト
+                                                </p>
+                                                @if($request->message)
+                                                    <p class="mt-1 text-sm text-gray-500 italic">
+                                                        "{{ $request->message }}"
+                                                    </p>
+                                                @endif
+                                                <div class="mt-2 flex items-center text-xs text-gray-500 space-x-4">
+                                                    <span>{{ $request->created_at->format('Y/m/d H:i') }}</span>
+                                                    <span>期限: {{ $request->expires_at->format('Y/m/d H:i') }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="ml-4 flex space-x-2">
+                                                <form method="POST" action="{{ route('member-link-requests.approve', $request->id) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium">
+                                                        承認
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ route('member-link-requests.decline', $request->id) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm font-medium">
+                                                        拒否
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 
                 <!-- アカウント情報 -->
                 <div class="bg-white overflow-hidden shadow rounded-lg mb-6">

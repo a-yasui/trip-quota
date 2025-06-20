@@ -379,18 +379,24 @@ class MemberController extends Controller
     }
 
     /**
-     * 関連付けリクエスト承認
+     * メンバー関連付けリクエストを承認
      */
-    public function approveLinkRequest(string $linkRequestId)
+    public function approveLinkRequest(\App\Models\MemberLinkRequest $linkRequest)
     {
         try {
-            $linkRequest = \App\Models\MemberLinkRequest::findOrFail($linkRequestId);
+            if ($linkRequest->target_user_id !== Auth::id()) {
+                abort(403, 'このリクエストを承認する権限がありません。');
+            }
 
-            $member = $this->memberService->approveLinkRequest($linkRequest, Auth::user());
+            if (!$linkRequest->isPending()) {
+                return back()->withErrors(['error' => 'このリクエストはすでに処理されているか、期限が切れています。']);
+            }
+
+            $this->memberService->approveLinkRequest($linkRequest);
 
             return redirect()
-                ->route('travel-plans.members.index', $member->travelPlan->uuid)
-                ->with('success', '関連付けを承認しました。旅行プラン「'.$member->travelPlan->plan_name.'」のメンバーになりました。');
+                ->route('dashboard')
+                ->with('success', 'メンバー関連付けリクエストを承認しました。');
         } catch (\Exception $e) {
             return back()
                 ->withErrors(['error' => $e->getMessage()]);
@@ -398,16 +404,24 @@ class MemberController extends Controller
     }
 
     /**
-     * 関連付けリクエスト拒否
+     * メンバー関連付けリクエストを拒否
      */
-    public function declineLinkRequest(string $linkRequestId)
+    public function declineLinkRequest(\App\Models\MemberLinkRequest $linkRequest)
     {
         try {
-            $linkRequest = \App\Models\MemberLinkRequest::findOrFail($linkRequestId);
+            if ($linkRequest->target_user_id !== Auth::id()) {
+                abort(403, 'このリクエストを拒否する権限がありません。');
+            }
 
-            $this->memberService->declineLinkRequest($linkRequest, Auth::user());
+            if (!$linkRequest->isPending()) {
+                return back()->withErrors(['error' => 'このリクエストはすでに処理されているか、期限が切れています。']);
+            }
 
-            return back()->with('success', '関連付けリクエストを拒否しました。');
+            $this->memberService->declineLinkRequest($linkRequest);
+
+            return redirect()
+                ->route('dashboard')
+                ->with('success', 'メンバー関連付けリクエストを拒否しました。');
         } catch (\Exception $e) {
             return back()
                 ->withErrors(['error' => $e->getMessage()]);

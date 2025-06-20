@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use TripQuota\Invitation\InvitationService;
 use TripQuota\Member\MemberRepositoryInterface;
+use TripQuota\Member\MemberService;
 
 class DashboardController extends Controller
 {
     public function __construct(
         private MemberRepositoryInterface $memberRepository,
-        private InvitationService $invitationService
+        private InvitationService $invitationService,
+        private MemberService $memberService
     ) {}
 
     /**
@@ -27,6 +29,9 @@ class DashboardController extends Controller
         // 未確認の招待数
         $pendingInvitationsCount = $this->invitationService->getUserPendingInvitations($user)->count();
 
-        return view('dashboard', compact('travelPlans', 'pendingInvitationsCount'));
+        // 未処理の関連付けリクエスト
+        $pendingLinkRequests = $this->memberService->getPendingLinkRequestsForUser($user);
+
+        return view('dashboard', compact('travelPlans', 'pendingInvitationsCount', 'pendingLinkRequests'));
     }
 }
