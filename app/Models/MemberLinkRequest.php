@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Auditable as AuditingTrait;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class MemberLinkRequest extends Model
+class MemberLinkRequest extends Model implements Auditable
 {
-    use HasFactory;
+    use AuditingTrait, HasFactory;
 
     protected $fillable = [
         'member_id',

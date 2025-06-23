@@ -271,16 +271,24 @@ class ExpenseService
             ->pluck('id')
             ->toArray();
 
+        // is_participatingキーが存在しない場合はfalseとして扱う
+        $normalizedAssignments = [];
         foreach ($memberAssignments as $assignment) {
             if (! in_array($assignment['member_id'], $validMembers)) {
                 throw new \Exception('無効なメンバーIDが含まれています。');
             }
+
+            $normalizedAssignments[] = [
+                'member_id' => $assignment['member_id'],
+                'is_participating' => $assignment['is_participating'] ?? false,
+                'amount' => $assignment['amount'] ?? null,
+            ];
         }
 
         // 分割金額の合計検証
-        $this->validateSplitAmounts($expense->amount, $memberAssignments);
+        $this->validateSplitAmounts($expense->amount, $normalizedAssignments);
 
-        $this->expenseRepository->assignMembers($expense, $memberAssignments);
+        $this->expenseRepository->assignMembers($expense, $normalizedAssignments);
     }
 
     private function validateSplitAmounts(float $totalAmount, array $memberAssignments): void
@@ -290,7 +298,10 @@ class ExpenseService
         $customAmountCount = 0;
 
         foreach ($memberAssignments as $assignment) {
-            if ($assignment['is_participating']) {
+            // is_participatingが存在しない場合はfalseとして扱う
+            $isParticipating = $assignment['is_participating'] ?? false;
+
+            if ($isParticipating) {
                 $participatingCount++;
 
                 if (isset($assignment['amount']) && $assignment['amount'] !== null && $assignment['amount'] > 0) {

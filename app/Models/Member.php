@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Auditable as AuditingTrait;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @property int $id
@@ -58,9 +60,9 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @mixin \Eloquent
  */
-class Member extends Model
+class Member extends Model implements Auditable
 {
-    use HasFactory;
+    use AuditingTrait, HasFactory;
 
     protected $fillable = [
         'travel_plan_id',
