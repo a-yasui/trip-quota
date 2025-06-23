@@ -30,3 +30,4 @@ storage/debugbar
 database/database.sqlite
 *.sqlite
 *.sqlite3
+.claude/settings.local.json

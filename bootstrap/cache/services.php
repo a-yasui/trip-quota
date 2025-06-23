@@ -32,9 +32,10 @@
     28 => 'Carbon\\Laravel\\ServiceProvider',
     29 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     30 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    31 => 'TheDoctor0\\LaravelFactoryGenerator\\FactoryGeneratorServiceProvider',
-    32 => 'App\\Providers\\AppServiceProvider',
-    33 => 'App\\Providers\\AuthServiceProvider',
+    31 => 'OwenIt\\Auditing\\AuditingServiceProvider',
+    32 => 'TheDoctor0\\LaravelFactoryGenerator\\FactoryGeneratorServiceProvider',
+    33 => 'App\\Providers\\AppServiceProvider',
+    34 => 'App\\Providers\\AuthServiceProvider',
   ),
   'eager' => 
   array (
@@ -52,9 +53,10 @@
     11 => 'Carbon\\Laravel\\ServiceProvider',
     12 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     13 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    14 => 'TheDoctor0\\LaravelFactoryGenerator\\FactoryGeneratorServiceProvider',
-    15 => 'App\\Providers\\AppServiceProvider',
-    16 => 'App\\Providers\\AuthServiceProvider',
+    14 => 'OwenIt\\Auditing\\AuditingServiceProvider',
+    15 => 'TheDoctor0\\LaravelFactoryGenerator\\FactoryGeneratorServiceProvider',
+    16 => 'App\\Providers\\AppServiceProvider',
+    17 => 'App\\Providers\\AuthServiceProvider',
   ),
   'deferred' => 
   array (
