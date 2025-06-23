@@ -27,6 +27,13 @@
       0 => 'BladeUI\\Icons\\BladeIconsServiceProvider',
     ),
   ),
+  'codeat3/blade-simple-line-icons' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Codeat3\\BladeSimpleLineIcons\\BladeSimpleLineIconsServiceProvider',
+    ),
+  ),
   'filament/actions' => 
   array (
     'providers' => 

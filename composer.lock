@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "79b89e1646a148433a736a1c85e479ab",
+    "content-hash": "d26a6059c27c749ba8af4a1a56983062",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -350,6 +350,78 @@
                 }
             ],
             "time": "2024-02-09T16:56:22+00:00"
+        },
+        {
+            "name": "codeat3/blade-simple-line-icons",
+            "version": "1.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/codeat3/blade-simple-line-icons.git",
+                "reference": "c64a937fc758136b0db58e4b6e99e2c980ffc5cf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/codeat3/blade-simple-line-icons/zipball/c64a937fc758136b0db58e4b6e99e2c980ffc5cf",
+                "reference": "c64a937fc758136b0db58e4b6e99e2c980ffc5cf",
+                "shasum": ""
+            },
+            "require": {
+                "blade-ui-kit/blade-icons": "^1.1",
+                "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0",
+                "php": "^7.4|^8.0"
+            },
+            "require-dev": {
+                "codeat3/blade-icon-generation-helpers": "^0.10",
+                "codeat3/phpcs-styles": "^1.0",
+                "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0|^10.0",
+                "phpunit/phpunit": "^9.0|^10.5|^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Codeat3\\BladeSimpleLineIcons\\BladeSimpleLineIconsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Codeat3\\BladeSimpleLineIcons\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Swapnil Sarwe",
+                    "homepage": "https://swapnilsarwe.com"
+                },
+                {
+                    "name": "Dries Vints",
+                    "homepage": "https://driesvints.com"
+                }
+            ],
+            "description": "A package to easily make use of Simple Line Icons in your Laravel Blade views.",
+            "homepage": "https://github.com/codeat3/blade-simple-line-icons",
+            "keywords": [
+                "blade",
+                "icons",
+                "laravel",
+                "simple-line"
+            ],
+            "support": {
+                "issues": "https://github.com/codeat3/blade-simple-line-icons/issues",
+                "source": "https://github.com/codeat3/blade-simple-line-icons/tree/1.5.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/swapnilsarwe",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-02-26T09:03:49+00:00"
         },
         {
             "name": "danharrin/date-format-converter",

@@ -21,6 +21,9 @@
 ## Upgrade
 `composer update ` をする度に `php artisan filament:upgrade` も実行しなければならない。
 
+## 習慣
+filament はキャッシュをする。Filament が使うクラスを追加・削除した時は `php artisan filament:optimize` を実行する事。
+
 ## 管理者ユーザの作成
 管理者ユーザは User Model を拡張して使用する。この例では特定ドメインかつEmailの確認が取れている場合のみ管理画面が使用できる。プロジェクトによっては、この限りでは無い。
 ```php
