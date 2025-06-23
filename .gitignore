@@ -31,3 +31,5 @@ database/database.sqlite
 *.sqlite
 *.sqlite3
 .claude/settings.local.json
+storage/framework
+bootstrap/cache

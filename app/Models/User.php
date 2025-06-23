@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -44,7 +47,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  *
  * @mixin \Eloquent
  */
-class User extends Authenticatable implements Auditable
+class User extends Authenticatable implements Auditable, FilamentUser, HasName
 {
     use AuditingTrait, HasFactory, Notifiable;
 
@@ -80,6 +83,30 @@ class User extends Authenticatable implements Auditable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->email === 'admin@tripquota.test';
+        return str_ends_with($this->email, '@yourdomain.com') && $this->hasVerifiedEmail();
+    }
+    public function getFilamentName(): string
+    {
+        return $this->email;
+    }
+    public function getUserName(): string
+    {
+        return $this->email;
+    }
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            // ...
+            ->login()
+            ->registration()
+            ->passwordReset()
+            ->emailVerification()
+            ->profile();
     }
 
     /**
