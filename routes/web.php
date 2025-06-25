@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccommodationController;
+use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialiteController;
@@ -134,5 +135,19 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['throttle:5,1'])->group(function () {
         Route::post('member-link-requests/{linkRequest}/approve', [MemberController::class, 'approveLinkRequest'])->name('member-link-requests.approve');
         Route::post('member-link-requests/{linkRequest}/decline', [MemberController::class, 'declineLinkRequest'])->name('member-link-requests.decline');
+    });
+});
+
+// 管理者認証ルート
+Route::prefix('admin')->group(function () {
+    // 管理者ログイン（ゲストのみ）
+    Route::middleware('guest:admin')->group(function () {
+        Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('filament.admin.auth.login');
+        Route::post('/login', [AdminLoginController::class, 'login']);
+    });
+
+    // 管理者ログアウト（認証済みのみ）
+    Route::middleware('auth:admin')->group(function () {
+        Route::post('/logout', [AdminLoginController::class, 'logout'])->name('filament.admin.auth.logout');
     });
 });
