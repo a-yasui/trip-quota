@@ -218,7 +218,7 @@ resources/views/members/
 ├── create.blade.php (表示名のみ/招待付き選択UI)
 ├── edit.blade.php (削除フォーム分離、グループ所属チェックボックス)
 ├── index.blade.php (作成者権限による確認/削除ボタン)
-└── show.blade.php (科学的記数法表示削除)
+└── show.blade.php (メンバーの一覧を表示)
 
 database/migrations/
 └── 2025_06_20_053031_create_member_link_requests_table.php
