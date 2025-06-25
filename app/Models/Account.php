@@ -76,7 +76,8 @@ class Account extends Model implements Auditable
      */
     public static function findByAccountNameIgnoreCase(string $accountName): ?self
     {
-        return self::whereRaw('LOWER(account_name) = ?', [strtolower($accountName)])->first();
+        // Use parameterized query with LOWER on both sides for cross-database compatibility
+        return self::whereRaw('LOWER(account_name) = LOWER(?)', [$accountName])->first();
     }
 
     /**
@@ -84,7 +85,8 @@ class Account extends Model implements Auditable
      */
     public static function isAccountNameAvailable(string $accountName, ?int $excludeId = null): bool
     {
-        $query = self::whereRaw('LOWER(account_name) = ?', [strtolower($accountName)]);
+        // Use parameterized query with LOWER on both sides for cross-database compatibility
+        $query = self::whereRaw('LOWER(account_name) = LOWER(?)', [$accountName]);
 
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);

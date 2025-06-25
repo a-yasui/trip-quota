@@ -1,20 +1,75 @@
-# 🔐 セキュリティ脆弱性分析レポート
+# Security Report for TripQuota
 
-**分析対象**: TripQuota メンバー関連付けシステム  
-**分析日**: 2025-06-20  
-**分析者**: セキュリティ専門家（ホワイトハッカー）
+*Last Updated: 2025-06-24*  
+*Previous Analysis: 2025-06-20 (Member Link System)*
 
----
+## Executive Summary
 
-## 📊 **脆弱性サマリー**
+This document outlines the comprehensive security audit findings for the entire TripQuota application. While the application follows many Laravel security best practices, several areas require attention to enhance the overall security posture.
 
-| 深刻度 | 件数 | 分類 |
-|--------|------|------|
-| High | 1 | CSRF Protection |
-| Medium | 3 | Information Disclosure, Race Condition, Session Security |
-| Low | 1 | Input Sanitization |
+## Security Status Overview
 
----
+| Category | Status | Priority | Notes |
+|----------|---------|----------|--------|
+| SQL Injection Protection | ⚠️ Needs Attention | High | whereRaw usage in Account model |
+| XSS Protection | ✅ Good | Low | Proper output escaping |
+| CSRF Protection | ✅ Excellent | - | All forms protected |
+| Authentication | ⚠️ Needs Hardening | High | Missing lockout & MFA |
+| Session Management | ⚠️ Needs Improvement | Medium | Encryption disabled |
+| Password Security | ✅ Good | - | Bcrypt hashing |
+| Input Validation | ✅ Good | - | Comprehensive rules |
+| Security Headers | ❌ Missing | Medium | No CSP, X-Frame-Options |
+| Rate Limiting | ⚠️ Partial | Medium | Only on specific routes |
+| Audit Logging | ❌ Missing | Medium | No login tracking |
+
+## Critical Security Issues
+
+### 1. SQL Injection Risk (NEW)
+**Severity:** Medium  
+**Location:** `app/Models/Account.php` lines 79, 87
+
+**Issue:**
+```php
+return self::whereRaw('LOWER(account_name) = ?', [strtolower($accountName)])->first();
+```
+
+**Recommendation:**
+```php
+// Use Eloquent's case-insensitive query
+return self::where('account_name', 'ilike', $accountName)->first();
+// Or for MySQL compatibility:
+return self::whereRaw('LOWER(account_name) = LOWER(?)', [$accountName])->first();
+```
+
+### 2. Missing Authentication Hardening (NEW)
+**Severity:** High
+
+**Missing Features:**
+- No account lockout after failed login attempts
+- No IP-based login tracking (mentioned in AI-docs but not implemented)
+- No multi-factor authentication (MFA)
+
+**Recommendations:**
+1. Implement failed login attempt tracking
+2. Add login activity logging
+3. Consider MFA implementation
+
+### 3. Session Security Issues (NEW)
+**Severity:** Medium
+
+**Issues:**
+- Session encryption disabled: `'encrypt' => env('SESSION_ENCRYPT', false)`
+- Secure cookies depend on environment variable
+
+**Fix:**
+```php
+// config/session.php
+'encrypt' => true,  // Always encrypt in production
+'secure' => env('SESSION_SECURE_COOKIE', true),  // Default to true
+'same_site' => 'strict',  // Stricter than 'lax'
+```
+
+## Previously Identified Issues (2025-06-20)
 
 ## 🚨 **脆弱性 #1: Information Disclosure via Exception Messages**
 
@@ -175,58 +230,6 @@ public function approveLinkRequest(MemberLinkRequest $linkRequest)
 
 ---
 
-## 🚨 **脆弱性 #4: Missing Input Sanitization**
-
-**分類**: OWASP Top 10 - A03:2021 (Injection)  
-**深刻度**: **Low**
-
-### 問題の詳細説明
-ダッシュボードでの表示時に、リクエストメッセージの適切なエスケープが不十分：
-
-```blade
-<!-- 問題のあるコード -->
-@if($request->message)
-    <p class="mt-1 text-sm text-gray-500 italic">
-        "{{ $request->message }}"
-    </p>
-@endif
-```
-
-**対象ファイル**:
-- `resources/views/dashboard.blade.php:192-196`
-
-### 影響度とリスク
-- XSS攻撃の可能性（Bladeの自動エスケープで一部軽減）
-- HTMLインジェクション
-
-### 修正方法
-
-```blade
-<!-- 修正コード -->
-@if($request->message)
-    <p class="mt-1 text-sm text-gray-500 italic">
-        "{{ Str::limit(strip_tags($request->message), 100) }}"
-    </p>
-@endif
-```
-
-```php
-// モデル側でのサニタイゼーション
-protected static function boot()
-{
-    parent::boot();
-    
-    static::saving(function ($model) {
-        if ($model->message) {
-            $model->message = strip_tags($model->message);
-            $model->message = Str::limit($model->message, 500);
-        }
-    });
-}
-```
-
----
-
 ## 🚨 **脆弱性 #5: Insufficient Session Security**
 
 **分類**: OWASP Top 10 - A07:2021 (Identification and Authentication Failures)  
@@ -372,5 +375,158 @@ protected $casts = [
 
 ---
 
-**次回レビュー予定**: 2025-07-20  
-**担当者**: 開発チーム + セキュリティチーム
+---
+
+## 🆕 Additional Security Findings (2025-06-24)
+
+### Missing Security Headers
+**Severity:** Medium
+
+**Required Headers:**
+```php
+// app/Http/Middleware/SecurityHeaders.php
+class SecurityHeaders
+{
+    public function handle($request, Closure $next)
+    {
+        $response = $next($request);
+        
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
+        $response->headers->set('X-Frame-Options', 'DENY');
+        $response->headers->set('X-XSS-Protection', '1; mode=block');
+        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        $response->headers->set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';");
+        
+        return $response;
+    }
+}
+```
+
+### Information Disclosure in Error Messages
+**Severity:** Medium
+
+**Issue:** Error messages reveal authentication methods
+- Example: "このメールアドレスはOAuth認証で登録されています"
+
+**Fix:** Use generic error messages:
+```php
+return back()->withErrors(['email' => '認証に失敗しました']);
+```
+
+### Insufficient Rate Limiting
+**Severity:** Medium
+
+**Current:** Only applied to member link requests
+
+**Recommendation:**
+```php
+// routes/web.php
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware(['throttle:5,1']); // 5 attempts per minute
+
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware(['throttle:3,10']); // 3 attempts per 10 minutes
+```
+
+## Security Best Practices Already Implemented
+
+### ✅ Excellent Practices
+1. **CSRF Protection**: All forms include CSRF tokens
+2. **Password Hashing**: Using bcrypt via `Hash::make()`
+3. **Mass Assignment Protection**: All models define `$fillable` arrays
+4. **Input Validation**: Comprehensive validation rules
+5. **Output Escaping**: Proper use of `{{ }}` in Blade templates
+6. **Parameterized Queries**: Eloquent ORM used throughout
+7. **Session Management**: Database session driver
+8. **Password Requirements**: Minimum 8 characters with complexity
+
+## Recommended Security Enhancements
+
+### Immediate Actions (Do Now)
+1. Fix SQL injection risk in Account model
+2. Enable session encryption in production
+3. Implement basic rate limiting on authentication endpoints
+4. Standardize error messages
+
+### Short Term (Within 1 Month)
+1. Implement login attempt tracking and account lockout
+2. Add security headers middleware
+3. Add comprehensive audit logging
+4. Expand rate limiting coverage
+
+### Long Term (Within 3 Months)
+1. Implement multi-factor authentication (MFA)
+2. Add IP-based security monitoring
+3. Consider field-level encryption for sensitive data
+4. Implement comprehensive security monitoring and alerting
+
+## Security Configuration for Production
+
+```env
+# .env.production
+APP_DEBUG=false
+APP_ENV=production
+SESSION_ENCRYPT=true
+SESSION_SECURE_COOKIE=true
+SESSION_SAME_SITE=strict
+```
+
+## Security Checklist for Developers
+
+Before deploying new features, ensure:
+
+- [ ] All user input is validated
+- [ ] Database queries use Eloquent or parameterized queries
+- [ ] Output is properly escaped in views
+- [ ] Forms include CSRF tokens
+- [ ] Routes use appropriate middleware
+- [ ] Error messages don't leak sensitive information
+- [ ] New features are rate-limited where appropriate
+- [ ] Audit logs capture sensitive operations
+- [ ] Exception handling follows global handler pattern
+- [ ] No try-catch blocks in controllers (use global handler)
+
+## Incident Response Plan
+
+In case of a security incident:
+
+1. **Immediate Response**
+   - Disable affected user accounts
+   - Rotate all secrets and API keys
+   - Enable maintenance mode if necessary
+
+2. **Investigation**
+   - Review audit logs
+   - Identify attack vector
+   - Assess data exposure
+
+3. **Recovery**
+   - Patch vulnerabilities
+   - Reset affected user passwords
+   - Notify affected users if required
+
+4. **Post-Incident**
+   - Document lessons learned
+   - Update security procedures
+   - Implement additional monitoring
+
+## Compliance Considerations
+
+- Personal data handling must comply with privacy regulations
+- Implement data retention policies
+- Ensure right to deletion (GDPR Article 17)
+- Maintain audit trails for compliance
+- Consider data residency requirements
+
+## Security Contact
+
+For security concerns or to report vulnerabilities:
+- Internal: Security team via internal channels
+- External: security@tripquota.example.com (implement responsible disclosure)
+
+---
+
+**Next Review Date**: 2025-07-24  
+**Responsible Teams**: Development Team + Security Team
+
+*This security report should be reviewed and updated monthly as the application evolves.*
