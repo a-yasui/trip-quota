@@ -20,7 +20,7 @@
             </p>
         </div>
         
-        <form class="mt-8 space-y-6" method="POST" action="{{ route('admin.login') }}">
+        <form class="mt-8 space-y-6" method="POST" action="{{ route('filament.admin.auth.login') }}">
             @csrf
             
             <div class="rounded-md shadow-sm -space-y-px">
