@@ -76,51 +76,8 @@
             </div>
         @endif
 
-        <!-- 精算サマリー -->
-        <div class="mt-6 bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-medium text-gray-900">精算サマリー</h2>
-                    <a href="{{ route('travel-plans.settlements.index', $travelPlan->uuid) }}" 
-                       class="text-sm text-blue-600 hover:text-blue-800">
-                        詳細を見る →
-                    </a>
-                </div>
-            </div>
-            <div class="px-6 py-4">
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-gray-900">{{ $settlementStats['total_settlements'] }}</div>
-                        <div class="text-sm text-gray-500">総精算件数</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-green-600">{{ $settlementStats['completed_settlements'] }}</div>
-                        <div class="text-sm text-gray-500">精算済み</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-yellow-600">{{ $settlementStats['pending_settlements'] }}</div>
-                        <div class="text-sm text-gray-500">未精算</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-sm text-gray-500 mb-1">アクション</div>
-                        <a href="{{ route('travel-plans.settlements.index', $travelPlan->uuid) }}" 
-                           class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
-                            精算計算
-                        </a>
-                    </div>
-                </div>
-                <p class="mt-4 text-sm text-gray-500 text-center">
-                    確定済みの費用から自動的に精算を計算できます。詳細は精算管理画面をご確認ください。
-                </p>
-            </div>
-        </div>
-
         <!-- アクションボタン -->
-        <div class="mt-6 flex justify-between items-center">
-            <a href="{{ route('travel-plans.settlements.index', $travelPlan->uuid) }}" 
-               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                精算管理
-            </a>
+        <div class="mt-6 flex justify-end">
             <a href="{{ route('travel-plans.expenses.create', $travelPlan->uuid) }}" 
                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                 費用を追加
@@ -142,9 +99,6 @@
                                         <div class="flex-1">
                                             <div class="flex items-center space-x-2">
                                                 <h3 class="text-sm font-medium text-gray-900">{{ $expense->title }}</h3>
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    精算対象
-                                                </span>
                                             </div>
                                             <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
                                                 <span>{{ $expense->expense_date->format('Y/m/d') }}</span>

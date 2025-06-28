@@ -12,7 +12,6 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SettlementController;
 use App\Http\Controllers\TravelPlanController;
 use Illuminate\Support\Facades\Route;
 
@@ -115,12 +114,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('travel-plans/{uuid}/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('travel-plans.expenses.destroy');
     Route::post('travel-plans/{uuid}/expenses/{expense}/update-splits', [ExpenseController::class, 'updateSplits'])->name('travel-plans.expenses.update-splits');
 
-    // 精算管理（旅行プラン配下）
-    Route::get('travel-plans/{uuid}/settlements', [SettlementController::class, 'index'])->name('travel-plans.settlements.index');
-    Route::post('travel-plans/{uuid}/settlements/calculate', [SettlementController::class, 'calculate'])->name('travel-plans.settlements.calculate');
-    Route::get('travel-plans/{uuid}/settlements/{settlement}', [SettlementController::class, 'show'])->name('travel-plans.settlements.show');
-    Route::post('travel-plans/{uuid}/settlements/{settlement}/complete', [SettlementController::class, 'markAsCompleted'])->name('travel-plans.settlements.complete');
-    Route::delete('travel-plans/{uuid}/settlements/reset', [SettlementController::class, 'reset'])->name('travel-plans.settlements.reset');
 
     // 招待管理
     Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');

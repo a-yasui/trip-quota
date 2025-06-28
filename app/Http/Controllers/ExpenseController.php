@@ -6,14 +6,12 @@ use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use TripQuota\Expense\ExpenseService;
-use TripQuota\Settlement\SettlementService;
 use TripQuota\TravelPlan\TravelPlanService;
 
 class ExpenseController extends Controller
 {
     public function __construct(
         private ExpenseService $expenseService,
-        private SettlementService $settlementService,
         private TravelPlanService $travelPlanService
     ) {}
 
@@ -45,19 +43,7 @@ class ExpenseController extends Controller
             return $expenses->sum('amount');
         });
 
-        // 精算統計情報を取得
-        try {
-            $settlementStats = $this->settlementService->getSettlementStatistics($travelPlan, Auth::user());
-        } catch (\Exception $e) {
-            $settlementStats = [
-                'total_settlements' => 0,
-                'completed_settlements' => 0,
-                'pending_settlements' => 0,
-                'by_currency' => [],
-            ];
-        }
-
-        return view('expenses.index', compact('travelPlan', 'expenses', 'expensesByGroup', 'totalAmount', 'amountsByCurrency', 'settlementStats'));
+        return view('expenses.index', compact('travelPlan', 'expenses', 'expensesByGroup', 'totalAmount', 'amountsByCurrency'));
     }
 
     /**

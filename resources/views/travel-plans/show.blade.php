@@ -183,24 +183,7 @@
                                     </div>
                                     <div class="ml-4 flex-1">
                                         <h3 class="text-sm font-medium text-gray-900">費用管理</h3>
-                                        <p class="text-sm text-gray-500">割り勘・精算管理</p>
-                                    </div>
-                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </a>
-
-                                <!-- 精算管理 -->
-                                <a href="{{ route('travel-plans.settlements.index', $travelPlan->uuid) }}" 
-                                   class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <div class="flex-shrink-0 w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                        <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="ml-4 flex-1">
-                                        <h3 class="text-sm font-medium text-gray-900">精算管理</h3>
-                                        <p class="text-sm text-gray-500">メンバー間の精算・決済</p>
+                                        <p class="text-sm text-gray-500">割り勘管理</p>
                                     </div>
                                     <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
